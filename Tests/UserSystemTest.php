@@ -14,10 +14,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testCurrentURL() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
+        $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
         $_SERVER['HTTP_HOST'] = "test";
         $_SERVER['REQUEST_URI'] = "php";
         $b = $a->currentURL();
@@ -25,10 +22,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testDefaultRedirect301() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
+        $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
         $b = $a->redirect301("localhost");
         if ($b) {
           $b = 1;
@@ -40,103 +34,71 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testEncryption() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
+        $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
         $b = $a->encrypt("cake", "dessert");
         $this->assertNotEquals("cake", $b);
     }
 
     public function testDecryption() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
+        $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
         $b = $a->encrypt("cake", "dessert");
         $c = $a->decrypt($b, "dessert");
         $this->assertEquals("cake", $c);
     }
 
-    public function testSanitizeNumber() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
-        $b = $a->sanitize(123, "n");
-        $this->assertEquals(123, $b);
+    public function testSanitize() {
+        $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
 
-        $c = $a->sanitize("123", "n");
-        $this->assertEquals(123, $c);
+        $t = $a->sanitize(123, "n");
+        $this->assertEquals(123, $t);
 
-        $d = $a->sanitize("123g", "n");
-        $this->assertEquals(123, $d);
+        $t = $a->sanitize("123", "n");
+        $this->assertEquals(123, $t);
 
-        $e = $a->sanitize("g", "n");
-        $this->assertEquals(0, $e);
-    }
+        $t = $a->sanitize("123g", "n");
+        $this->assertEquals(123, $t);
 
-    public function testSanitizeString() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
-        $b = $a->sanitize("g", "s");
-        $this->assertEquals("g", $b);
+        $t = $a->sanitize("g", "n");
+        $this->assertEquals(0, $t);
 
-        $c = $a->sanitize("g'°", "s");
-        $this->assertEquals("g&#39;&deg;", $c);
+        $t = $a->sanitize("g", "s");
+        $this->assertEquals("g", $t);
 
-        $d = $a->sanitize(123, "s");
-        $this->assertEquals("123", $d);
-    }
+        $t = $a->sanitize("g'°", "s");
+        $this->assertEquals("g&#39;&deg;", $t);
 
-    public function testSanitizeDate() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
-        $b = $a->sanitize(1414035554, "d");
-        $this->assertEquals(1414035554, $b);
+        $t = $a->sanitize(123, "s");
+        $this->assertEquals("123", $t);
 
-        $c = $a->sanitize("1414035554", "d");
-        $this->assertEquals(1414035554, $c);
+        $t = $a->sanitize(1414035554, "d");
+        $this->assertEquals(1414035554, $t);
 
-        $d = $a->sanitize("1414;035554", "d");
-        $this->assertEquals(1414035554, $d);
+        $t = $a->sanitize("1414035554", "d");
+        $this->assertEquals(1414035554, $t);
 
-        $e = $a->sanitize("2014-10-21", "d");
-        $this->assertEquals(1413871200, $e);
+        $t = $a->sanitize("1414;035554", "d");
+        $this->assertEquals(1414035554, $t);
 
-        $f = $a->sanitize("+1 week 2 days 4 hours 2 seconds", "d");
-        $this->assertEquals(strtotime("+1 week 2 days 4 hours 2 seconds"), $f);
+        $t = $a->sanitize("2014-10-21", "d");
+        $this->assertEquals(1413871200, $t);
 
-        $g = $a->sanitize("next Thursday", "d");
-        $this->assertEquals(strtotime("next Thursday"), $g);
-    }
+        $t = $a->sanitize("+1 week 2 days 4 hours 2 seconds", "d");
+        $this->assertEquals(strtotime("+1 week 2 days 4 hours 2 seconds"), $t);
 
-    public function testSanitizeHTML() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
-        $b = $a->sanitize("<span>cake</span>", "h");
-        $this->assertEquals("<span>cake</span>", $b);
+        $t = $a->sanitize("next Thursday", "d");
+        $this->assertEquals(strtotime("next Thursday"), $t);
 
-        $c = $a->sanitize("g'°", "h");
-        $this->assertEquals("g'&deg;", $c);
+        $t = $a->sanitize("<span>cake</span>", "h");
+        $this->assertEquals("<span>cake</span>", $t);
+
+        $t = $a->sanitize("g'°", "h");
+        $this->assertEquals("g'&deg;", $t);
     }
 
     public function testDBModInsert() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
+        $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
         $a->db->query("CREATE DATABASE test");
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "test","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
+        $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
         $a->db->query("CREATE TABLE `test1` (`id` INT(50) NOT NULL AUTO_INCREMENT,
         `test` VARCHAR(50) NULL DEFAULT NULL,PRIMARY KEY (`id`))
         COLLATE='latin1_swedish_ci' ENGINE=MyISAM AUTO_INCREMENT=0;;");
@@ -148,10 +110,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testDBModUpdate() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "test","username" => "root","password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
+    $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
         $a->dbMod(["u", "test1", ["test"=>"pie"], ["test"=>"cake"]]);
         $b = $a->dbSel(["test1", ["id"=>1]]);
         $this->assertEquals(1, $b[0]);
@@ -160,20 +119,14 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testDBModDelete() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "test", "username" => "root", "password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
+    $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
         $a->dbMod(["d", "test1", ["test"=>"pie"]]);
         $b = $a->dbSel(["test1", ["id"=>1]]);
         $this->assertEquals(0, $b[0]);
     }
 
     public function testDBSel() {
-        $a = new UserSystem(
-          ["location" => "localhost","database" => "test", "username" => "root", "password" => ""],
-          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-        );
+    $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
         $b = $a->dbSel(["test1", ["id"=>1]]);
         $this->assertEquals(0, $b[0]);
         $a->db->query("DROP DATABASE test");

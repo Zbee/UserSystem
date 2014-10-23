@@ -7,10 +7,14 @@ class UserSystem {
   #Would initialize the UserSystem.PHP class with the database connection info
   #and config.php options
   public function __construct ($db, $opts) {
+    if (!$db) {
+      $db = ["location"=>"localhost","database"=>"","username"=>"root","password" =>""];
+    }
+    
     $this->db = new PDO(
-                "mysql:host=$db[location];dbname=$db[database];
-                charset=utf8", $db['username'], $db['password']
-              );
+                  "mysql:host=$db[location];dbname=$db[database];
+                  charset=utf8", $db['username'], $db['password']
+                );
     $this->OPTIONS = $opts;
   }
 
