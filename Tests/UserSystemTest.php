@@ -126,4 +126,47 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         $c = $a->sanitize("g'°", ["t" => "h", "d" => false]);
         $this->assertEquals("g'&deg;", $c);
     }
+
+    public function testDBModInsert() {
+        $a = new UserSystem(
+          ["location" => "localhost","database" => "","username" => "root","password" => ""],
+          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
+        );
+        $a->db->query("CREATE DATABASE test");
+        $a = new UserSystem(
+          ["location" => "localhost","database" => "test","username" => "root","password" => ""],
+          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
+        );
+        $a->db->query("CREATE TABLE `test1` (`id` INT(50) NOT NULL AUTO_INCREMENT,
+        `test` VARCHAR(50) NULL DEFAULT NULL,PRIMARY KEY (`id`))
+        COLLATE='latin1_swedish_ci' ENGINE=MyISAM AUTO_INCREMENT=0;;");
+        $a->dbMod(["i", "test1", ["test"=>"cake"]]);
+        $b = $a->dbSel(["test1", ["id"=>1]]);
+        $this->assertEquals(1, $b[0]);
+        $this->assertEquals(1, $b[1]['id']);
+        $this->assertEquals("cake", $b[1]['test']);
+    }
+
+    public function testDBModUpdate() {
+        $a = new UserSystem(
+          ["location" => "localhost","database" => "test","username" => "root","password" => ""],
+          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
+        );
+        $a->dbMod(["u", "test1", ["test"=>"pie"], ["test"=>"cake"]]);
+        $b = $a->dbSel(["test1", ["id"=>1]]);
+        $this->assertEquals(1, $b[0]);
+        $this->assertEquals(1, $b[1]['id']);
+        $this->assertEquals("pie", $b[1]['test']);
+    }
+
+    public function testDBModDelete() {
+        $a = new UserSystem(
+          ["location" => "localhost","database" => "test","username" => "root","password" => ""],
+          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
+        );
+        $a->dbMod(["d", "test1", ["test"=>"pie"]]);
+        $b = $a->dbSel(["test1", ["id"=>1]]);
+        $this->assertEquals(0, $b[0]);
+        $a->db->query("DROP DATABASE test");
+    }
 }

@@ -106,7 +106,6 @@ class UserSystem {
       return preg_replace_callback('/[\x{80}-\x{10FFFF}]/u', function($match) {
           list($utf8) = $match;
           $entity = mb_convert_encoding($utf8, 'HTML-ENTITIES', 'UTF-8');
-          printf("%s -> %s\n", $utf8, $entity);
           return $entity;
       }, $code);
   }
@@ -241,26 +240,66 @@ class UserSystem {
         $cols = "";
         $entries = "";
         foreach ($d as $item) {
-          $cols .= strtolower($item[0]).", ";
-          $entries .= strtolower($item[1])."', '";
+          $cols .= $item[0].", ";
+          $entries .= $item[1]."', '";
         }
         $cols = substr($cols, 0, -2);
         $entries = substr($entries, 0, -3);
-        $this->db->query("INSERT INTO $data[1] ($cols) VALUES ($entries)");
+        $this->db->query("INSERT INTO $data[1] ($cols) VALUES ('$entries)");
         return true;
         break;
       case "u":
         $update = "";
         foreach ($d as $item) {
-          $update .= "`".strtolower($item[0])."`='".$item[1]."', ";
+          $update .= "`".$item[0]."`='".$item[1]."', ";
         }
+        $q = [];
+        foreach ($data[3] as $item) {
+          $col = array_search($item, $data[3]);
+          array_push($q, [$col, $item]);
+        }
+        $equals = "";
+        foreach ($q as $item) {
+          $equals .= "`".$item[0]."`='".$item[1]."', ";
+        }
+        $equals = substr($equals, 0, -2);
         $update = substr($update, 0, -2);
-        $this->db->query("UPDATE $data[1] SET $update");
+        $this->db->query("UPDATE $data[1] SET $update WHERE $equals");
         return true;
+      case "d":
+        $equals = "";
+        foreach ($d as $item) {
+          $equals .= "`".$item[0]."`='".$item[1]."', ";
+        }
+        $equals = substr($equals, 0, -2);
+        $this->db->query("DELETE FROM $data[1] WHERE $equals");
+        return true;
+        break;
       default:
         return false;
         break;
     }
+  }
+
+  #$userSystem->dbSel(["users", ["username"=>"Bob","id"=>0]])
+  #Returns an array of all of the users with the username bob AND the id of 0
+  public function dbSel ($data) {
+    $d = [];
+    foreach ($data[1] as $item) {
+      $col = array_search($item, $data[1]);
+      array_push($d, [$col, $item]);
+    }
+    $equals = '';
+    foreach ($d as $item) {
+      $equals .= " AND `".strtolower($item[0])."`='".$item[1]."'";
+    }
+    $equals = substr($equals, 5);
+    $stmt = $this->db->query("SELECT * from $data[0] WHERE $equals");
+    $arr = [$stmt->rowCount()];
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      array_push($arr, $row);
+    }
+    return $arr;
   }
 
   //////////////////////////////////////////////////////////////////////////////
