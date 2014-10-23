@@ -1,6 +1,7 @@
 <?php
 ob_start(); #For testing redirection
 require_once 'UserSystem/UserSystem.php';
+date_default_timezone_set('America/Denver');
 
 class UserSystemTest extends PHPUnit_Framework_TestCase {
     public function testDefaultConstruct() {
@@ -105,7 +106,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(1414035554, $d);
 
         $e = $a->sanitize("2014-10-21", ["t" => "d", "d" => false]);
-        $this->assertEquals(1413842400, $e);
+        $this->assertEquals(1413871200, $e);
 
         $f = $a->sanitize("+1 week 2 days 4 hours 2 seconds", ["t" => "d", "d" => false]);
         $this->assertEquals(strtotime("+1 week 2 days 4 hours 2 seconds"), $f);
