@@ -1,6 +1,6 @@
 <?php
-require_once 'UserSystem/UserSystem.php';
 ob_start(); #For testing redirection
+require_once 'UserSystem/UserSystem.php';
 
 class UserSystemTest extends PHPUnit_Framework_TestCase {
     public function testDefaultConstruct() {
