@@ -104,8 +104,8 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         $d = $a->sanitize("1414;035554", ["t" => "d", "d" => false]);
         $this->assertEquals(1414035554, $d);
 
-        $e = $a->sanitize("2014-10-22", ["t" => "d", "d" => false]);
-        $this->assertEquals(1413928800, $e);
+        $e = $a->sanitize("2014-10-21", ["t" => "d", "d" => false]);
+        $this->assertEquals(1413842400, $e);
 
         $f = $a->sanitize("+1 week 2 days 4 hours 2 seconds", ["t" => "d", "d" => false]);
         $this->assertEquals(strtotime("+1 week 2 days 4 hours 2 seconds"), $f);
