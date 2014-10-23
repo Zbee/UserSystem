@@ -2,6 +2,8 @@
 
 A ready to deploy user system that is both secure, and simple.
 
+Supports PHP 5.4.0 and up, and uses a MySQL database.
+
 ##Features
 
 * 2-step Logins
