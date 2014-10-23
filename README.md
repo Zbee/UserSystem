@@ -1,4 +1,4 @@
-#UserSystem.PHP
+#UserSystem [![Build Status](https://magnum.travis-ci.com/Zbee/UserSystem.svg?token=veGjBxpNcK87wbXFt4ee&branch=master)](https://magnum.travis-ci.com/Zbee/UserSystem)
 
 A ready to deploy user system that is both secure, and simple.
 
