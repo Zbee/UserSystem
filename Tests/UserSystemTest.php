@@ -101,8 +101,8 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         $c = $a->sanitize("1414035554", ["t" => "d", "d" => false]);
         $this->assertEquals(1414035554, $c);
 
-        $d = $a->sanitize("1414-035554", ["t" => "d", "d" => false]);
-        $this->assertEquals(null, $d);
+        $d = $a->sanitize("1414;035554", ["t" => "d", "d" => false]);
+        $this->assertEquals('', $d);
 
         $e = $a->sanitize("2014-10-22", ["t" => "d", "d" => false]);
         $this->assertEquals(1413928800, $e);
