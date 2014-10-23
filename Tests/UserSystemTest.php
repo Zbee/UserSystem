@@ -161,10 +161,19 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
 
     public function testDBModDelete() {
         $a = new UserSystem(
-          ["location" => "localhost","database" => "test","username" => "root","password" => ""],
+          ["location" => "localhost","database" => "test", "username" => "root", "password" => ""],
           ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
         );
         $a->dbMod(["d", "test1", ["test"=>"pie"]]);
+        $b = $a->dbSel(["test1", ["id"=>1]]);
+        $this->assertEquals(0, $b[0]);
+    }
+
+    public function testDBSel() {
+        $a = new UserSystem(
+          ["location" => "localhost","database" => "test", "username" => "root", "password" => ""],
+          ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
+        );
         $b = $a->dbSel(["test1", ["id"=>1]]);
         $this->assertEquals(0, $b[0]);
         $a->db->query("DROP DATABASE test");
