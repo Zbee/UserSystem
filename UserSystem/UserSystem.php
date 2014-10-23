@@ -28,9 +28,13 @@ class UserSystem {
   #Would redirect the user or bot to "http://example.com" and set the correct
   #HTTP error so the bot will follow the page
   public function redirect301($url) {
-    header("HTTP/1.1 301 Moved Permanently");
-    header("Location: $url");
-    return true;
+    if (!headers_sent()) {
+      header("HTTP/1.1 301 Moved Permanently");
+      header("Location: $url");
+      return true;
+    } else {
+      return false;
+    }
   }
 
   #$UserSystem->encrypt("myEmail", "bob")
