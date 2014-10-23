@@ -1,5 +1,5 @@
 <?php
-require_once '../UserSystem/UserSystem.php';
+require_once 'UserSystem/UserSystem.php';
 ob_start(); #For testing redirection
 
 class UserSystemTest extends PHPUnit_Framework_TestCase {
