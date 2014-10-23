@@ -63,16 +63,16 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
           ["location" => "localhost","database" => "","username" => "root","password" => ""],
           ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
         );
-        $b = $a->sanitize(123, ["t" => "n", "d" => false]);
+        $b = $a->sanitize(123, "n");
         $this->assertEquals(123, $b);
 
-        $c = $a->sanitize("123", ["t" => "n", "d" => false]);
+        $c = $a->sanitize("123", "n");
         $this->assertEquals(123, $c);
 
-        $d = $a->sanitize("123g", ["t" => "n", "d" => false]);
+        $d = $a->sanitize("123g", "n");
         $this->assertEquals(123, $d);
 
-        $e = $a->sanitize("g", ["t" => "n", "d" => false]);
+        $e = $a->sanitize("g", "n");
         $this->assertEquals(0, $e);
     }
 
@@ -81,13 +81,13 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
           ["location" => "localhost","database" => "","username" => "root","password" => ""],
           ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
         );
-        $b = $a->sanitize("g", ["t" => "s", "d" => false]);
+        $b = $a->sanitize("g", "s");
         $this->assertEquals("g", $b);
 
-        $c = $a->sanitize("g'°", ["t" => "s", "d" => false]);
+        $c = $a->sanitize("g'°", "s");
         $this->assertEquals("g&#39;&deg;", $c);
 
-        $d = $a->sanitize(123, ["t" => "s", "d" => false]);
+        $d = $a->sanitize(123, "s");
         $this->assertEquals("123", $d);
     }
 
@@ -96,22 +96,22 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
           ["location" => "localhost","database" => "","username" => "root","password" => ""],
           ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
         );
-        $b = $a->sanitize(1414035554, ["t" => "d", "d" => false]);
+        $b = $a->sanitize(1414035554, "d");
         $this->assertEquals(1414035554, $b);
 
-        $c = $a->sanitize("1414035554", ["t" => "d", "d" => false]);
+        $c = $a->sanitize("1414035554", "d");
         $this->assertEquals(1414035554, $c);
 
-        $d = $a->sanitize("1414;035554", ["t" => "d", "d" => false]);
+        $d = $a->sanitize("1414;035554", "d");
         $this->assertEquals(1414035554, $d);
 
-        $e = $a->sanitize("2014-10-21", ["t" => "d", "d" => false]);
+        $e = $a->sanitize("2014-10-21", "d");
         $this->assertEquals(1413871200, $e);
 
-        $f = $a->sanitize("+1 week 2 days 4 hours 2 seconds", ["t" => "d", "d" => false]);
+        $f = $a->sanitize("+1 week 2 days 4 hours 2 seconds", "d");
         $this->assertEquals(strtotime("+1 week 2 days 4 hours 2 seconds"), $f);
 
-        $g = $a->sanitize("next Thursday", ["t" => "d", "d" => false]);
+        $g = $a->sanitize("next Thursday", "d");
         $this->assertEquals(strtotime("next Thursday"), $g);
     }
 
@@ -120,10 +120,10 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
           ["location" => "localhost","database" => "","username" => "root","password" => ""],
           ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
         );
-        $b = $a->sanitize("<span>cake</span>", ["t" => "h", "d" => false]);
+        $b = $a->sanitize("<span>cake</span>", "h");
         $this->assertEquals("<span>cake</span>", $b);
 
-        $c = $a->sanitize("g'°", ["t" => "h", "d" => false]);
+        $c = $a->sanitize("g'°", "h");
         $this->assertEquals("g'&deg;", $c);
     }
 

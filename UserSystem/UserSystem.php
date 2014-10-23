@@ -112,49 +112,22 @@ class UserSystem {
 
   #$UserSystem->sanitize("dirt")
   #Would sanitize the string dirt with the set options
-  public function sanitize ($data, $opts = false) {
+  public function sanitize ($data, $type = 's') {
     $data = trim($data);
-    $dopts = [
-      "t" => "s", #Type: n=number,s=string,d=date,h=html,q=sql,b=bool,u=url
-      "d" => false, #Debug
-    ];
 
-    if (!$opts) {
-      $opts = $dopts;
-    } else {
-      if (!is_string($opts['t']) || !isset($opts['t'])) {
-        $opts['t'] = $dopts['t'];
-      }
-      if (!is_bool($opts['d']) || !isset($opts['d'])) {
-        $opts['d'] = $dopts['d'];
-      }
-    }
-
-    if ($opts['t'] === false) {
+    if ($type === false) {
       $tc = false;
     } else {
       $tc = false;
-      if ($opts['t'] == "n") { //if number type
+      if ($type == "n") { //if number type
         $data = filter_var($data, FILTER_SANITIZE_NUMBER_FLOAT);
         $data = preg_replace("/[^0-9]/", "", $data);
-        $data = intval($data);
-
-        if (is_numeric($data) === true) {
-          $tc = true;
-        } else {
-          if ($opts['d']) { return "FAIL-Number-Type-Check"; }
-        }
-      } elseif ($opts['t'] == "s") { //If string type
+        return intval($data);
+      } elseif ($type == "s") { //If string type
         $data = $this->handleUTF8($data);
         $data = filter_var($data, FILTER_SANITIZE_STRING);
-        $data = filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-
-        if (is_string($data) === true) {
-          $tc = true;
-        } else {
-          if ($opts['d']) { return "FAIL-String-Type-Check"; }
-        }
-      } elseif ($opts['t'] == "d") { //If date type
+        return filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+      } elseif ($type == "d") { //If date type
         $data = preg_replace("/[^0-9\-\s\+a-zA-Z]/", "", $data);
         if (is_numeric($data) !== true) {
           $data = strtotime($data);
@@ -163,19 +136,12 @@ class UserSystem {
         $d = date("j", $data);
         $y = date("Y", $data);
 
-        if (checkdate($m, $d, $y === true)) {
-          $tc = true;
-        } else {
-          if ($opts['d']) { return "FAIL-Date-Type-Check"; }
+        if (checkdate($m, $d, $y) === true) {
+         return $data;
         }
-      } elseif ($opts['t'] == "h") { //If html type
-        $data = $this->handleUTF8($data);
-        if (is_string($data) === true) {
-          $tc = true;
-        } else {
-          if ($opts['d']) { return "FAIL-HTML-Type-Check"; }
-        }
-      } elseif ($opts['t'] == "q") { //If sql type
+      } elseif ($type == "h") { //If html type
+        return $this->handleUTF8($data);
+      } elseif ($type == "q") { //If sql type
         $data = $this->handleUTF8($data);
         $b = "drop table|show table|`|\*|--|1=1|1='1'|a=a|a='a'|not null|\\\\";
         $data = preg_replace(
@@ -187,42 +153,22 @@ class UserSystem {
         $data = mysql_real_escape_string($data);
 
         if (is_string($data) === true) {
-          $tc = true;
-        } else {
-          if ($opts['d']) { return "FAIL-SQL-Type-Check"; }
+          return $data;
         }
-      } elseif ($opts['t'] == "b") { //If boolean type
+      } elseif ($type == "b") { //If boolean type
         $data = (filter_var($data, FILTER_VALIDATE_BOOLEAN)) ? true : "fail";
 
         if (is_bool($data)) {
-          $tc = true;
-        } else {
-          if ($opts['d']) { return "FAIL-Boolean-Type-Check"; }
+          return $data;
         }
-      } elseif ($opts['t'] == "u") { //if url type
+      } elseif ($type == "u") { //if url type
         if (filter_var($data, FILTER_VALIDATE_URL) === true) {
-          $data = filter_var($data, FILTER_SANITIZE_URL);
-          $tc = true;
-        } else {
-          if ($opts['d']) { return "FAIL-URL-Type-Check"; }
+          return filter_var($data, FILTER_SANITIZE_URL);
         }
-      } else {
-        $tc = false;
-        if ($opts['d']) { return ""; } else { return "FAIL-Type-Check"; }
       }
     }
 
-    if ($tc === false) {
-      $data = filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-      $data = strip_tags($data);
-      $tc = true;
-    }
-
-    if ($tc === true) {
-      return $data;
-    } else {
-      if (!$opts['d']) { return false; } else { return "FAIL-Sanitization"; }
-    }
+    return "FAIL-Sanitization";
   }
 
   #$UserSystem->dbMod(["i","users",["username"=>"Bob","email"=>"bob@ex.com"]])
