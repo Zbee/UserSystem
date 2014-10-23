@@ -112,7 +112,6 @@ class UserSystem {
 
   #$UserSystem->sanitize("dirt")
   #Would sanitize the string dirt with the set options
-  #Needs to be finished
   public function sanitize ($data, $opts = false) {
     $data = trim($data);
     $dopts = [
