@@ -157,6 +157,7 @@ class UserSystem {
           if ($opts['d']) { return "FAIL-String-Type-Check"; }
         }
       } elseif ($opts['t'] == "d") { //If date type
+        $data = preg_replace("/[^0-9\-\s\+a-zA-Z]/", "", $data);
         if (is_numeric($data) !== true) {
           $data = strtotime($data);
         }
