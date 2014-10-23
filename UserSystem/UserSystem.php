@@ -100,6 +100,17 @@ class UserSystem {
     return $rows;
   }
 
+  #UserSystem->handleUTF8("g'°")
+  #Would make that string safe for HTML by turning them into HTML entities
+  public function handleUTF8 ($code) {
+      return preg_replace_callback('/[\x{80}-\x{10FFFF}]/u', function($match) {
+          list($utf8) = $match;
+          $entity = mb_convert_encoding($utf8, 'HTML-ENTITIES', 'UTF-8');
+          printf("%s -> %s\n", $utf8, $entity);
+          return $entity;
+      }, $code);
+  }
+
   #$UserSystem->sanitize("dirt")
   #Would sanitize the string dirt with the set options
   #Needs to be finished
@@ -113,7 +124,7 @@ class UserSystem {
     if (!$opts) {
       $opts = $dopts;
     } else {
-      if (!is_bool($opts['t']) || !isset($opts['t'])) {
+      if (!is_string($opts['t']) || !isset($opts['t'])) {
         $opts['t'] = $dopts['t'];
       }
       if (!is_bool($opts['d']) || !isset($opts['d'])) {
@@ -127,6 +138,8 @@ class UserSystem {
       $tc = false;
       if ($opts['t'] == "n") { //if number type
         $data = filter_var($data, FILTER_SANITIZE_NUMBER_FLOAT);
+        $data = preg_replace("/[^0-9]/", "", $data);
+        $data = intval($data);
 
         if (is_numeric($data) === true) {
           $tc = true;
@@ -134,7 +147,9 @@ class UserSystem {
           if ($opts['d']) { return "FAIL-Number-Type-Check"; }
         }
       } elseif ($opts['t'] == "s") { //If string type
+        $data = $this->handleUTF8($data);
         $data = filter_var($data, FILTER_SANITIZE_STRING);
+        $data = filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
         if (is_string($data) === true) {
           $tc = true;
@@ -142,8 +157,6 @@ class UserSystem {
           if ($opts['d']) { return "FAIL-String-Type-Check"; }
         }
       } elseif ($opts['t'] == "d") { //If date type
-        $data = filter_var($data, FILTER_SANITIZE_NUMBER_FLOAT);
-
         if (is_numeric($data) !== true) {
           $data = strtotime($data);
         }
@@ -157,12 +170,14 @@ class UserSystem {
           if ($opts['d']) { return "FAIL-Date-Type-Check"; }
         }
       } elseif ($opts['t'] == "h") { //If html type
+        $data = $this->handleUTF8($data);
         if (is_string($data) === true) {
           $tc = true;
         } else {
           if ($opts['d']) { return "FAIL-HTML-Type-Check"; }
         }
       } elseif ($opts['t'] == "q") { //If sql type
+        $data = $this->handleUTF8($data);
         $b = "drop table|show table|`|\*|--|1=1|1='1'|a=a|a='a'|not null|\\\\";
         $data = preg_replace(
                               "/($b)/i",

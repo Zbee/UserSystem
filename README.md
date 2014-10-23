@@ -52,7 +52,7 @@ A ready to deploy user system that is both secure, and simple.
 
 After downloading the [.zip file](https://github.com/Zbee/UserSystem.php/archive/master.zip) you can add the /UserSystem/ and /Example/ folders to your own site and immediately start using that.
 
-For more detailed information please see the [documentation](https://zbee.github.com/UserSystem.php/documentation)
+For more detailed information please see the [documentation](https://zbee.github.io/UserSystem.php/documentation)
 
 ##License
 Copyright (c) 2014 Ethan Henderson See the LICENSE file for license rights and limitations (MIT).
