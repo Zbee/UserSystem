@@ -1,17 +1,17 @@
 <?php
 class UserSystem {
-  var $db;
-  const OPTIONS;
+  var $db = '';
+  const OPTIONS = '';
 
   #$UserSystem = new UserSystem ($database, $opts)
   #Would initialize the UserSystem.PHP class with the database connection info
   #and config.php options
   public function __construct ($db, $opts) {
-    self::db = new PDO(
+    $this->db = new PDO(
                 "mysql:host=$db[location];dbname=$db[database];
                 charset=utf8", $db['username'], $db['password']
               );
-    self::OPTIONS = $opts;
+    $this->OPTIONS = $opts;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -30,14 +30,13 @@ class UserSystem {
   public function redirect301($url) {
     header("HTTP/1.1 301 Moved Permanently");
     header("Location: $url");
+    return true;
   }
 
   #$UserSystem->encrypt("myEmail", "bob")
   #Would encrypt "bob"'s "myemail" text
   public function encrypt ($decrypted, $username) {
-    $user      = self::session($username);
-    $salt      = $user['salt'];
-    $key       = hash('SHA256', $salt, true);
+    $key       = hash('SHA256', $username, true);
     srand();
     $iv        = mcrypt_create_iv(
                   mcrypt_get_iv_size(
@@ -64,9 +63,7 @@ class UserSystem {
   #$UserSystem->decrypt("fnmeuixf4hm98g45hgx849gx4hg98h598g", "bob")
   #Would decrypt the stated string of "bob"'s
   public function decrypt ($encrypted, $username) {
-    $user      = self::session($username);
-    $salt      = $user['salt'];
-    $key       = hash('SHA256', $salt, true);
+    $key       = hash('SHA256', $username, true);
     $iv        = base64_decode(substr($encrypted, 0, 22) . '==');
     $encrypted = substr($encrypted, 22);
     $decrypted = rtrim(
@@ -91,9 +88,9 @@ class UserSystem {
   #Would return the number of users with the entered username
   public function numRows ($table, $thing = false, $answer = false) {
     if (!$thing && !$answer) {
-      $stmt = self::db->query("SELECT * FROM $table");
+      $stmt = $this->db->query("SELECT * FROM $table");
     } else {
-      $stmt = self::db->query("SELECT * FROM $table WHERE $thing='$answer'");
+      $stmt = $this->db->query("SELECT * FROM $table WHERE $thing='$answer'");
     }
     $rows = $stmt->rowCount();
     return $rows;
@@ -109,7 +106,7 @@ class UserSystem {
       "d" => false, #Debug
     ];
 
-    if ($opts === false) {
+    if (!$opts) {
       $opts = $dopts;
     } else {
       if (!is_bool($opts['t']) || !isset($opts['t'])) {
@@ -229,7 +226,7 @@ class UserSystem {
         }
         $cols = substr($cols, 0, -2);
         $entries = substr($entries, 0, -3);
-        self::db->query("INSERT INTO $data[1] ($cols) VALUES ($entries)");
+        $this->db->query("INSERT INTO $data[1] ($cols) VALUES ($entries)");
         return true;
         break;
       case "u":
@@ -238,7 +235,7 @@ class UserSystem {
           $update .= "`".strtolower($item[0])."`='".$item[1]."', ";
         }
         $update = substr($update, 0, -2);
-        self::db->query("UPDATE $data[1] SET $update");
+        $this->db->query("UPDATE $data[1] SET $update");
         return true;
       default:
         return false;
@@ -254,9 +251,10 @@ class UserSystem {
   #Will get the whole user array for the user "bob"
   public function session ($session = false) {
     if (!$session) {
-      $session = self::sanitize($_COOKIE[self::OPTIONS['sitename']], ["t"=>"q"]);
+      if (!isset($_COOKIE[$this->OPTIONS['sitename']])) { return false; }
+      $session = $this->sanitize($_COOKIE[$this->OPTIONS['sitename']], ["t"=>"q"]);
       $time    = strtotime('+30 days');
-      $stmt = self::db->query(
+      $stmt = $this->db->query(
                 "SELECT * FROM userblobs
                 WHERE code='$session' AND date<'$time' AND action='session'"
               );
@@ -266,7 +264,7 @@ class UserSystem {
       }
 
       if ($rows === 1) {
-        $stmt = self::db->query(
+        $stmt = $this->db->query(
                   "SELECT * FROM users WHERE username='$username'"
                 );
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -276,7 +274,7 @@ class UserSystem {
         return false;
       }
     } else {
-      $stmt = self::db->query(
+      $stmt = $this->db->query(
                 "SELECT * FROM users WHERE username='$session'"
               );
       $rows = $stmt->rowCount();
@@ -295,7 +293,7 @@ class UserSystem {
   public function insertUserBlob ($username, $hash, $action="session") {
     $time = time();
     $ip   = $_SERVER['REMOTE_ADDR'];
-    self::db->query(
+    $this->db->query(
       "INSERT INTO userblobs
       (user, code, action, date, ip) VALUES
       ('$username', '$hash', '$action', '$time', '$ip')"
@@ -305,7 +303,7 @@ class UserSystem {
   #$UserSystem->banCheck("127.0.0.1", "bob)
   #Would check if "bob" at "127.0.0.1" is banned
   public function checkBan ($ip, $username = false) {
-    $stmt = self::db->query("SELECT * FROM ban WHERE ip='$ip'");
+    $stmt = $this->db->query("SELECT * FROM ban WHERE ip='$ip'");
     while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       if ($row['appealed'] == 0) {
         $thing = true;
@@ -315,7 +313,7 @@ class UserSystem {
     }
 
     if ($username !== false) {
-      $stmt = self::db->query("SELECT * FROM ban WHERE username='$username'");
+      $stmt = $this->db->query("SELECT * FROM ban WHERE username='$username'");
       while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         if ($row['appealed'] == 0) {
           if ($thing === false) { $thing = true; } else {$thing = false; }
@@ -331,9 +329,10 @@ class UserSystem {
   #$UserSystem->verifySession($_COOKIE[$sitename])
   #Verifies the session with the stated code
   public function verifySession ($session = false) {
-    if (!$session) { $session = $_COOKIE[self::OPTIONS['sitename']]; }
+    if (!isset($_COOKIE[$this->OPTIONS['sitename']])) { return false; }
+    if (!$session) { $session = $_COOKIE[$this->OPTIONS['sitename']]; }
     $time    = strtotime( '+30 days' );
-    $stmt = self::db->query(
+    $stmt = $this->db->query(
               "SELECT * FROM userblobs
               WHERE code='$session' AND date<'$time' AND action='session'"
             );
@@ -352,7 +351,7 @@ class UserSystem {
         }
       } else {
         return "tamper";
-        self::db->query(
+        $this->db->query(
                   "DELETE FROM userblobs
                   WHERE code='$session' AND action='session' LIMIT 1"
               );
@@ -378,24 +377,24 @@ class UserSystem {
   #Would logout Bob's session by removing the user blob as well as the cookie
   public function logOut ($code, $user, $cursess = false, $all = false) {
     if (!$all) {
-      self::db->query(
+      $this->db->query(
         "DELETE FROM userblobs
         WHERE code='$code' AND user='$user' AND action='session'
         LIMIT 1"
       );
     } else {
-      self::db->query(
+      $this->db->query(
         "DELETE FROM userblobs
         WHERE user='$user'"
       );
     }
     if ($cursess) {
       setcookie(
-        self::OPTIONS['sitename'],
+        $this->OPTIONS['sitename'],
         null,
         strtotime('-60 days'),
         "/",
-        self::OPTIONS['domain_simple']
+        $this->OPTIONS['domain_simple']
       );
     }
   }
