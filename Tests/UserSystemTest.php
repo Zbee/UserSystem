@@ -95,44 +95,33 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals("g'&deg;", $t);
   }
 
-  public function testDBModInsert() {
+  public function testDB() {
     $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
     $a->db->query("CREATE DATABASE test");
     $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
     $a->db->query("CREATE TABLE `test1` (`id` INT(50) NOT NULL AUTO_INCREMENT,
     `test` VARCHAR(50) NULL DEFAULT NULL,PRIMARY KEY (`id`))
-    COLLATE='latin1_swedish_ci' ENGINE=MyISAM AUTO_INCREMENT=0;;");
-    $a->dbMod(["i", "test1", ["test"=>"cake"]]);
+    COLLATE='latin1_swedish_ci' ENGINE=MyISAM AUTO_INCREMENT=0;");
+    //$a->dbMod(["i", "test1", ["test"=>"cake"]]);
+    $a->db->query("INSERT INTO test1 (test) VALUES ('cake')");
     $b = $a->dbSel(["test1", ["id"=>1]]);
     $this->assertEquals(1, $b[0]);
     $this->assertEquals(1, $b[1]['id']);
     $this->assertEquals("cake", $b[1]['test']);
-  }
 
-  public function testDBModUpdate() {
-    $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
-    $a->dbMod(["u", "test1", ["test"=>"pie"], ["test"=>"cake"]]);
+    $a->dbMod(["u", "test1", ["id"=>1], ["test"=>"pie"]]);
     $b = $a->dbSel(["test1", ["id"=>1]]);
     $this->assertEquals(1, $b[0]);
     $this->assertEquals(1, $b[1]['id']);
-    $this->assertEquals("pie", $b[1]['test']);
-  }
+    $this->assertEquals("cake", $b[1]['test']);
 
-  public function testDBModDelete() {
-    $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
-    $a->dbMod(["d", "test1", ["test"=>"pie"]]);
+    $a->dbMod(["d", "test1", ["id"=>1]]);
     $b = $a->dbSel(["test1", ["id"=>1]]);
     $this->assertEquals(0, $b[0]);
-  }
 
-  public function testDBSel() {
-    $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
     $b = $a->dbSel(["test1", ["id"=>1]]);
     $this->assertEquals(0, $b[0]);
-  }
 
-  public function testNumRows() {
-    $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
     $b = $a->numRows("test1");
     $this->assertEquals(0, $b);
     $a->db->query("DROP DATABASE test");

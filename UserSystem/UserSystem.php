@@ -181,7 +181,6 @@ class UserSystem {
                             $data
                           );
       $data = filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-      $data = mysql_real_escape_string($data);
 
       if (is_string($data) === true) {
         return $data;
@@ -227,7 +226,8 @@ class UserSystem {
           $entries .= $this->sanitize($item[1], "q")."', '";
         }
         $cols = substr($cols, 0, -2);
-        $entries = substr($entries, 0, -3);
+        $entries = substr($entries, 0, -4);
+        print "INSERT INTO $data[1] ($cols) VALUES ('$entries)";
         $this->db->query("INSERT INTO $data[1] ($cols) VALUES ('$entries)");
         return true;
       case "u":
@@ -309,7 +309,7 @@ class UserSystem {
        $answer = $this->sanitize($answer, "q");
        $stmt = $this->db->query("SELECT * FROM $table WHERE $thing='$answer'");
      }
-     $rows = $stmt->rowCount();
+     $rows =  (is_object($stmt)) ? $stmt->rowCount(): 0;
      return $rows;
    }
 
