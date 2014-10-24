@@ -5,10 +5,7 @@ date_default_timezone_set('America/Denver');
 
 class UserSystemTest extends PHPUnit_Framework_TestCase {
   public function testDefaultConstruct() {
-    $a = new UserSystem(
-      ["location" => "localhost","database" => "","username" => "root","password" => ""],
-      ['sitename' => "examplecom", 'domain_simple' => "example.com", 'domain' => "accounts.example.com", 'system_loc'=> "/usersystem", 'encryption' => false]
-    );
+    $a = new UserSystem(["location" => "localhost","database"=> "","username" =>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
     $this->assertObjectHasAttribute("db", $a);
     $this->assertObjectHasAttribute("OPTIONS", $a);
   }
@@ -26,10 +23,10 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $b = $a->redirect301("localhost");
     if ($b) {
       $b = 1;
-  }
+    }
     if (!$b) {
-      $b = 0;
-  }
+        $b = 0;
+    }
     $this->assertLessThan(2, $b);
   }
 
