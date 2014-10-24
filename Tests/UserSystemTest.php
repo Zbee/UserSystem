@@ -123,4 +123,69 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(0, $b);
     $a->db->query("DROP DATABASE test");
   }
+
+  public function testSession() {
+    $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
+    $a->db->query("CREATE DATABASE test");
+    $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
+    $a->db->query("CREATE TABLE `users` (`id` INT(50) NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(50) NULL DEFAULT NULL,PRIMARY KEY (`id`))
+    COLLATE='latin1_swedish_ci' ENGINE=MyISAM AUTO_INCREMENT=0;");
+    $a->db->query("INSERT INTO users (username) VALUES ('cake')");
+    $b = $a->session("cake")['username'];
+    $this->assertEquals("cake", $b);
+
+    $a->db->query("
+      CREATE TABLE `userblobs` (
+        `id` INT(5) NOT NULL AUTO_INCREMENT,
+        `user` VARCHAR(100) NOT NULL,
+        `code` VARCHAR(256) NOT NULL,
+        `ip` VARCHAR(256) NOT NULL,
+        `action` VARCHAR(100) NOT NULL,
+        `date` VARCHAR(50) NOT NULL,
+        PRIMARY KEY (`id`)
+      )
+      COLLATE='latin1_swedish_ci'
+      ENGINE=MyISAM
+      AUTO_INCREMENT=0;
+    ");
+    $a->db->query("INSERT INTO userblobs (user, code, ip, action, date) VALUES ('cake', 'pie', '127.0.0.1', 'session', '1414169627')");
+    $_COOKIE['examplecom'] = "pie";
+    $b = $a->session()["username"];
+    $this->assertEquals("cake", $b);
+    $a->db->query("DROP DATABASE test");
+  }
+
+  public function testInsertUserBlob() {
+    $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
+    $a->db->query("CREATE DATABASE test");
+    $a = new UserSystem(["location"=>"localhost","database"=>"test","username"=>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
+    $a->db->query("CREATE TABLE `users` (`id` INT(50) NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(50) NULL DEFAULT NULL,PRIMARY KEY (`id`))
+    COLLATE='latin1_swedish_ci' ENGINE=MyISAM AUTO_INCREMENT=0;");
+    $a->db->query("
+      CREATE TABLE `userblobs` (
+        `id` INT(5) NOT NULL AUTO_INCREMENT,
+        `user` VARCHAR(100) NOT NULL,
+        `code` VARCHAR(256) NOT NULL,
+        `ip` VARCHAR(256) NOT NULL,
+        `action` VARCHAR(100) NOT NULL,
+        `date` VARCHAR(50) NOT NULL,
+        PRIMARY KEY (`id`)
+      )
+      COLLATE='latin1_swedish_ci'
+      ENGINE=MyISAM
+      AUTO_INCREMENT=0;
+    ");
+    $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
+    $a->insertUserBlob("cake", "pie");
+    $b = $a->dbSel(["userblobs", ["code"=>"pie"]]);
+    $this->assertEquals(1, $b[0]);
+    $this->assertEquals(1, $b[1]["id"]);
+    $this->assertEquals("cake", $b[1]["user"]);
+    $this->assertEquals("pie", $b[1]["code"]);
+    $this->assertEquals("127.0.0.1", $b[1]["ip"]);
+    $this->assertEquals("session", $b[1]["action"]);
+    $a->db->query("DROP DATABASE test");
+  }
 }
