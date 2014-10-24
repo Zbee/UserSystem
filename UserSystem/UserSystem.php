@@ -1,16 +1,22 @@
 <?php
 class UserSystem {
   var $db = '';
-  const OPTIONS = '';
+  const OPTION = '';
 
-  #$UserSystem = new UserSystem ($database, $opts)
-  #Would initialize the UserSystem.PHP class with the database connection info
-  #and config.php options
+  /**
+  * Initializes the class and connects to the database and sets up options.
+  * Example: $UserSystem = new UserSystem ($database, $opts)
+  *
+  * @access public
+  * @param mixed $db
+  * @param mixed $opts
+  * @return void
+  */
   public function __construct ($db, $opts) {
     if (!$db) {
       $db = ["location"=>"localhost","database"=>"","username"=>"root","password" =>""];
     }
-    
+
     $this->db = new PDO(
                   "mysql:host=$db[location];dbname=$db[database];
                   charset=utf8", $db['username'], $db['password']
@@ -22,15 +28,25 @@ class UserSystem {
   //Utility Functions
   //////////////////////////////////////////////////////////////////////////////
 
-  #$UserSystem->currentURL()
-  #Returns URL of current page
+  /**
+  * Gives the current url that the user is on.
+  * Example: $UserSystem->currentURL()
+  *
+  * @access public
+  * @return string
+  */
   public function currentURL () {
     return "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
   }
 
-  #$UserSystem->redirect301("http://example.com")
-  #Would redirect the user or bot to "http://example.com" and set the correct
-  #HTTP error so the bot will follow the page
+  /**
+  * Provides the proper headers to redirect a user, including a page-has-moved flag.
+  * Example: $UserSystem->redirect301("http://example.com")
+  *
+  * @access public
+  * @param string $url
+  * @return boolean
+  */
   public function redirect301($url) {
     if (!headers_sent()) {
       header("HTTP/1.1 301 Moved Permanently");
@@ -41,8 +57,15 @@ class UserSystem {
     }
   }
 
-  #$UserSystem->encrypt("myEmail", "bob")
-  #Would encrypt "bob"'s "myemail" text
+  /**
+  * Encrypts any data and makes it only decryptable by the same user.
+  * Example: $UserSystem->encrypt("myEmail", "bob")
+  *
+  * @access public
+  * @param string $decrypted
+  * @param string $username
+  * @return string
+  */
   public function encrypt ($decrypted, $username) {
     $key       = hash('SHA256', $username, true);
     srand();
@@ -68,8 +91,15 @@ class UserSystem {
     return $iv_base64 . $encrypted;
    }
 
-  #$UserSystem->decrypt("fnmeuixf4hm98g45hgx849gx4hg98h598g", "bob")
-  #Would decrypt the stated string of "bob"'s
+  /**
+  * Decrypts any data that belongs to a set user
+  * Example: $UserSystem->decrypt("4lj84mui4htwyi58g7gh5y8hvn8t", "bob")
+  *
+  * @access public
+  * @param string $encrypted
+  * @param string $username
+  * @return string
+  */
   public function decrypt ($encrypted, $username) {
     $key       = hash('SHA256', $username, true);
     $iv        = base64_decode(substr($encrypted, 0, 22) . '==');
@@ -92,20 +122,14 @@ class UserSystem {
     return $decrypted;
  }
 
-  #$UserSystem->numberOfRows("users", "username", $enteredUsername)
-  #Would return the number of users with the entered username
-  public function numRows ($table, $thing = false, $answer = false) {
-    if (!$thing && !$answer) {
-      $stmt = $this->db->query("SELECT * FROM $table");
-    } else {
-      $stmt = $this->db->query("SELECT * FROM $table WHERE $thing='$answer'");
-    }
-    $rows = $stmt->rowCount();
-    return $rows;
-  }
-
-  #UserSystem->handleUTF8("g'°")
-  #Would make that string safe for HTML by turning them into HTML entities
+  /**
+  * Makes any string safe for HTML by converting it to an entity code.
+  * Example: $UserSystem->handleUTF8("g'°")
+  *
+  * @access public
+  * @param string $code
+  * @return string
+  */
   public function handleUTF8 ($code) {
       return preg_replace_callback('/[\x{80}-\x{10FFFF}]/u', function($match) {
           list($utf8) = $match;
@@ -114,98 +138,107 @@ class UserSystem {
       }, $code);
   }
 
-  #$UserSystem->sanitize("dirt")
-  #Would sanitize the string dirt with the set options
+  /**
+  * Sanitizes any given string in a particular fashion of your choosing.
+  * Example: $UserSystem->sanitize("dirt")
+  *
+  * @access public
+  * @param string $data
+  * @param string $type
+  * @return string
+  */
   public function sanitize ($data, $type = 's') {
     $data = trim($data);
 
-    if ($type === false) {
-      $tc = false;
-    } else {
-      $tc = false;
-      if ($type == "n") { //if number type
-        $data = filter_var($data, FILTER_SANITIZE_NUMBER_FLOAT);
-        $data = preg_replace("/[^0-9]/", "", $data);
-        return intval($data);
-      } elseif ($type == "s") { //If string type
-        $data = $this->handleUTF8($data);
-        $data = filter_var($data, FILTER_SANITIZE_STRING);
-        return filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-      } elseif ($type == "d") { //If date type
-        $data = preg_replace("/[^0-9\-\s\+a-zA-Z]/", "", $data);
-        if (is_numeric($data) !== true) {
-          $data = strtotime($data);
-        }
-        $m = date("n", $data);
-        $d = date("j", $data);
-        $y = date("Y", $data);
+    if ($type == "n") { //if number type
+      $data = filter_var($data, FILTER_SANITIZE_NUMBER_FLOAT);
+      $data = preg_replace("/[^0-9]/", "", $data);
+      return intval($data);
+    } elseif ($type == "s") { //If string type
+      $data = $this->handleUTF8($data);
+      $data = filter_var($data, FILTER_SANITIZE_STRING);
+      return filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    } elseif ($type == "d") { //If date type
+      $data = preg_replace("/[^0-9\-\s\+a-zA-Z]/", "", $data);
+      if (is_numeric($data) !== true) {
+        $data = strtotime($data);
+      }
+      $m = date("n", $data);
+      $d = date("j", $data);
+      $y = date("Y", $data);
 
-        if (checkdate($m, $d, $y) === true) {
-         return $data;
-        }
-      } elseif ($type == "h") { //If html type
-        return $this->handleUTF8($data);
-      } elseif ($type == "q") { //If sql type
-        $data = $this->handleUTF8($data);
-        $b = "drop table|show table|`|\*|--|1=1|1='1'|a=a|a='a'|not null|\\\\";
-        $data = preg_replace(
-                              "/($b)/i",
-                              "",
-                              $data
-                            );
-        $data = filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $data = mysql_real_escape_string($data);
+      if (checkdate($m, $d, $y) === true) {
+       return $data;
+      }
+    } elseif ($type == "h") { //If html type
+      return $this->handleUTF8($data);
+    } elseif ($type == "q") { //If sql type
+      $data = $this->handleUTF8($data);
+      $b = "drop table|show table|`|\*|--|1=1|1='1'|a=a|a='a'|not null|\\\\";
+      $data = preg_replace(
+                            "/($b)/i",
+                            "",
+                            $data
+                          );
+      $data = filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+      $data = mysql_real_escape_string($data);
 
-        if (is_string($data) === true) {
-          return $data;
-        }
-      } elseif ($type == "b") { //If boolean type
-        $data = (filter_var($data, FILTER_VALIDATE_BOOLEAN)) ? true : "fail";
+      if (is_string($data) === true) {
+        return $data;
+      }
+    } elseif ($type == "b") { //If boolean type
+      $data = (filter_var($data, FILTER_VALIDATE_BOOLEAN)) ? true : "fail";
 
-        if (is_bool($data)) {
-          return $data;
-        }
-      } elseif ($type == "u") { //if url type
-        if (filter_var($data, FILTER_VALIDATE_URL) === true) {
-          return filter_var($data, FILTER_SANITIZE_URL);
-        }
+      if (is_bool($data)) {
+        return $data;
+      }
+    } elseif ($type == "u") { //if url type
+      if (filter_var($data, FILTER_VALIDATE_URL) === true) {
+        return filter_var($data, FILTER_SANITIZE_URL);
       }
     }
 
     return "FAIL-Sanitization";
   }
 
-  #$UserSystem->dbMod(["i","users",["username"=>"Bob","email"=>"bob@ex.com"]])
-  #Will insert the user bob into the table users with the email of bob@ex.com
+  /**
+  * A shortcut for eaily modifying the MySQL database, not necessarily easier, but hits up
+  * all required functions in the process.
+  * Example: $UserSystem->dbMod(["i","users",["username"=>"Bob","email"=>"bob@ex.com"]])
+  *
+  * @access public
+  * @param array $data
+  * @return boolean
+  */
   public function dbMod ($data) {
     $d = [];
     foreach ($data[2] as $item) {
       $col = array_search($item, $data[2]);
       array_push($d, [$col, $item]);
     }
+    $data[1] = $this->sanitize($data[1], "q");
 
     switch ($data[0]) {
       case "i":
         $cols = "";
         $entries = "";
         foreach ($d as $item) {
-          $cols .= $item[0].", ";
-          $entries .= $item[1]."', '";
+          $cols .= $this->sanitize($item[0], "q").", ";
+          $entries .= $this->sanitize($item[1], "q")."', '";
         }
         $cols = substr($cols, 0, -2);
         $entries = substr($entries, 0, -3);
         $this->db->query("INSERT INTO $data[1] ($cols) VALUES ('$entries)");
         return true;
-        break;
       case "u":
         $update = "";
         foreach ($d as $item) {
-          $update .= "`".$item[0]."`='".$item[1]."', ";
+          $update .= "`".$this->sanitize($item[0], "q")."`='".$this->sanitize($item[1], "q")."', ";
         }
         $q = [];
         foreach ($data[3] as $item) {
           $col = array_search($item, $data[3]);
-          array_push($q, [$col, $item]);
+          array_push($q, [$this->sanitize($col, "q"), $this->sanitize($item, "q")]);
         }
         $equals = "";
         foreach ($q as $item) {
@@ -218,20 +251,25 @@ class UserSystem {
       case "d":
         $equals = "";
         foreach ($d as $item) {
-          $equals .= "`".$item[0]."`='".$item[1]."', ";
+          $equals .= "`".$this->sanitize($item[0], "q")."`='".$this->sanitize($item[1], "q")."', ";
         }
         $equals = substr($equals, 0, -2);
         $this->db->query("DELETE FROM $data[1] WHERE $equals");
         return true;
-        break;
       default:
         return false;
-        break;
     }
   }
 
-  #$userSystem->dbSel(["users", ["username"=>"Bob","id"=>0]])
-  #Returns an array of all of the users with the username bob AND the id of 0
+  /**
+  * Returns an array for the database search performed, again, just a shortcut for hitting
+  * required functions
+  * Example: $UserSystem->dbSel(["users", ["username"=>"Bob","id"=>0]])
+  *
+  * @access public
+  * @param array $data
+  * @return array
+  */
   public function dbSel ($data) {
     $d = [];
     foreach ($data[1] as $item) {
@@ -251,6 +289,30 @@ class UserSystem {
     return $arr;
   }
 
+   /**
+   * Returns the number of rows for a given search.
+   * Example: $UserSystem->numberOfRows("users", "username", $enteredUsername)
+   * Should follow pattern of dbMod() so as to support more $thing/$answer combos.
+   *
+   * @access public
+   * @param string $table
+   * @param mixed $thing
+   * @param mixed $answer
+   * @return integer
+   */
+   public function numRows ($table, $thing = false, $answer = false) {
+     $table = $this->sanitize($table, "q");
+     if (!$thing && !$answer) {
+       $stmt = $this->db->query("SELECT * FROM $table");
+     } else {
+       $thing = $this->sanitize($thing, "q");
+       $answer = $this->sanitize($answer, "q");
+       $stmt = $this->db->query("SELECT * FROM $table WHERE $thing='$answer'");
+     }
+     $rows = $stmt->rowCount();
+     return $rows;
+   }
+
   //////////////////////////////////////////////////////////////////////////////
   //System Functions
   //////////////////////////////////////////////////////////////////////////////
@@ -260,7 +322,7 @@ class UserSystem {
   public function session ($session = false) {
     if (!$session) {
       if (!isset($_COOKIE[$this->OPTIONS['sitename']])) { return false; }
-      $session = $this->sanitize($_COOKIE[$this->OPTIONS['sitename']], ["t"=>"q"]);
+      $session = $this->sanitize($_COOKIE[$this->OPTIONS['sitename']], "q");
       $time    = strtotime('+30 days');
       $stmt = $this->db->query(
                 "SELECT * FROM userblobs
@@ -358,11 +420,11 @@ class UserSystem {
           return "ban";
         }
       } else {
+      $this->db->query(
+                "DELETE FROM userblobs
+                WHERE code='$session' AND action='session' LIMIT 1"
+            );
         return "tamper";
-        $this->db->query(
-                  "DELETE FROM userblobs
-                  WHERE code='$session' AND action='session' LIMIT 1"
-              );
       }
     } else {
       return "session";
