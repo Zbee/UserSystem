@@ -317,8 +317,14 @@ class UserSystem {
   //System Functions
   //////////////////////////////////////////////////////////////////////////////
 
-  #$UserSystem->session("bob")
-  #Will get the whole user array for the user "bob"
+  /**
+   * Returns an array full of the data about a user
+   * Example: $UserSystem->session("bob")
+   *
+   * @access public
+   * @param string $session
+   * @return mixed
+   */
   public function session ($session = false) {
     if (!$session) {
       if (!isset($_COOKIE[$this->OPTIONS['sitename']])) { return false; }
@@ -358,8 +364,16 @@ class UserSystem {
     }
   }
 
-  #$UserSystem->insertUserBlob("bob", "rmt9c84htnqy54h78tcy54hmgtx", "2step")
-  #Would insert a 2-step user blob for "bob" with the code stated above
+  /**
+   * Inserts a user blob into the database for you
+   * Example: $UserSystem->insertUserBlob("bob", "rmt54h78tcy54hmgtx", "2step")
+   *
+   * @access public
+   * @param string $username
+   * @param string $hash
+   * @param mixed $action
+   * @return boolean
+   */
   public function insertUserBlob ($username, $hash, $action="session") {
     $time = time();
     $ip   = $_SERVER['REMOTE_ADDR'];
@@ -370,25 +384,40 @@ class UserSystem {
     );
   }
 
-  #$UserSystem->banCheck("127.0.0.1", "bob)
-  #Would check if "bob" at "127.0.0.1" is banned
+  /**
+   * Checks if a user is banned
+   * Example: $UserSystem->checkBan("127.0.0.1", "bob)
+   *
+   * @access public
+   * @param string $ip
+   * @param mixed $username
+   * @return boolean
+   */
   public function checkBan ($ip, $username = false) {
     $stmt = $this->db->query("SELECT * FROM ban WHERE ip='$ip'");
-    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-      if ($row['appealed'] == 0) {
-        $thing = true;
-      } else {
-        $thing = false;
+    $rows = $stmt->rowCount();
+    if ($rows > 0) {
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        if ($row['appealed'] == 0) {
+          $thing = true;
+        } else {
+          $thing = false;
+        }
       }
+    } else {
+      $thing = false;
     }
 
     if ($username !== false) {
       $stmt = $this->db->query("SELECT * FROM ban WHERE username='$username'");
-      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        if ($row['appealed'] == 0) {
-          if ($thing === false) { $thing = true; } else {$thing = false; }
-        } else {
-          $thing = false;
+      $rows = $stmt->rowCount();
+      if ($rows > 0) {
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+          if ($row['appealed'] == 0) {
+            $thing = true;
+          } else {
+            $thing = false;
+          }
         }
       }
     }
@@ -396,12 +425,18 @@ class UserSystem {
     return $thing;
   }
 
-  #$UserSystem->verifySession($_COOKIE[$sitename])
-  #Verifies the session with the stated code
+  /**
+   * Verifies a user's session
+   * Example: $UserSystem->verifySession($_COOKIE[$sitename])
+   *
+   * @access public
+   * @param mixed $session
+   * @return mixed
+   */
   public function verifySession ($session = false) {
     if (!isset($_COOKIE[$this->OPTIONS['sitename']])) { return false; }
     if (!$session) { $session = $_COOKIE[$this->OPTIONS['sitename']]; }
-    $time    = strtotime( '+30 days' );
+    $time = strtotime("+30 days");
     $stmt = $this->db->query(
               "SELECT * FROM userblobs
               WHERE code='$session' AND date<'$time' AND action='session'"
@@ -412,15 +447,15 @@ class UserSystem {
     }
     $tamper  = substr($session, -32);
 
-    if ($rows === 1) {
-      if (md5($username.substr($session, 0, 64)) === $tamper) {
-        if (banCheck($_SERVER['REMOTE_ADDR']) == false) {
+    if ($rows == 1) {
+      if (md5($username.substr($session, 0, 64)) == $tamper) {
+        if ($this->checkBan($_SERVER['REMOTE_ADDR']) == false) {
           return true;
         } else {
           return "ban";
         }
       } else {
-      $this->db->query(
+        $this->db->query(
                 "DELETE FROM userblobs
                 WHERE code='$session' AND action='session' LIMIT 1"
             );
@@ -431,20 +466,42 @@ class UserSystem {
     }
   }
 
-  #$UserSystem->activateUser("mrogjsruicyu78chsr87thmrsu")
-  #Would activate the user to which this activation code belongs
+  /**
+   * Activates a new user's account
+   * Example: $UserSystem->activateUser("mrogjsruicyu78chsr87thmrsu")
+   *
+   * @access public
+   * @param string $code
+   * @return boolean
+   */
   public function activateUser ($code) {
 
   }
 
-  #$UserSystem->LogIn("Bob", "Bob's Password")
-  #Would login Bob if "Bob's Password" was his actual password
+  /**
+   * Logs in a user
+   * Example: $UserSystem->LogIn("Bob", "Bob's Password")
+   *
+   * @access public
+   * @param string $username
+   * @param string $password
+   * @return boolean
+   */
   public function logIn ($username, $password) {
 
   }
 
-  #$UserSystem->logOut($_COOKIE[$sitename], "Bob", true)
-  #Would logout Bob's session by removing the user blob as well as the cookie
+  /**
+   * Logs out a selected userblob or group of user blobs
+   * Example: $UserSystem->logOut($_COOKIE[$sitename], "Bob", true)
+   *
+   * @access public
+   * @param string $code
+   * @param string $user
+   * @param mixed $cursess
+   * @param mixed $all
+   * @return boolean
+   */
   public function logOut ($code, $user, $cursess = false, $all = false) {
     if (!$all) {
       $this->db->query(
