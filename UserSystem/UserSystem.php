@@ -168,7 +168,7 @@ class UserSystem {
   * @param string $type
   * @return mixed
   */
-  public function $this->sanitize ($data, $type = 's') {
+  public function sanitize ($data, $type = 's') {
     $data = trim($data);
 
     if ($type == "n") { //if number type
