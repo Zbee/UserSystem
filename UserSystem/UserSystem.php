@@ -2,20 +2,19 @@
 class UserSystem {
   var $DATABASE = '';
   const OPTION = '';
-  var $SERVER = [
-    "REMOTE_ADDR" => filter_var(
-                          $_SERVER['REMOTE_ADDR'],
-                          FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                        ),
-    "HTTP_HOST" => filter_var(
-                          $_SERVER['HTTP_HOST'],
-                          FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                        ),
-    "REQUEST_URI" => filter_var(
-                          $_SERVER['REQUEST_URI'],
-                          FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                        )
-  ];
+
+  var $SERVERR = filter_var(
+                    $_SERVER["REMOTE_ADDR"],
+                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                  );
+  var $SERVERH = filter_var(
+                    $_SERVER["HTTP_HOST"],
+                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                  );
+  var $SERVERU = filter_var(
+                    $_SERVER["REQUEST_URI"],
+                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                  );
 
   /**
   * Initializes the class and connects to the database and sets up options.
@@ -54,7 +53,7 @@ class UserSystem {
   * @return string
   */
   public function currentURL () {
-    return "//$SERVER[HTTP_HOST]$SERVER[REQUEST_URI]";
+    return "//$SERVERH$SERVERU";
   }
 
   /**
@@ -396,7 +395,7 @@ class UserSystem {
     $username = $this->sanitize($username, "q");
     $hash = $this->sanitize($hash, "q");
     $time = time();
-    $ipAddress = $SERVER['REMOTE_ADDR'];
+    $ipAddress = $SERVERR;
     $this->DATABASE->query(
       "INSERT INTO userblobs
       (user, code, action, date, ip) VALUES
@@ -413,7 +412,7 @@ class UserSystem {
    * @param mixed $username
    * @return boolean
    */
-  public function checkBan ($ip, $username = false) {
+  public function checkBan ($ipAddress, $username = false) {
     $ipAddress = $this->sanitize($ipAddress, "q");
     $username = $this->sanitize($username, "q");
 
@@ -472,7 +471,7 @@ class UserSystem {
 
     if ($rows == 1) {
       if (md5($username.substr($session, 0, 64)) == $tamper) {
-        if ($this->checkBan($SERVER['REMOTE_ADDR']) === false) {
+        if ($this->checkBan($SERVERR) === false) {
           return true;
         } else {
           return "ban";
