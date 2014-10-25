@@ -1,7 +1,19 @@
 <?php
 class UserSystem {
-  var $db = '';
+  var $DATABASE = '';
   const OPTION = '';
+  var $SERVER['REMOTE_ADDR'] = filter_var(
+                                  $_SERVER['REMOTE_ADDR'],
+                                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                                );
+  var $SERVER['HTTP_HOST'] = filter_var(
+                                  $_SERVER['HTTP_HOST'],
+                                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                                );
+  var $SERVER['REQUEST_URI'] = filter_var(
+                                  $_SERVER['REQUEST_URI'],
+                                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                                );
 
   /**
   * Initializes the class and connects to the database and sets up options.
@@ -17,12 +29,17 @@ class UserSystem {
       $db = ["location"=>"localhost","database"=>"","username"=>"root","password" =>""];
     }
 
-    $this->db = new PDO(
+    $this->DATABASE = new PDO(
                   "mysql:host=$db[location];dbname=$db[database];
                   charset=utf8", $db['username'], $db['password']
                 );
     $this->OPTIONS = $opts;
   }
+
+  var $COOKIE = filter_var(
+                    $_COOKIE[$this->OPTIONS['sitename']],
+                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                  );
 
   //////////////////////////////////////////////////////////////////////////////
   //Utility Functions
@@ -36,7 +53,7 @@ class UserSystem {
   * @return string
   */
   public function currentURL () {
-    return "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+    return "//$SERVER[HTTP_HOST]$SERVER[REQUEST_URI]";
   }
 
   /**
@@ -69,14 +86,14 @@ class UserSystem {
   public function encrypt ($decrypted, $username) {
     $key       = hash('SHA256', $username, true);
     srand();
-    $iv        = mcrypt_create_iv(
+    $initVector        = mcrypt_create_iv(
                   mcrypt_get_iv_size(
                     MCRYPT_RIJNDAEL_128,
                     MCRYPT_MODE_CBC
                   ),
                   MCRYPT_RAND
                 );
-    if (strlen($iv_base64 = rtrim(base64_encode($iv), '=')) != 22) {
+    if (strlen($iv_base64 = rtrim(base64_encode($initVector), '=')) != 22) {
         return false;
     }
     $encrypted = base64_encode(
@@ -85,7 +102,7 @@ class UserSystem {
                     $key,
                     $decrypted . md5($decrypted),
                     MCRYPT_MODE_CBC,
-                    $iv
+                    $initVector
                   )
                 );
     return $iv_base64 . $encrypted;
@@ -139,15 +156,15 @@ class UserSystem {
   }
 
   /**
-  * Sanitizes any given string in a particular fashion of your choosing.
+  * $this->sanitizes any given string in a particular fashion of your choosing.
   * Example: $UserSystem->sanitize("dirt")
   *
   * @access public
   * @param string $data
   * @param string $type
-  * @return string
+  * @return mixed
   */
-  public function sanitize ($data, $type = 's') {
+  public function $this->sanitize ($data, $type = 's') {
     $data = trim($data);
 
     if ($type == "n") { //if number type
@@ -163,20 +180,20 @@ class UserSystem {
       if (is_numeric($data) !== true) {
         $data = strtotime($data);
       }
-      $m = date("n", $data);
-      $d = date("j", $data);
-      $y = date("Y", $data);
+      $month = date("n", $data);
+      $day = date("j", $data);
+      $year = date("Y", $data);
 
-      if (checkdate($m, $d, $y) === true) {
+      if (checkdate($month, $day, $year) === true) {
        return $data;
       }
     } elseif ($type == "h") { //If html type
       return $this->handleUTF8($data);
     } elseif ($type == "q") { //If sql type
       $data = $this->handleUTF8($data);
-      $b = "drop table|show table|`|\*|--|1=1|1='1'|a=a|a='a'|not null|\\\\";
+      $bad = "drop table|show table|`|\*|--|1=1|1='1'|a=a|a='a'|not null|\\\\";
       $data = preg_replace(
-                            "/($b)/i",
+                            "/($bad)/i",
                             "",
                             $data
                           );
@@ -186,7 +203,7 @@ class UserSystem {
         return $data;
       }
     } elseif ($type == "b") { //If boolean type
-      $data = (filter_var($data, FILTER_VALIDATE_BOOLEAN)) ? true : "fail";
+      $data = (filter_var($data, FILTER_VALIDATE_BOOLEAN)) ? $data : "fail";
 
       if (is_bool($data)) {
         return $data;
@@ -210,10 +227,10 @@ class UserSystem {
   * @return boolean
   */
   public function dbMod ($data) {
-    $d = [];
+    $dataArr = [];
     foreach ($data[2] as $item) {
       $col = array_search($item, $data[2]);
-      array_push($d, [$col, $item]);
+      array_push($dataArr, [$col, $item]);
     }
     $data[1] = $this->sanitize($data[1], "q");
 
@@ -221,40 +238,40 @@ class UserSystem {
       case "i":
         $cols = "";
         $entries = "";
-        foreach ($d as $item) {
+        foreach ($dataArr as $item) {
           $cols .= $this->sanitize($item[0], "q").", ";
           $entries .= $this->sanitize($item[1], "q")."', '";
         }
         $cols = substr($cols, 0, -2);
         $entries = substr($entries, 0, -4);
         print "INSERT INTO $data[1] ($cols) VALUES ('$entries)";
-        $this->db->query("INSERT INTO $data[1] ($cols) VALUES ('$entries)");
+        $this->DATABASE->query("INSERT INTO $data[1] ($cols) VALUES ('$entries)");
         return true;
       case "u":
         $update = "";
-        foreach ($d as $item) {
+        foreach ($dataArr as $item) {
           $update .= "`".$this->sanitize($item[0], "q")."`='".$this->sanitize($item[1], "q")."', ";
         }
-        $q = [];
+        $equalsArr = [];
         foreach ($data[3] as $item) {
           $col = array_search($item, $data[3]);
-          array_push($q, [$this->sanitize($col, "q"), $this->sanitize($item, "q")]);
+          array_push($equalsArr, [$this->sanitize($col, "q"), $this->sanitize($item, "q")]);
         }
         $equals = "";
-        foreach ($q as $item) {
+        foreach ($equalsArr as $item) {
           $equals .= "`".$item[0]."`='".$item[1]."', ";
         }
         $equals = substr($equals, 0, -2);
         $update = substr($update, 0, -2);
-        $this->db->query("UPDATE $data[1] SET $update WHERE $equals");
+        $this->DATABASE->query("UPDATE $data[1] SET $update WHERE $equals");
         return true;
       case "d":
         $equals = "";
-        foreach ($d as $item) {
+        foreach ($dataArr as $item) {
           $equals .= "`".$this->sanitize($item[0], "q")."`='".$this->sanitize($item[1], "q")."', ";
         }
         $equals = substr($equals, 0, -2);
-        $this->db->query("DELETE FROM $data[1] WHERE $equals");
+        $this->DATABASE->query("DELETE FROM $data[1] WHERE $equals");
         return true;
       default:
         return false;
@@ -271,17 +288,17 @@ class UserSystem {
   * @return array
   */
   public function dbSel ($data) {
-    $d = [];
+    $dataArr = [];
     foreach ($data[1] as $item) {
       $col = array_search($item, $data[1]);
-      array_push($d, [$col, $item]);
+      array_push($dataArr, [$this->sanitize($col, "q"), $this->sanitize($item, "q")]);
     }
     $equals = '';
-    foreach ($d as $item) {
-      $equals .= " AND `".strtolower($item[0])."`='".$item[1]."'";
+    foreach ($dataArr as $item) {
+      $equals .= " AND `".$item[0]."`='".$item[1]."'";
     }
     $equals = substr($equals, 5);
-    $stmt = $this->db->query("SELECT * from $data[0] WHERE $equals");
+    $stmt = $this->DATABASE->query("SELECT * from $data[0] WHERE $equals");
     $arr = [$stmt->rowCount()];
     while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       array_push($arr, $row);
@@ -303,11 +320,11 @@ class UserSystem {
    public function numRows ($table, $thing = false, $answer = false) {
      $table = $this->sanitize($table, "q");
      if (!$thing && !$answer) {
-       $stmt = $this->db->query("SELECT * FROM $table");
+       $stmt = $this->DATABASE->query("SELECT * FROM $table");
      } else {
        $thing = $this->sanitize($thing, "q");
        $answer = $this->sanitize($answer, "q");
-       $stmt = $this->db->query("SELECT * FROM $table WHERE $thing='$answer'");
+       $stmt = $this->DATABASE->query("SELECT * FROM $table WHERE $thing='$answer'");
      }
      $rows =  (is_object($stmt)) ? $stmt->rowCount(): 0;
      return $rows;
@@ -327,10 +344,10 @@ class UserSystem {
    */
   public function session ($session = false) {
     if (!$session) {
-      if (!isset($_COOKIE[$this->OPTIONS['sitename']])) { return false; }
-      $session = $this->sanitize($_COOKIE[$this->OPTIONS['sitename']], "q");
+      if (!isset($COOKIE)) { return false; }
+      $session = $this->sanitize($COOKIE, "q");
       $time    = strtotime('+30 days');
-      $stmt = $this->db->query(
+      $stmt = $this->DATABASE->query(
                 "SELECT * FROM userblobs
                 WHERE code='$session' AND date<'$time' AND action='session'"
               );
@@ -340,7 +357,7 @@ class UserSystem {
       }
 
       if ($rows === 1) {
-        $stmt = $this->db->query(
+        $stmt = $this->DATABASE->query(
                   "SELECT * FROM users WHERE username='$username'"
                 );
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -350,7 +367,7 @@ class UserSystem {
         return false;
       }
     } else {
-      $stmt = $this->db->query(
+      $stmt = $this->DATABASE->query(
                 "SELECT * FROM users WHERE username='$session'"
               );
       $rows = $stmt->rowCount();
@@ -375,12 +392,14 @@ class UserSystem {
    * @return boolean
    */
   public function insertUserBlob ($username, $hash, $action="session") {
+    $username = $this->sanitize($username, "q");
+    $hash = $this->sanitize($hash, "q");
     $time = time();
-    $ip   = $_SERVER['REMOTE_ADDR'];
-    $this->db->query(
+    $ipAddress = $SERVER['REMOTE_ADDR'];
+    $this->DATABASE->query(
       "INSERT INTO userblobs
       (user, code, action, date, ip) VALUES
-      ('$username', '$hash', '$action', '$time', '$ip')"
+      ('$username', '$hash', '$action', '$time', '$ipAddress')"
     );
   }
 
@@ -394,7 +413,10 @@ class UserSystem {
    * @return boolean
    */
   public function checkBan ($ip, $username = false) {
-    $stmt = $this->db->query("SELECT * FROM ban WHERE ip='$ip'");
+    $ipAddress = $this->sanitize($ipAddress, "q");
+    $username = $this->sanitize($username, "q");
+
+    $stmt = $this->DATABASE->query("SELECT * FROM ban WHERE ip='$ipAddress'");
     $rows = $stmt->rowCount();
     if ($rows > 0) {
       while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -409,7 +431,7 @@ class UserSystem {
     }
 
     if ($username !== false) {
-      $stmt = $this->db->query("SELECT * FROM ban WHERE username='$username'");
+      $stmt = $this->DATABASE->query("SELECT * FROM ban WHERE username='$username'");
       $rows = $stmt->rowCount();
       if ($rows > 0) {
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -434,10 +456,10 @@ class UserSystem {
    * @return mixed
    */
   public function verifySession ($session = false) {
-    if (!isset($_COOKIE[$this->OPTIONS['sitename']])) { return false; }
-    if (!$session) { $session = $_COOKIE[$this->OPTIONS['sitename']]; }
+    if (!isset($COOKIE)) { return false; }
+    if (!$session) { $session = $COOKIE; }
     $time = strtotime("+30 days");
-    $stmt = $this->db->query(
+    $stmt = $this->DATABASE->query(
               "SELECT * FROM userblobs
               WHERE code='$session' AND date<'$time' AND action='session'"
             );
@@ -449,13 +471,13 @@ class UserSystem {
 
     if ($rows == 1) {
       if (md5($username.substr($session, 0, 64)) == $tamper) {
-        if ($this->checkBan($_SERVER['REMOTE_ADDR']) == false) {
+        if ($this->checkBan($SERVER['REMOTE_ADDR']) === false) {
           return true;
         } else {
           return "ban";
         }
       } else {
-        $this->db->query(
+        $this->DATABASE->query(
                 "DELETE FROM userblobs
                 WHERE code='$session' AND action='session' LIMIT 1"
             );
@@ -475,7 +497,7 @@ class UserSystem {
    * @return boolean
    */
   public function activateUser ($code) {
-
+    $code = $this->sanitize($code, "q");
   }
 
   /**
@@ -488,7 +510,7 @@ class UserSystem {
    * @return boolean
    */
   public function logIn ($username, $password) {
-
+    $username = $this->sanitize($username, "q");
   }
 
   /**
@@ -503,14 +525,17 @@ class UserSystem {
    * @return boolean
    */
   public function logOut ($code, $user, $cursess = false, $all = false) {
+    $code = $this->sanitize($code, "q");
+    $user = $this->sanitize($user, "q");
+
     if (!$all) {
-      $this->db->query(
+      $this->DATABASE->query(
         "DELETE FROM userblobs
         WHERE code='$code' AND user='$user' AND action='session'
         LIMIT 1"
       );
     } else {
-      $this->db->query(
+      $this->DATABASE->query(
         "DELETE FROM userblobs
         WHERE user='$user'"
       );
