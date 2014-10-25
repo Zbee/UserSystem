@@ -1,10 +1,6 @@
 <?php
 class UserSystem {
   var $DATABASE = '';
-  var $SERVERR = '';
-  var $SERVERH = '';
-  var $SERVERU = '';
-  var $COOKIE = '';
   const OPTIONS = '';
 
   /**
@@ -26,23 +22,6 @@ class UserSystem {
                   charset=utf8", $db['username'], $db['password']
                 );
     $this->OPTIONS = $opts;
-
-    $SERVERR = filter_var(
-                  $_SERVER["REMOTE_ADDR"],
-                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                );
-    $SERVERH = filter_var(
-                  $_SERVER["HTTP_HOST"],
-                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                );
-    $SERVERU = filter_var(
-                  $_SERVER["REQUEST_URI"],
-                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                );
-    $COOKIE = filter_var(
-                      $_COOKIE[$this->OPTIONS['sitename']],
-                      FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                    );
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -57,7 +36,7 @@ class UserSystem {
   * @return string
   */
   public function currentURL () {
-    return "//$SERVERH$SERVERU";
+    return "//$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
   }
 
   /**
@@ -347,9 +326,16 @@ class UserSystem {
    * @return mixed
    */
   public function session ($session = false) {
+    $COOKIE = $this->sanitize(
+                        filter_var(
+                            $_COOKIE[$this->OPTIONS['sitename']],
+                            FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                        ),
+                        "q"
+                      );
     if (!$session) {
       if (!isset($COOKIE)) { return false; }
-      $session = $this->sanitize($COOKIE, "q");
+      $session = $COOKIE;
       $time    = strtotime('+30 days');
       $stmt = $this->DATABASE->query(
                 "SELECT * FROM userblobs
@@ -399,7 +385,10 @@ class UserSystem {
     $username = $this->sanitize($username, "q");
     $hash = $this->sanitize($hash, "q");
     $time = time();
-    $ipAddress = $SERVERR;
+    $ipAddress = filter_var(
+                    $_SERVER["REMOTE_ADDR"],
+                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                  );
     $this->DATABASE->query(
       "INSERT INTO userblobs
       (user, code, action, date, ip) VALUES
@@ -462,6 +451,10 @@ class UserSystem {
   public function verifySession ($session = false) {
     if (!isset($COOKIE)) { return false; }
     if (!$session) { $session = $COOKIE; }
+    $ipAddress= filter_var(
+                  $_SERVER["REMOTE_ADDR"],
+                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                );
     $time = strtotime("+30 days");
     $stmt = $this->DATABASE->query(
               "SELECT * FROM userblobs
@@ -475,7 +468,7 @@ class UserSystem {
 
     if ($rows == 1) {
       if (md5($username.substr($session, 0, 64)) == $tamper) {
-        if ($this->checkBan($SERVERR) === false) {
+        if ($this->checkBan($ipAddress) === false) {
           return true;
         } else {
           return "ban";
