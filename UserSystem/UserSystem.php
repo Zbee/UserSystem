@@ -4,6 +4,7 @@ class UserSystem {
   var $SERVERR = '';
   var $SERVERH = '';
   var $SERVERU = '';
+  var $COOKIE = '';
   const OPTIONS = '';
 
   /**
@@ -38,11 +39,11 @@ class UserSystem {
                   $_SERVER["REQUEST_URI"],
                   FILTER_SANITIZE_FULL_SPECIAL_CHARS
                 );
+    $COOKIE = filter_var(
+                      $_COOKIE[$this->OPTIONS['sitename']],
+                      FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                    );
   }
-  var $COOKIE = filter_var(
-                    $_COOKIE[$this->OPTIONS['sitename']],
-                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                  );
 
   //////////////////////////////////////////////////////////////////////////////
   //Utility Functions
