@@ -6,7 +6,7 @@ date_default_timezone_set('America/Denver');
 class UserSystemTest extends PHPUnit_Framework_TestCase {
   public function testDefaultConstruct() {
     $a = new UserSystem(["location" => "localhost","database"=> "","username" =>"root","password" =>""],['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
-    $this->assertObjectHasAttribute("db", $a);
+    $this->assertObjectHasAttribute("DATABASE", $a);
     $this->assertObjectHasAttribute("OPTIONS", $a);
   }
 
@@ -97,24 +97,24 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $a->DATABASE->query("CREATE TABLE `test1` (`id` INT(50) NOT NULL AUTO_INCREMENT,
     `test` VARCHAR(50) NULL DEFAULT NULL,PRIMARY KEY (`id`))
     COLLATE='latin1_swedish_ci' ENGINE=MyISAM AUTO_INCREMENT=0;");
-    //$a->DATABASEMod(["i", "test1", ["test"=>"cake"]]);
+    //$a->dbMod(["i", "test1", ["test"=>"cake"]]);
     $a->DATABASE->query("INSERT INTO test1 (test) VALUES ('cake')");
-    $b = $a->DATABASESel(["test1", ["id"=>1]]);
+    $b = $a->dbSel(["test1", ["id"=>1]]);
     $this->assertEquals(1, $b[0]);
     $this->assertEquals(1, $b[1]['id']);
     $this->assertEquals("cake", $b[1]['test']);
 
-    $a->DATABASEMod(["u", "test1", ["id"=>1], ["test"=>"pie"]]);
-    $b = $a->DATABASESel(["test1", ["id"=>1]]);
+    $a->dbMod(["u", "test1", ["id"=>1], ["test"=>"pie"]]);
+    $b = $a->dbSel(["test1", ["id"=>1]]);
     $this->assertEquals(1, $b[0]);
     $this->assertEquals(1, $b[1]['id']);
     $this->assertEquals("cake", $b[1]['test']);
 
-    $a->DATABASEMod(["d", "test1", ["id"=>1]]);
-    $b = $a->DATABASESel(["test1", ["id"=>1]]);
+    $a->dbMod(["d", "test1", ["id"=>1]]);
+    $b = $a->dbSel(["test1", ["id"=>1]]);
     $this->assertEquals(0, $b[0]);
 
-    $b = $a->DATABASESel(["test1", ["id"=>1]]);
+    $b = $a->dbSel(["test1", ["id"=>1]]);
     $this->assertEquals(0, $b[0]);
 
     $b = $a->numRows("test1");
@@ -177,7 +177,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     ");
     $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
     $a->insertUserBlob("cake", "pie");
-    $b = $a->DATABASESel(["userblobs", ["code"=>"pie"]]);
+    $b = $a->dbSel(["userblobs", ["code"=>"pie"]]);
     $this->assertEquals(1, $b[0]);
     $this->assertEquals(1, $b[1]["id"]);
     $this->assertEquals("cake", $b[1]["user"]);

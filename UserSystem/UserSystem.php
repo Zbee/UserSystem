@@ -326,16 +326,15 @@ class UserSystem {
    * @return mixed
    */
   public function session ($session = false) {
-    $COOKIE = $this->sanitize(
-                        filter_var(
-                            $_COOKIE[$this->OPTIONS['sitename']],
-                            FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                        ),
-                        "q"
-                      );
     if (!$session) {
-      if (!isset($COOKIE)) { return false; }
-      $session = $COOKIE;
+      if (!isset($_COOKIE)) { return false; }
+      $session = $this->sanitize(
+                            filter_var(
+                                $_COOKIE[$this->OPTIONS['sitename']],
+                                FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                            ),
+                            "q"
+                          );
       $time    = strtotime('+30 days');
       $stmt = $this->DATABASE->query(
                 "SELECT * FROM userblobs
@@ -449,9 +448,24 @@ class UserSystem {
    * @return mixed
    */
   public function verifySession ($session = false) {
-    if (!isset($COOKIE)) { return false; }
-    if (!$session) { $session = $COOKIE; }
-    $ipAddress= filter_var(
+    if (!isset($_COOKIE)) { return false; }
+    $COOKIE = $this->sanitize(
+                        filter_var(
+                            $_COOKIE[$this->OPTIONS['sitename']],
+                            FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                        ),
+                        "q"
+                      );
+    if (!$session) {
+      $session = $this->sanitize(
+                        filter_var(
+                            $_COOKIE[$this->OPTIONS['sitename']],
+                            FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                        ),
+                        "q"
+                      );
+    }
+    $ipAddress = filter_var(
                   $_SERVER["REMOTE_ADDR"],
                   FILTER_SANITIZE_FULL_SPECIAL_CHARS
                 );
