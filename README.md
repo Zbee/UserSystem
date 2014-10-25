@@ -1,8 +1,12 @@
-#UserSystem [![Build Status](https://magnum.travis-ci.com/Zbee/UserSystem.svg?token=veGjBxpNcK87wbXFt4ee&branch=master)](https://magnum.travis-ci.com/Zbee/UserSystem) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Zbee/UserSystem/badges/quality-score.png?b=master&s=acaa3d81e2ba3dcb2e6c97724a02f2a2043fcac3)](https://scrutinizer-ci.com/g/Zbee/UserSystem/?branch=master) [![Code Climate](https://codeclimate.com/github/Zbee/UserSystem/badges/gpa.svg)](https://codeclimate.com/github/Zbee/UserSystem)
+#UserSystem [![Build Status](https://magnum.travis-ci.com/Zbee/UserSystem.svg?token=veGjBxpNcK87wbXFt4ee&branch=master)](https://magnum.travis-ci.com/Zbee/UserSystem) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Zbee/UserSystem/badges/quality-score.png?b=master&s=acaa3d81e2ba3dcb2e6c97724a02f2a2043fcac3)](https://scrutinizer-ci.com/g/Zbee/UserSystem/?branch=master) [![Code Test Coverage](https://scrutinizer-ci.com/g/Zbee/UserSystem/badges/coverage.png?b=master&s=82b5667782aba07b4b2eb8fc743b8f6be865b878)](https://scrutinizer-ci.com/g/Zbee/UserSystem/?branch=master) [![Code Climate](https://codeclimate.com/github/Zbee/UserSystem/badges/gpa.svg)](https://codeclimate.com/github/Zbee/UserSystem)
 
 A ready to deploy user system that is both secure, and simple.
 
 Supports PHP 5.4.0 and up, and uses a MySQL database (Supports 5.2.0 and up if you change [arrayhere] to array(arrayHere)).
+
+##Installation & Use
+
+After downloading the [.zip file](https://github.com/Zbee/UserSystem.php/archive/master.zip) you can add the /UserSystem/ and /Example/ folders to your own site and immediately start using that.
 
 ##Features
 
@@ -49,10 +53,6 @@ Supports PHP 5.4.0 and up, and uses a MySQL database (Supports 5.2.0 and up if y
 * The database structure was also created with simplicity in mind, and leaves plenty of room for extra doo-dads.
 
 * Stores valuable data that can be used in many other systems and is vital for many circumstances. Data such as IPs, one previous password, one previous email, the first email, the first username, when they last logged on, when they last changed their password, when they last changed their email, and more!
-
-##Installation & Use
-
-After downloading the [.zip file](https://github.com/Zbee/UserSystem.php/archive/master.zip) you can add the /UserSystem/ and /Example/ folders to your own site and immediately start using that.
 
 For more detailed information please see the [documentation](https://zbee.github.io/UserSystem/documentation)
 
