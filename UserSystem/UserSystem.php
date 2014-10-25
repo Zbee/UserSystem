@@ -1,20 +1,10 @@
 <?php
 class UserSystem {
   var $DATABASE = '';
-  const OPTION = '';
-
-  var $SERVERR = filter_var(
-                    $_SERVER["REMOTE_ADDR"],
-                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                  );
-  var $SERVERH = filter_var(
-                    $_SERVER["HTTP_HOST"],
-                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                  );
-  var $SERVERU = filter_var(
-                    $_SERVER["REQUEST_URI"],
-                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                  );
+  var $SERVERR = '';
+  var $SERVERH = '';
+  var $SERVERU = '';
+  const OPTIONS = '';
 
   /**
   * Initializes the class and connects to the database and sets up options.
@@ -35,6 +25,19 @@ class UserSystem {
                   charset=utf8", $db['username'], $db['password']
                 );
     $this->OPTIONS = $opts;
+
+    $SERVERR = filter_var(
+                  $_SERVER["REMOTE_ADDR"],
+                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                );
+    $SERVERH = filter_var(
+                  $_SERVER["HTTP_HOST"],
+                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                );
+    $SERVERU = filter_var(
+                  $_SERVER["REQUEST_URI"],
+                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                );
   }
   var $COOKIE = filter_var(
                     $_COOKIE[$this->OPTIONS['sitename']],
