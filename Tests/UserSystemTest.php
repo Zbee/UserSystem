@@ -34,9 +34,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
     $b = $a->encrypt("cake", "dessert");
     $this->assertNotEquals("cake", $b);
-  }
 
-  public function testDecryption() {
     $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
     $b = $a->encrypt("cake", "dessert");
     $c = $a->decrypt($b, "dessert");

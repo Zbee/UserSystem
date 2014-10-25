@@ -8,6 +8,8 @@ Supports PHP 5.4.0 and up, and uses a MySQL database (Supports 5.2.0 and up if y
 
 After downloading the [.zip file](https://github.com/Zbee/UserSystem.php/archive/master.zip) you can add the /UserSystem/ and /Example/ folders to your own site and immediately start using that.
 
+For more detailed information please see the [documentation](https://zbee.github.io/UserSystem/documentation)
+
 ##Features
 
 * 2-step Logins
@@ -53,8 +55,6 @@ After downloading the [.zip file](https://github.com/Zbee/UserSystem.php/archive
 * The database structure was also created with simplicity in mind, and leaves plenty of room for extra doo-dads.
 
 * Stores valuable data that can be used in many other systems and is vital for many circumstances. Data such as IPs, one previous password, one previous email, the first email, the first username, when they last logged on, when they last changed their password, when they last changed their email, and more!
-
-For more detailed information please see the [documentation](https://zbee.github.io/UserSystem/documentation)
 
 ##License
 Copyright (c) 2014 Ethan Henderson See the LICENSE file for license rights and limitations (MIT).
