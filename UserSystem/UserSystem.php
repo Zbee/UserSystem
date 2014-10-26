@@ -8,19 +8,24 @@ class UserSystem {
   * Example: $UserSystem = new UserSystem ($database, $opts)
   *
   * @access public
-  * @param mixed $db
+  * @param mixed $dbConn
   * @param mixed $opts
   * @return void
   */
-  public function __construct ($db, $opts) {
-    if (!$db) {
-      $db = ["location"=>"localhost","database"=>"","username"=>"root","password" =>""];
+  public function __construct ($dbConn, $opts) {
+    if (!$dbConn) {
+      $dbConn = [
+                  "location"=>"localhost",
+                  "database"=>"",
+                  "username"=>"root",
+                  "password" =>""
+                ];
     }
 
     $this->DATABASE = new PDO(
-                  "mysql:host=$db[location];dbname=$db[database];
-                  charset=utf8", $db['username'], $db['password']
-                );
+        "mysql:host=$dbConn[location];dbname=$dbConn[database];
+        charset=utf8", $dbConn['username'], $dbConn['password']
+      );
     $this->OPTIONS = $opts;
   }
 
@@ -40,7 +45,8 @@ class UserSystem {
   }
 
   /**
-  * Provides the proper headers to redirect a user, including a page-has-moved flag.
+  * Provides the proper headers to redirect a user, including a
+  * page-has-moved flag.
   * Example: $UserSystem->redirect301("http://example.com")
   *
   * @access public
@@ -101,8 +107,8 @@ class UserSystem {
   * @return string
   */
   public function decrypt ($encrypted, $username) {
-    $key       = hash('SHA256', $username, true);
-    $iv        = base64_decode(substr($encrypted, 0, 22) . '==');
+    $key = hash('SHA256', $username, true);
+    $initVector  = base64_decode(substr($encrypted, 0, 22) . '==');
     $encrypted = substr($encrypted, 22);
     $decrypted = rtrim(
                   mcrypt_decrypt(
@@ -110,7 +116,7 @@ class UserSystem {
                     $key,
                     base64_decode($encrypted),
                     MCRYPT_MODE_CBC,
-                    $iv
+                    $initVector
                    ),
                   "\0\4"
                 );
@@ -150,15 +156,15 @@ class UserSystem {
   public function sanitize ($data, $type = 's') {
     $data = trim($data);
 
-    if ($type == "n") { //if number type
+    if ($type == "n") {
       $data = filter_var($data, FILTER_SANITIZE_NUMBER_FLOAT);
       $data = preg_replace("/[^0-9]/", "", $data);
       return intval($data);
-    } elseif ($type == "s") { //If string type
+    } elseif ($type == "s") {
       $data = $this->handleUTF8($data);
       $data = filter_var($data, FILTER_SANITIZE_STRING);
       return filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    } elseif ($type == "d") { //If date type
+    } elseif ($type == "d") {
       $data = preg_replace("/[^0-9\-\s\+a-zA-Z]/", "", $data);
       if (is_numeric($data) !== true) {
         $data = strtotime($data);
@@ -170,9 +176,9 @@ class UserSystem {
       if (checkdate($month, $day, $year) === true) {
        return $data;
       }
-    } elseif ($type == "h") { //If html type
+    } elseif ($type == "h") {
       return $this->handleUTF8($data);
-    } elseif ($type == "q") { //If sql type
+    } elseif ($type == "q") {
       $data = $this->handleUTF8($data);
       $bad = "drop table|show table|`|\*|--|1=1|1='1'|a=a|a='a'|not null|\\\\";
       $data = preg_replace(
@@ -181,19 +187,23 @@ class UserSystem {
                             $data
                           );
       $data = filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-
-      if (is_string($data) === true) {
-        return $data;
-      }
-    } elseif ($type == "b") { //If boolean type
+      return $data;
+    } elseif ($type == "b") {
       $data = (filter_var($data, FILTER_VALIDATE_BOOLEAN)) ? $data : "fail";
-
-      if (is_bool($data)) {
+      return $data;
+    } elseif ($type == "u") {
+      if (
+        filter_var(
+                      filter_var(
+                                  $data,
+                                  FILTER_SANITIZE_URL
+                                ),
+                      FILTER_VALIDATE_URL
+          )
+           ===
+           true
+          ) {
         return $data;
-      }
-    } elseif ($type == "u") { //if url type
-      if (filter_var($data, FILTER_VALIDATE_URL) === true) {
-        return filter_var($data, FILTER_SANITIZE_URL);
       }
     }
 
@@ -201,9 +211,10 @@ class UserSystem {
   }
 
   /**
-  * A shortcut for eaily modifying the MySQL database, not necessarily easier, but hits up
+  * A shortcut for eaily modifying the MySQL database, not necessarily easier,
+  * but hits up
   * all required functions in the process.
-  * Example: $UserSystem->dbMod(["i","users",["username"=>"Bob","email"=>"bob@ex.com"]])
+  * Example: $UserSystem->dbMod(["i","users",["u"=>"Bob","e"=>"bob@ex.com"]])
   *
   * @access public
   * @param array $data
@@ -228,32 +239,42 @@ class UserSystem {
         $cols = substr($cols, 0, -2);
         $entries = substr($entries, 0, -4);
         print "INSERT INTO $data[1] ($cols) VALUES ('$entries)";
-        $this->DATABASE->query("INSERT INTO $data[1] ($cols) VALUES ('$entries)");
+        $this->DATABASE->query(
+          "INSERT INTO $data[1] ($cols) VALUES ('$entries)"
+        );
         return true;
       case "u":
         $update = "";
         foreach ($dataArr as $item) {
-          $update .= "`".$this->sanitize($item[0], "q")."`='".$this->sanitize($item[1], "q")."', ";
+          $update .= "`".$this->sanitize($item[0], "q").
+                    "`='".$this->sanitize($item[1], "q")."', ";
         }
         $equalsArr = [];
         foreach ($data[3] as $item) {
           $col = array_search($item, $data[3]);
-          array_push($equalsArr, [$this->sanitize($col, "q"), $this->sanitize($item, "q")]);
+          array_push(
+            $equalsArr,
+            [
+              $this->sanitize($col, "q"),
+              $this->sanitize($item, "q")
+            ]
+          );
         }
         $equals = "";
         foreach ($equalsArr as $item) {
-          $equals .= "`".$item[0]."`='".$item[1]."', ";
+          $equals .= "`".$item[0]."`='".$item[1]."' AND ";
         }
-        $equals = substr($equals, 0, -2);
+        $equals = substr($equals, 0, -5);
         $update = substr($update, 0, -2);
         $this->DATABASE->query("UPDATE $data[1] SET $update WHERE $equals");
         return true;
       case "d":
         $equals = "";
         foreach ($dataArr as $item) {
-          $equals .= "`".$this->sanitize($item[0], "q")."`='".$this->sanitize($item[1], "q")."', ";
+          $equals .= "`".$this->sanitize($item[0], "q").
+                    "`='".$this->sanitize($item[1], "q")."' AND ";
         }
-        $equals = substr($equals, 0, -2);
+        $equals = substr($equals, 0, -5);
         $this->DATABASE->query("DELETE FROM $data[1] WHERE $equals");
         return true;
       default:
@@ -262,8 +283,8 @@ class UserSystem {
   }
 
   /**
-  * Returns an array for the database search performed, again, just a shortcut for hitting
-  * required functions
+  * Returns an array for the database search performed, again, just a shortcut
+  * for hitting required functions
   * Example: $UserSystem->dbSel(["users", ["username"=>"Bob","id"=>0]])
   *
   * @access public
@@ -274,7 +295,13 @@ class UserSystem {
     $dataArr = [];
     foreach ($data[1] as $item) {
       $col = array_search($item, $data[1]);
-      array_push($dataArr, [$this->sanitize($col, "q"), $this->sanitize($item, "q")]);
+      array_push(
+        $dataArr,
+        [
+          $this->sanitize($col, "q"),
+          $this->sanitize($item, "q")
+        ]
+      );
     }
     $equals = '';
     foreach ($dataArr as $item) {
@@ -292,7 +319,8 @@ class UserSystem {
    /**
    * Returns the number of rows for a given search.
    * Example: $UserSystem->numberOfRows("users", "username", $enteredUsername)
-   * Should follow pattern of dbMod() so as to support more $thing/$answer combos.
+   * Should follow pattern of dbMod() so as to support more $thing/$answer
+   * combos.
    *
    * @access public
    * @param string $table
@@ -307,7 +335,9 @@ class UserSystem {
      } else {
        $thing = $this->sanitize($thing, "q");
        $answer = $this->sanitize($answer, "q");
-       $stmt = $this->DATABASE->query("SELECT * FROM $table WHERE $thing='$answer'");
+       $stmt = $this->DATABASE->query(
+                  "SELECT * FROM $table WHERE $thing='$answer'"
+                );
      }
      $rows =  (is_object($stmt)) ? $stmt->rowCount(): 0;
      return $rows;
@@ -423,7 +453,9 @@ class UserSystem {
     }
 
     if ($username !== false) {
-      $stmt = $this->DATABASE->query("SELECT * FROM ban WHERE username='$username'");
+      $stmt = $this->DATABASE->query(
+        "SELECT * FROM ban WHERE username='$username'"
+      );
       $rows = $stmt->rowCount();
       if ($rows > 0) {
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -456,15 +488,7 @@ class UserSystem {
                         ),
                         "q"
                       );
-    if (!$session) {
-      $session = $this->sanitize(
-                        filter_var(
-                            $_COOKIE[$this->OPTIONS['sitename']],
-                            FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                        ),
-                        "q"
-                      );
-    }
+    if (!$session) { $session = $COOKIE; }
     $ipAddress = filter_var(
                   $_SERVER["REMOTE_ADDR"],
                   FILTER_SANITIZE_FULL_SPECIAL_CHARS
@@ -509,6 +533,18 @@ class UserSystem {
    */
   public function activateUser ($code) {
     $code = $this->sanitize($code, "q");
+    $rows = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"activate"]]);
+    $user = $rows[1]["user"];
+    $rows = $rows[0];
+    $this->dbMod(["u", "users", ["activated"=>1], ["username"=>$user]]);
+    $b = $this->dbSel(["users", ["username"=>$user]])[0];
+    $this->dbMod(["d", "userblobs", ["code"=>$code, "action"=>"activate"]]);
+    $c = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"activate"]])[0];
+    if ($b === 0 && $c === 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
