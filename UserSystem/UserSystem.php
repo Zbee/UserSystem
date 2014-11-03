@@ -418,6 +418,9 @@ class UserSystem {
                     $_SERVER["REMOTE_ADDR"],
                     FILTER_SANITIZE_FULL_SPECIAL_CHARS
                   );
+    if ($this->OPTIONS["encryption"] === true) {
+      $ipAddress = encrypt($ipAddress, $username);
+    }
     $this->DATABASE->query(
       "INSERT INTO userblobs
       (user, code, action, date, ip) VALUES
@@ -437,6 +440,9 @@ class UserSystem {
   public function checkBan ($ipAddress, $username = false) {
     $ipAddress = $this->sanitize($ipAddress, "q");
     $username = $this->sanitize($username, "q");
+    if ($this->OPTIONS["encryption"] === true) {
+      $ipAddress = encrypt($ipAddress, $username);
+    }
 
     $stmt = $this->DATABASE->query("SELECT * FROM ban WHERE ip='$ipAddress'");
     $rows = $stmt->rowCount();
@@ -493,6 +499,10 @@ class UserSystem {
                   $_SERVER["REMOTE_ADDR"],
                   FILTER_SANITIZE_FULL_SPECIAL_CHARS
                 );
+
+    if ($this->OPTIONS["encryption"] === true) {
+      $ipAddress = encrypt($ipAddress, $username);
+    }
     $time = strtotime("+30 days");
     $stmt = $this->DATABASE->query(
               "SELECT * FROM userblobs
@@ -558,6 +568,65 @@ class UserSystem {
    */
   public function logIn ($username, $password) {
     $username = $this->sanitize($username, "q");
+    $user = $this->dbSel(["users", ["username"=>$username]]);
+    if ($user[0] === 1) {
+      $password = hash("sha256", $password.$user[1]["salt"]);
+      $oldPassword = hash("sha256", $password.$user[1]["oldsalt"]);
+      if ($password == $user[1]["password"]) {
+        if ($user[1]["activated"] == 1) {
+          if ($this->checkBan($_SERVER['REMOTE_ADDR'], $username) === false) {
+            $ipAddress = filter_var(
+                          $_SERVER["REMOTE_ADDR"],
+                          FILTER_SANITIZE_FULL_SPECIAL_CHARS
+                        );
+
+            if ($this->OPTIONS["encryption"] === true) {
+              $ipAddress = encrypt($ipAddress, $username);
+            }
+            $this->dbMod(
+              [
+                "u",
+                "users",
+                [
+                  "ip"=>$ipAddress,
+                  "last_logged_in"=>time(),
+                  "old_last_logged_in"=>$user[1]["old_last_logged_in"]
+                ],
+                ["username"=>$username]
+              ]
+            );
+            $hash   = hash("sha256",
+                        $username.substr(str_shuffle(str_repeat(
+                                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ
+                                    RSTUVWXYZ0123456789!@$%^&_+{}[]:<.>?", 17
+                                  )), 1, 50));
+            $hash   = $hash.md5($username.$hash);
+
+            $this->insertUserBlob($username, $hash);
+            setcookie(
+              $this->OPTIONS["sitename"],
+              $hash,
+              strtotime('+30 days'),
+              "/",
+              $this->OPTIONS["domain_simple"]
+            );
+            return true;
+          } else {
+            return "ban";
+          }
+        } else {
+          return "activate";
+        }
+      } else {
+        if ($password == $oldPassword) {
+          return "oldpassword";
+        } else {
+          return "password";
+        }
+      }
+    }  else {
+      return "username";
+    }
   }
 
   /**
