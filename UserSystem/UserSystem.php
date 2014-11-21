@@ -568,18 +568,17 @@ class UserSystem {
    */
   public function logIn ($username, $password) {
     $username = $this->sanitize($username, "q");
+    $ipAddress = filter_var(
+      $_SERVER["REMOTE_ADDR"],
+      FILTER_SANITIZE_FULL_SPECIAL_CHARS
+    );
     $user = $this->dbSel(["users", ["username"=>$username]]);
     if ($user[0] === 1) {
       $password = hash("sha256", $password.$user[1]["salt"]);
       $oldPassword = hash("sha256", $password.$user[1]["oldsalt"]);
       if ($password == $user[1]["password"]) {
         if ($user[1]["activated"] == 1) {
-          if ($this->checkBan($_SERVER['REMOTE_ADDR'], $username) === false) {
-            $ipAddress = filter_var(
-                          $_SERVER["REMOTE_ADDR"],
-                          FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                        );
-
+          if ($this->checkBan($ipAddress, $username) === false) {
             if ($this->OPTIONS["encryption"] === true) {
               $ipAddress = encrypt($ipAddress, $username);
             }
@@ -595,12 +594,12 @@ class UserSystem {
                 ["username"=>$username]
               ]
             );
-            $hash   = hash("sha256",
+            $hash = hash("sha256",
                         $username.substr(str_shuffle(str_repeat(
                                     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ
                                     RSTUVWXYZ0123456789!@$%^&_+{}[]:<.>?", 17
                                   )), 1, 50));
-            $hash   = $hash.md5($username.$hash);
+            $hash = $hash.md5($username.$hash);
 
             $this->insertUserBlob($username, $hash);
             setcookie(
