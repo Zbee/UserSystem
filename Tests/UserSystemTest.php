@@ -393,8 +393,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
               'cake', '".hash("sha256", "pie")."', 1
             )"
       );
-      $_COOKIE = [];
-      //$_SERVER['REMOTE_ADDR'] = "127.0.0.1";
+      $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
       $b = $a->logIn("cake", "pie");
       $this->assertTrue($b);
   }
