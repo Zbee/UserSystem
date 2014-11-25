@@ -602,13 +602,15 @@ class UserSystem {
             $hash = $hash.md5($username.$hash);
 
             $this->insertUserBlob($username, $hash);
-            setcookie(
-              $this->OPTIONS["sitename"],
-              $hash,
-              strtotime('+30 days'),
-              "/",
-              $this->OPTIONS["domain_simple"]
-            );
+            if (!headers_sent()) {
+              setcookie(
+                $this->OPTIONS["sitename"],
+                $hash,
+                strtotime('+30 days'),
+                "/",
+                $this->OPTIONS["domain_simple"]
+              );
+            }
             return true;
           } else {
             return "ban";

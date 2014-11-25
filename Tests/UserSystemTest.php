@@ -1,5 +1,5 @@
 <?php
-ob_start(); #For testing redirection
+ob_start();
 require_once 'UserSystem/UserSystem.php';
 date_default_timezone_set('America/Denver');
 
