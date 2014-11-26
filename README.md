@@ -1,14 +1,24 @@
-#UserSystem [![Build Status](https://travis-ci.org/Zbee/UserSystem.svg)](https://travis-ci.org/Zbee/UserSystem) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Zbee/UserSystem/badges/quality-score.png?b=master&s=acaa3d81e2ba3dcb2e6c97724a02f2a2043fcac3)](https://scrutinizer-ci.com/g/Zbee/UserSystem/?branch=master) [![Code Test Coverage](https://scrutinizer-ci.com/g/Zbee/UserSystem/badges/coverage.png?b=master&s=82b5667782aba07b4b2eb8fc743b8f6be865b878)](https://scrutinizer-ci.com/g/Zbee/UserSystem/?branch=master) [![Code Climate](https://codeclimate.com/github/Zbee/UserSystem/badges/gpa.svg)](https://codeclimate.com/github/Zbee/UserSystem)
+#UserSystem [![Build Status](https://travis-ci.org/Zbee/UserSystem.svg)](https://travis-ci.org/Zbee/UserSystem) [![Code Climate](https://codeclimate.com/github/Zbee/UserSystem/badges/gpa.svg)](https://codeclimate.com/github/Zbee/UserSystem)
 
 A ready to deploy user system that is both secure, and simple.
 
-Supports PHP 5.4.0 and up, and uses a MySQL database (Supports 5.2.0 and up if you change [arrayhere] to array(arrayHere)).
+Runs with PHP 5.4.0+, and uses a MySQL 5.6.20+ database.
+
+##Todo
+
+* Documentation
+
+* Example site
+
+* Implement $DATABASE_PREFACE
+
+* Re-make all config variables as constants
 
 ##Installation & Use
 
-After downloading the [.zip file](https://github.com/Zbee/UserSystem.php/archive/master.zip) you can add the /UserSystem/ and /Example/ folders to your own site and immediately start using that.
+After downloading the [.zip file](https://github.com/Zbee/UserSystem.php/archive/master.zip) you can add the `/UserSystem/ `and `/Example/` folders to your own site and immediately start using that.
 
-For more detailed information please see the [documentation](https://zbee.github.io/UserSystem/documentation)
+For more detailed information please see the [documentation](https://zbee.github.io/UserSystem/documentation).
 
 ##Features
 
@@ -32,7 +42,7 @@ For more detailed information please see the [documentation](https://zbee.github
 
 * Has a very simple 2Step Authentication system that will delay login of users with it activated and require them to follow a link in an email sent to them, again utilizing the blob system.
 
-* SSL (https://) connections as well as http:// connections are both supported.
+* SSL (https://) connections are supported with no extra configuration.
 
 * The logout file has conventions in place to allow for users to destroy every session tied to their account, increasing their ability to keep their own accounts as secure as possible.
 
@@ -57,4 +67,4 @@ For more detailed information please see the [documentation](https://zbee.github
 * Stores valuable data that can be used in many other systems and is vital for many circumstances. Data such as IPs, one previous password, one previous email, the first email, the first username, when they last logged on, when they last changed their password, when they last changed their email, and more!
 
 ##License
-Copyright (c) 2014 Ethan Henderson See the LICENSE file for license rights and limitations (MIT).
+Do whatever you want, just credit me.

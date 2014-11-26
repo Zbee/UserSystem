@@ -319,6 +319,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $a->insertUserBlob("cake", "pie", "activate");
       $b = $a->activateUser("pie");
       $this->assertTrue($b);
+      $a->DATABASE->query("DROP DATABASE test");
   }
 
   public function testLogIn() {
@@ -396,5 +397,6 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
       $b = $a->logIn("cake", "pie");
       $this->assertTrue($b);
+      $a->DATABASE->query("DROP DATABASE test");
   }
 }

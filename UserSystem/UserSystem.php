@@ -534,6 +534,69 @@ class UserSystem {
   }
 
   /**
+  * Returns an array of a user's data
+  * Example: $UserSystem->userSel(["username"=>"Bob"])
+  *
+  * @access public
+  * @param array $data
+  * @return array
+  */
+  public function userSel ($data) {
+    $dataArr = [];
+    foreach ($data as $item) {
+      $col = array_search($item, $data);
+      array_push(
+        $dataArr,
+        [
+          $this->sanitize($col, "q"),
+          $this->sanitize($item, "q")
+        ]
+      );
+    }
+    $equals = '';
+    foreach ($dataArr as $item) {
+      $equals .= " AND `".$item[0]."`='".$item[1]."'";
+    }
+    $equals = substr($equals, 5);
+    $stmt = $this->DATABASE->query("SELECT * from users WHERE $equals");
+    $numRows = (is_object($stmt)) ? $stmt->rowCount() : 0;
+    if ($numRows >= 1) {
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        return $row;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Inserts a new user
+   * Example: $UserSystem->addUser("Bob","jg85h58gh58","bob@example.com")
+   *
+   * @access public
+   * @param string $username
+   * @param string $password
+   * @param string $email
+   * @param mixed $more
+   * @return mixed
+   */
+   public function addUser ($username, $password, $email, $more = false) {
+     $data = [
+       "username" => $username,
+       "password" => $password,
+       "email" => $email
+     ];
+
+     if ($more !== false && is_array($more)) {
+       foreach ($more as $item) {
+         $data[array_search($item, $more)] = $item;
+       }
+     }
+
+     $this->dbMod(["i", "users", $data]);
+   }
+
+  /**
    * Activates a new user's account
    * Example: $UserSystem->activateUser("mrogjsruicyu78chsr87thmrsu")
    *
@@ -559,7 +622,7 @@ class UserSystem {
 
   /**
    * Logs in a user
-   * Example: $UserSystem->LogIn("Bob", "Bob's Password")
+   * Example: $UserSystem->logIn("Bob", "Bob's Password")
    *
    * @access public
    * @param string $username
@@ -572,12 +635,12 @@ class UserSystem {
       $_SERVER["REMOTE_ADDR"],
       FILTER_SANITIZE_FULL_SPECIAL_CHARS
     );
-    $user = $this->dbSel(["users", ["username"=>$username]]);
-    if ($user[0] === 1) {
-      $password = hash("sha256", $password.$user[1]["salt"]);
-      $oldPassword = hash("sha256", $password.$user[1]["oldsalt"]);
-      if ($password == $user[1]["password"]) {
-        if ($user[1]["activated"] == 1) {
+    $user = $this->userSel(["username"=>$username]);
+    if (is_array($user)) {
+      $password = hash("sha256", $password.$user["salt"]);
+      $oldPassword = hash("sha256", $password.$user["oldsalt"]);
+      if ($password == $user["password"]) {
+        if ($user["activated"] == 1) {
           if ($this->checkBan($ipAddress, $username) === false) {
             if ($this->OPTIONS["encryption"] === true) {
               $ipAddress = encrypt($ipAddress, $username);
@@ -589,16 +652,25 @@ class UserSystem {
                 [
                   "ip"=>$ipAddress,
                   "last_logged_in"=>time(),
-                  "old_last_logged_in"=>$user[1]["old_last_logged_in"]
+                  "old_last_logged_in"=>$user["old_last_logged_in"]
                 ],
                 ["username"=>$username]
               ]
             );
-            $hash = hash("sha256",
-                        $username.substr(str_shuffle(str_repeat(
-                                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ
-                                    RSTUVWXYZ0123456789!@$%^&_+{}[]:<.>?", 17
-                                  )), 1, 50));
+            $hash = hash(
+                      "sha256",
+                      $username.substr(
+                        str_shuffle(
+                          str_repeat(
+                            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ
+                            RSTUVWXYZ0123456789!@$%^&_+{}[]:<.>?",
+                            17
+                          )
+                        ),
+                        1,
+                        50
+                      )
+                    );
             $hash = $hash.md5($username.$hash);
 
             $this->insertUserBlob($username, $hash);
@@ -610,8 +682,10 @@ class UserSystem {
                 "/",
                 $this->OPTIONS["domain_simple"]
               );
+              return true;
+            } else {
+              return "headers";
             }
-            return true;
           } else {
             return "ban";
           }
@@ -625,7 +699,7 @@ class UserSystem {
           return "password";
         }
       }
-    }  else {
+    } else {
       return "username";
     }
   }
@@ -666,5 +740,6 @@ class UserSystem {
         $this->OPTIONS['domain_simple']
       );
     }
+    return true;
   }
 }
