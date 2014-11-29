@@ -18,7 +18,7 @@ Runs with PHP 5.4.0+, and makes use of a MySQL database (5.6.20 used in developm
 
 ##Installation & Use
 
-After downloading the [archive file](https://github.com/Zbee/UserSystem/archive/master.zip) you can add the `/UserSystem/ `and `/Example/` folders to your own site and immediately start using that.
+After downloading the [archive file](https://github.com/Zbee/UserSystem/archive/master.zip) you can add the `/UserSystem/ ` and `/Example/` directories to your own site and the example site will work as soon as you update the database information in `/UserSystem/config.php`.
 
 For more detailed information please see the [documentation](https://zbee.github.io/UserSystem/documentation).
 
