@@ -44,12 +44,6 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
   public function testSanitize() {
     $a = new UserSystem(false,['sitename'=>"examplecom",'domain_simple'=>"example.com",'domain'=>"accounts.example.com",'system_loc'=>"/usersystem",'encryption'=>false]);
 
-    $t = $a->sanitize(123, "n");
-    $this->assertEquals(123, $t);
-
-    $t = $a->sanitize("123", "n");
-    $this->assertEquals(123, $t);
-
     $t = $a->sanitize("123g", "n");
     $this->assertEquals(123, $t);
 
@@ -62,13 +56,7 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
     $t = $a->sanitize("g'°", "s");
     $this->assertEquals("g&#39;&deg;", $t);
 
-    $t = $a->sanitize(123, "s");
-    $this->assertEquals("123", $t);
-
     $t = $a->sanitize(1414035554, "d");
-    $this->assertEquals(1414035554, $t);
-
-    $t = $a->sanitize("1414035554", "d");
     $this->assertEquals(1414035554, $t);
 
     $t = $a->sanitize("1414;035554", "d");
