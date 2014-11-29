@@ -1,6 +1,7 @@
 <?php
 ob_start();
-require_once 'UserSystem/UserSystem.php';
+require_once("UserSystem/Utils.php");
+require_once("UserSystem/UserSystem.php");
 date_default_timezone_set('America/Denver');
 
 class UserSystemTest extends PHPUnit_Framework_TestCase {

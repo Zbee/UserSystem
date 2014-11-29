@@ -1,22 +1,24 @@
-#UserSystem [![Build Status](https://travis-ci.org/Zbee/UserSystem.svg)](https://travis-ci.org/Zbee/UserSystem) [![Code Climate](https://codeclimate.com/github/Zbee/UserSystem/badges/gpa.svg)](https://codeclimate.com/github/Zbee/UserSystem)
+#UserSystem [![Build Status](https://travis-ci.org/Zbee/UserSystem.svg)](https://travis-ci.org/Zbee/UserSystem)
 
 A ready to deploy user system that is both secure, and simple.
 
-Runs with PHP 5.4.0+, and uses a MySQL 5.6.20+ database.
+Runs with PHP 5.4.0+, and makes use of a MySQL database (5.6.20 used in development).
 
 ##Todo
-
-* Documentation
-
-* Example site
 
 * Implement $DATABASE_PREFACE
 
 * Re-make all config variables as constants
 
+* Documentation
+
+* Example site
+
+* Add support for using Authy
+
 ##Installation & Use
 
-After downloading the [.zip file](https://github.com/Zbee/UserSystem.php/archive/master.zip) you can add the `/UserSystem/ `and `/Example/` folders to your own site and immediately start using that.
+After downloading the [archive file](https://github.com/Zbee/UserSystem/archive/master.zip) you can add the `/UserSystem/ `and `/Example/` folders to your own site and immediately start using that.
 
 For more detailed information please see the [documentation](https://zbee.github.io/UserSystem/documentation).
 
@@ -67,4 +69,6 @@ For more detailed information please see the [documentation](https://zbee.github
 * Stores valuable data that can be used in many other systems and is vital for many circumstances. Data such as IPs, one previous password, one previous email, the first email, the first username, when they last logged on, when they last changed their password, when they last changed their email, and more!
 
 ##License
-Do whatever you want, just credit me.
+Author: Ethan Henderson [ethan@zbee.me](mailto:ethan@zbee.me) [https://twitter.com/zbee_](https://twitter.com/zbee_)
+
+Licensed under AOL [http://aol.nexua.org](http://aol.nexua.org)
