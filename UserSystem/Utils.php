@@ -303,16 +303,21 @@ class Utils {
     foreach ($data[1] as $item) {
       $col = array_search($item, $data[1]);
       array_push(
-      $dataArr,
-      [
-      $this->sanitize($col, "q"),
-      $this->sanitize($item, "q")
-      ]
+        $dataArr,
+        [
+          $this->sanitize($col, "q"),
+          is_array($item) ? "@~#~@".$item[0]."~=exarg@@".$this->sanitize($item[1], "q") : $this->sanitize($item, "q")
+        ]
       );
     }
     $equals = '';
     foreach ($dataArr as $item) {
-      $equals .= " AND `".$item[0]."`='".$item[1]."'";
+      $ex = '=';
+      if (substr($item[1], 0, 5) === "@~#~@") {
+        $ex = explode("~=exarg@@", substr($item[1], 5))[0];
+        $item[1] = explode("~=exarg@@", $item[1])[1];
+      }
+      $equals .= " AND `".$item[0]."`".$ex."'".$item[1]."'";
     }
     $equals = substr($equals, 5);
     $stmt = $this->DATABASE->query("SELECT * from $data[0] WHERE $equals");

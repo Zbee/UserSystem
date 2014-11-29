@@ -6,7 +6,7 @@
 * @author     Ethan Henderson <ethan@zbee.me>
 * @copyright  2014 Ethan Henderson
 * @license    http://aol.nexua.org  AOL v0.6
-* @version    Release: 0.49
+* @version    Release: 0.50
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.1
 */
@@ -65,19 +65,33 @@ class UserSystem extends Utils {
     }
   }
 
+
+  /**
+  * Generates a new salt based off of a username
+  * Example: $UserSystem->createSalt("Bob")
+  *
+  * @access public
+  * @param string $username
+  * @return string
+  */
+  public function createSalt ($username) {
+    return hash("sha512", $username.substr(str_shuffle(str_repeat("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@$%^&_+{}[]:<.>?", (rand(15,20)*strlen($username)-preg_match_all('/[aeiou]/i',$username,$matches)))), 1, rand(256,1024)));
+  }
+
   /**
    * Inserts a user blob into the database for you
-   * Example: $UserSystem->insertUserBlob("bob", "rmt54h78tcy54hmgtx", "2step")
+   * Example: $UserSystem->insertUserBlob("bob", "2step")
    *
    * @access public
    * @param string $username
-   * @param string $hash
    * @param mixed $action
    * @return boolean
    */
-  public function insertUserBlob ($username, $hash, $action="session") {
+  public function insertUserBlob ($username, $action = "session") {
     $username = $this->sanitize($username, "q");
-    $hash = $this->sanitize($hash, "q");
+    $action = $this->sanitize($action, "q");
+    $hash = $this->createSalt($username);
+    $hash = $hash.md5($username.$hash);
     $time = time();
     $ipAddress = filter_var(
                     $_SERVER["REMOTE_ADDR"],
@@ -91,6 +105,7 @@ class UserSystem extends Utils {
       (user, code, action, date, ip) VALUES
       ('$username', '$hash', '$action', '$time', '$ipAddress')"
     );
+    return $hash;
   }
 
   /**
@@ -103,38 +118,34 @@ class UserSystem extends Utils {
    * @return boolean
    */
   public function checkBan ($ipAddress, $username = false) {
-    $ipAddress = $this->sanitize($ipAddress, "q");
     $username = $this->sanitize($username, "q");
+    $ipAddress = filter_var(
+      $ipAddress,
+      FILTER_SANITIZE_FULL_SPECIAL_CHARS
+    );
     if ($this->OPTIONS["encryption"] === true) {
       $ipAddress = encrypt($ipAddress, $username);
     }
-
-    $stmt = $this->DATABASE->query("SELECT * FROM ban WHERE ip='$ipAddress'");
-    $rows = $stmt->rowCount();
+    $stmt = $this->dbSel(["ban", ["ip" => $ipAddress]]);
+    $rows = $stmt[0];
     if ($rows > 0) {
-      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        if ($row['appealed'] == 0) {
-          $thing = true;
-        } else {
-          $thing = false;
-        }
+      if ($stmt[1]['appealed'] == 0) {
+        $thing = true;
+      } else {
+        $thing = false;
       }
     } else {
       $thing = false;
     }
 
     if ($username !== false) {
-      $stmt = $this->DATABASE->query(
-        "SELECT * FROM ban WHERE username='$username'"
-      );
-      $rows = $stmt->rowCount();
+      $stmt = $this->dbSel(["ban", ["username" => $username]]);
+      $rows = $stmt[0];
       if ($rows > 0) {
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-          if ($row['appealed'] == 0) {
-            $thing = true;
-          } else {
-            $thing = false;
-          }
+        if ($stmt[1]['appealed'] == 0) {
+          $thing = true;
+        } else {
+          $thing = false;
         }
       }
     }
@@ -153,34 +164,39 @@ class UserSystem extends Utils {
   public function verifySession ($session = false) {
     if (!isset($_COOKIE)) { return false; }
     $COOKIE = $this->sanitize(
-                        filter_var(
-                            $_COOKIE[$this->OPTIONS['sitename']],
-                            FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                        ),
-                        "q"
-                      );
+      filter_var(
+          $_COOKIE[$this->OPTIONS['sitename']],
+          FILTER_SANITIZE_FULL_SPECIAL_CHARS
+      ),
+      "q"
+    );
     if (!$session) { $session = $COOKIE; }
+    $tamper  = substr($session, -32);
     $ipAddress = filter_var(
-                  $_SERVER["REMOTE_ADDR"],
-                  FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                );
+      $_SERVER["REMOTE_ADDR"],
+      FILTER_SANITIZE_FULL_SPECIAL_CHARS
+    );
 
     if ($this->OPTIONS["encryption"] === true) {
       $ipAddress = encrypt($ipAddress, $username);
     }
     $time = strtotime("+30 days");
-    $stmt = $this->DATABASE->query(
-              "SELECT * FROM userblobs
-              WHERE code='$session' AND date<'$time' AND action='session'"
-            );
-    $rows = $stmt->rowCount();
-    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-      $username = $row['user'];
-    }
-    $tamper  = substr($session, -32);
 
+    $stmt = $this->dbSel(
+      [
+        "userblobs",
+        [
+          "code" => $session,
+          "date" => ["<", $time],
+          "action" => "session"
+        ]
+      ]
+    );
+
+    $rows = $stmt[0];
     if ($rows == 1) {
-      if (md5($username.substr($session, 0, 64)) == $tamper) {
+      $username = $stmt[1]['user'];
+      if (md5($username.substr($session, 0, 128)) == $tamper) {
         if ($this->checkBan($ipAddress) === false) {
           return true;
         } else {
@@ -199,42 +215,6 @@ class UserSystem extends Utils {
   }
 
   /**
-  * Returns an array of a user's data
-  * Example: $UserSystem->userSel(["username"=>"Bob"])
-  *
-  * @access public
-  * @param array $data
-  * @return array
-  */
-  public function userSel ($data) {
-    $dataArr = [];
-    foreach ($data as $item) {
-      $col = array_search($item, $data);
-      array_push(
-        $dataArr,
-        [
-          $this->sanitize($col, "q"),
-          $this->sanitize($item, "q")
-        ]
-      );
-    }
-    $equals = '';
-    foreach ($dataArr as $item) {
-      $equals .= " AND `".$item[0]."`='".$item[1]."'";
-    }
-    $equals = substr($equals, 5);
-    $stmt = $this->DATABASE->query("SELECT * from users WHERE $equals");
-    $numRows = (is_object($stmt)) ? $stmt->rowCount() : 0;
-    if ($numRows >= 1) {
-      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        return $row;
-      }
-    } else {
-      return false;
-    }
-  }
-
-  /**
    * Inserts a new user
    * Example: $UserSystem->addUser("Bob","jg85h58gh58","bob@example.com")
    *
@@ -249,7 +229,8 @@ class UserSystem extends Utils {
      $data = [
        "username" => $username,
        "password" => $password,
-       "email" => $email
+       "email" => $email,
+       "salt" => $this->createSalt($username)
      ];
 
      if ($more !== false && is_array($more)) {
@@ -272,14 +253,18 @@ class UserSystem extends Utils {
   public function activateUser ($code) {
     $code = $this->sanitize($code, "q");
     $rows = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"activate"]]);
-    $user = $rows[1]["user"];
     $rows = $rows[0];
-    $this->dbMod(["u", "users", ["activated"=>1], ["username"=>$user]]);
-    $b = $this->dbSel(["users", ["username"=>$user]])[0];
-    $this->dbMod(["d", "userblobs", ["code"=>$code, "action"=>"activate"]]);
-    $c = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"activate"]])[0];
-    if ($b === 0 && $c === 0) {
-      return true;
+    if ($rows >= 1) {
+      $user = $rows[1]["user"];
+      $this->dbMod(["u", "users", ["activated"=>1], ["username"=>$user]]);
+      $b = $this->dbSel(["users", ["username"=>$user]])[0];
+      $this->dbMod(["d", "userblobs", ["code"=>$code, "action"=>"activate"]]);
+      $c = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"activate"]])[0];
+      if ($b === 0 && $c === 0) {
+        return true;
+      } else {
+        return false;
+      }
     } else {
       return false;
     }
@@ -300,7 +285,7 @@ class UserSystem extends Utils {
       $_SERVER["REMOTE_ADDR"],
       FILTER_SANITIZE_FULL_SPECIAL_CHARS
     );
-    $user = $this->userSel(["username"=>$username]);
+    $user = $this->session($username);
     if (is_array($user)) {
       $password = hash("sha256", $password.$user["salt"]);
       $oldPassword = hash("sha256", $password.$user["oldsalt"]);
@@ -322,23 +307,7 @@ class UserSystem extends Utils {
                 ["username"=>$username]
               ]
             );
-            $hash = hash(
-                      "sha256",
-                      $username.substr(
-                        str_shuffle(
-                          str_repeat(
-                            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ
-                            RSTUVWXYZ0123456789!@$%^&_+{}[]:<.>?",
-                            17
-                          )
-                        ),
-                        1,
-                        50
-                      )
-                    );
-            $hash = $hash.md5($username.$hash);
-
-            $this->insertUserBlob($username, $hash);
+            $hash = $this->insertUserBlob($username);
             if (!headers_sent()) {
               setcookie(
                 $this->OPTIONS["sitename"],

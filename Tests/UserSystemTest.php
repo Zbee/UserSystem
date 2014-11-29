@@ -58,12 +58,13 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       AUTO_INCREMENT=0;
     ");
     $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-    $a->insertUserBlob("cake", "pie");
-    $b = $a->dbSel(["userblobs", ["code"=>"pie"]]);
+    $a->insertUserBlob("cake");
+    $b = $a->dbSel(["userblobs", ["user"=>"cake"]]);
     $this->assertEquals(1, $b[0]);
     $this->assertEquals(1, $b[1]["id"]);
     $this->assertEquals("cake", $b[1]["user"]);
-    $this->assertEquals("pie", $b[1]["code"]);
+    $this->assertNotSame("pie", $b[1]["code"]);
+    $this->assertEquals(160, strlen($b[1]["code"]));
     $this->assertEquals("127.0.0.1", $b[1]["ip"]);
     $this->assertEquals("session", $b[1]["action"]);
     $a->DATABASE->query("DROP DATABASE test");
@@ -88,11 +89,10 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     ENGINE=MyISAM
     AUTO_INCREMENT=0;
     ");
-    $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-    $a->DATABASE->query("INSERT INTO ban (username, issuer, ip, date, reason, appealed) VALUES ('cake', 'pie', '127.0.0.1', '1414169627', 'Because', 0)");
-    $b = $a->checkBan($_SERVER['REMOTE_ADDR']);
+    $a->DATABASE->query("INSERT INTO ban (username, issuer, ip, date, reason, appealed) VALUES ('cake', 'pie', '127.0.0.1', '".(time() - 86400)."', 'Because', 0)");
+    $b = $a->checkBan("127.0.0.1");
     $this->assertTrue($b);
-    $b = $a->checkBan($_SERVER['REMOTE_ADDR'], "cake");
+    $b = $a->checkBan("127.0.0.1", "cake");
     $this->assertTrue($b);
     $a->DATABASE->query("DROP DATABASE test");
   }
@@ -134,10 +134,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       AUTO_INCREMENT=0;
       ");
       $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-      $hash = hash("sha256", "cake".substr(str_shuffle(str_repeat("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@$%^&_+{}[]:<.>?", 17)), 1, 50));
-      $hash = $hash.md5("cake".$hash);
-      $_COOKIE['examplecom'] = $hash;
-      $a->insertUserBlob("cake", $hash);
+      $_COOKIE['examplecom'] = $a->insertUserBlob("cake");
       $b = $a->verifySession();
       $this->assertTrue($b);
       $a->DATABASE->query("DROP DATABASE test");
@@ -199,9 +196,9 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         "INSERT INTO users (user, activated) VALUES ('cake', 0)"
       );
       $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-      $a->insertUserBlob("cake", "pie", "activate");
-      $b = $a->activateUser("pie");
-      $this->assertTrue($b);
+      $b = $a->insertUserBlob("cake", "activate");
+      $c = $a->activateUser($b);
+      $this->assertTrue($c);
       $a->DATABASE->query("DROP DATABASE test");
   }
 
