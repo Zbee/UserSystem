@@ -15,7 +15,7 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
     $_SERVER['HTTP_HOST'] = "test";
     $_SERVER['REQUEST_URI'] = "php";
     $b = $a->currentURL();
-    $this->assertEquals("//testphp", $b);
+    $this->assertEquals("http://testphp", $b);
   }
 
   public function testDefaultRedirect301() {
