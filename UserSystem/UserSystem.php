@@ -6,11 +6,11 @@
 * @author     Ethan Henderson <ethan@zbee.me>
 * @copyright  2014 Ethan Henderson
 * @license    http://aol.nexua.org  AOL v0.6
-* @version    Release: 0.58
+* @version    Release: 0.59
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.1
 */
-class UserSystem extends Utils {
+class UserSystem extends Database {
 
   /**
    * Returns an array full of the data about a user
@@ -254,7 +254,7 @@ class UserSystem extends Utils {
        }
      }
 
-     $this->dbMod(["i", "users", $data]);
+     $this->dbIns(["users", $data]);
    }
 
   /**
@@ -271,9 +271,9 @@ class UserSystem extends Utils {
     $rows = $rows[0];
     if ($rows >= 1) {
       $user = $rows[1]["user"];
-      $this->dbMod(["u", "users", ["activated"=>1], ["username"=>$user]]);
+      $this->dbUpd(["users", ["activated"=>1], ["username"=>$user]]);
       $b = $this->dbSel(["users", ["username"=>$user]])[0];
-      $this->dbMod(["d", "userblobs", ["code"=>$code, "action"=>"activate"]]);
+      $this->dbDel(["userblobs", ["code"=>$code, "action"=>"activate"]]);
       $c = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"activate"]])[0];
       if ($b === 0 && $c === 0) {
         return true;
@@ -310,9 +310,8 @@ class UserSystem extends Utils {
             if (ENCRYPTION === true) {
               $ipAddress = encrypt($ipAddress, $username);
             }
-            $this->dbMod(
+            $this->dbUpd(
               [
-                "u",
                 "users",
                 [
                   "ip"=>$ipAddress,
