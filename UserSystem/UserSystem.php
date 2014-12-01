@@ -6,7 +6,7 @@
 * @author     Ethan Henderson <ethan@zbee.me>
 * @copyright  2014 Ethan Henderson
 * @license    http://aol.nexua.org  AOL v0.6
-* @version    Release: 0.50
+* @version    Release: 0.58
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.1
 */
@@ -24,26 +24,25 @@ class UserSystem extends Utils {
     if (!$session) {
       if (!isset($_COOKIE)) { return false; }
       $session = $this->sanitize(
-                            filter_var(
-                                $_COOKIE[$this->OPTIONS['sitename']],
-                                FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                            ),
-                            "q"
-                          );
-      $time    = strtotime('+30 days');
-      $stmt = $this->DATABASE->query(
-                "SELECT * FROM userblobs
-                WHERE code='$session' AND date<'$time' AND action='session'"
-              );
-      $rows = $stmt->rowCount();
+        filter_var(
+            $_COOKIE[SITENAME],
+            FILTER_SANITIZE_FULL_SPECIAL_CHARS
+        ),
+        "q"
+      );
+      $time = strtotime('+30 days');
+      $stmt = $this->DATABASE->query("
+        SELECT * FROM `".DB_PREFACE."userblobs`
+        WHERE code='$session' AND date<'$time' AND action='session'
+      ");
+      $rows = is_object($stmt) ? $stmt->rowCount() : 0;
       while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $username = $row['user'];
       }
-
       if ($rows === 1) {
-        $stmt = $this->DATABASE->query(
-                  "SELECT * FROM users WHERE username='$username'"
-                );
+        $stmt = $this->DATABASE->query("
+          SELECT * FROM `".DB_PREFACE."users` WHERE username='$username'
+        ");
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
           return $row;
         }
@@ -51,10 +50,10 @@ class UserSystem extends Utils {
         return false;
       }
     } else {
-      $stmt = $this->DATABASE->query(
-                "SELECT * FROM users WHERE username='$session'"
-              );
-      $rows = $stmt->rowCount();
+      $stmt = $this->DATABASE->query("
+        SELECT * FROM `".DB_PREFACE."users` WHERE username='$session'
+      ");
+      $rows = is_object($stmt) ? $stmt->rowCount(): 0;
       if ($rows === 1) {
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
           return $row;
@@ -75,7 +74,25 @@ class UserSystem extends Utils {
   * @return string
   */
   public function createSalt ($username) {
-    return hash("sha512", $username.substr(str_shuffle(str_repeat("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@$%^&_+{}[]:<.>?", (rand(15,20)*strlen($username)-preg_match_all('/[aeiou]/i',$username,$matches)))), 1, rand(256,1024)));
+    return hash(
+      "sha512",
+      $username.substr(
+        str_shuffle(
+          str_repeat(
+            "abcdefghijklmnopqrstuvwxyz
+            ABCDEFGHIJKLMNOPQRSTUVWXYZ
+            0123456789!@$%^&_+{}[]:<.>?",
+            (
+              rand(15,20)*
+              strlen($username)-
+              preg_match_all('/[aeiou]/i',$username,$matches)
+            )
+          )
+        ),
+        1,
+        rand(256,1024)
+      )
+    );
   }
 
   /**
@@ -97,14 +114,14 @@ class UserSystem extends Utils {
                     $_SERVER["REMOTE_ADDR"],
                     FILTER_SANITIZE_FULL_SPECIAL_CHARS
                   );
-    if ($this->OPTIONS["encryption"] === true) {
+    if (ENCRYPTION === true) {
       $ipAddress = encrypt($ipAddress, $username);
     }
-    $this->DATABASE->query(
-      "INSERT INTO userblobs
+    $this->DATABASE->query("
+      INSERT INTO `".DB_PREFACE."userblobs`
       (user, code, action, date, ip) VALUES
-      ('$username', '$hash', '$action', '$time', '$ipAddress')"
-    );
+      ('$username', '$hash', '$action', '$time', '$ipAddress')
+    ");
     return $hash;
   }
 
@@ -123,7 +140,7 @@ class UserSystem extends Utils {
       $ipAddress,
       FILTER_SANITIZE_FULL_SPECIAL_CHARS
     );
-    if ($this->OPTIONS["encryption"] === true) {
+    if (ENCRYPTION === true) {
       $ipAddress = encrypt($ipAddress, $username);
     }
     $stmt = $this->dbSel(["ban", ["ip" => $ipAddress]]);
@@ -165,7 +182,7 @@ class UserSystem extends Utils {
     if (!isset($_COOKIE)) { return false; }
     $COOKIE = $this->sanitize(
       filter_var(
-          $_COOKIE[$this->OPTIONS['sitename']],
+          $_COOKIE[SITENAME],
           FILTER_SANITIZE_FULL_SPECIAL_CHARS
       ),
       "q"
@@ -176,12 +193,10 @@ class UserSystem extends Utils {
       $_SERVER["REMOTE_ADDR"],
       FILTER_SANITIZE_FULL_SPECIAL_CHARS
     );
-
-    if ($this->OPTIONS["encryption"] === true) {
+    if (ENCRYPTION === true) {
       $ipAddress = encrypt($ipAddress, $username);
     }
     $time = strtotime("+30 days");
-
     $stmt = $this->dbSel(
       [
         "userblobs",
@@ -203,10 +218,10 @@ class UserSystem extends Utils {
           return "ban";
         }
       } else {
-        $this->DATABASE->query(
-                "DELETE FROM userblobs
-                WHERE code='$session' AND action='session' LIMIT 1"
-            );
+        $this->DATABASE->query("
+          DELETE FROM `".DB_PREFACE."userblobs`
+          WHERE code='$session' AND action='session' LIMIT 1
+        ");
         return "tamper";
       }
     } else {
@@ -292,7 +307,7 @@ class UserSystem extends Utils {
       if ($password == $user["password"]) {
         if ($user["activated"] == 1) {
           if ($this->checkBan($ipAddress, $username) === false) {
-            if ($this->OPTIONS["encryption"] === true) {
+            if (ENCRYPTION === true) {
               $ipAddress = encrypt($ipAddress, $username);
             }
             $this->dbMod(
@@ -310,11 +325,11 @@ class UserSystem extends Utils {
             $hash = $this->insertUserBlob($username);
             if (!headers_sent()) {
               setcookie(
-                $this->OPTIONS["sitename"],
+                SITENAME,
                 $hash,
                 strtotime('+30 days'),
                 "/",
-                $this->OPTIONS["domain_simple"]
+                DOMAIN_SIMPLE
               );
               return true;
             } else {
@@ -354,24 +369,24 @@ class UserSystem extends Utils {
     $user = $this->sanitize($user, "q");
 
     if (!$all) {
-      $this->DATABASE->query(
-        "DELETE FROM userblobs
+      $this->DATABASE->query("
+        DELETE FROM `".DB_PREFACE."userblobs`
         WHERE code='$code' AND user='$user' AND action='session'
-        LIMIT 1"
-      );
+        LIMIT 1
+      ");
     } else {
-      $this->DATABASE->query(
-        "DELETE FROM userblobs
-        WHERE user='$user'"
-      );
+      $this->DATABASE->query("
+        DELETE FROM `".DB_PREFACE."userblobs`
+        WHERE user='$user'
+      ");
     }
     if ($cursess) {
       setcookie(
-        $this->OPTIONS['sitename'],
+        SITENAME,
         null,
         strtotime('-60 days'),
         "/",
-        $this->OPTIONS['domain_simple']
+        DOMAIN_SIMPLE
       );
     }
     return true;

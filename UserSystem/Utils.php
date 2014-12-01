@@ -6,38 +6,31 @@
 * @author     Ethan Henderson <ethan@zbee.me>
 * @copyright  2014 Ethan Henderson
 * @license    http://aol.nexua.org  AOL v0.6
-* @version    Release: 0.1
+* @version    Release: 0.2
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.48
 */
 class Utils {
   var $DATABASE = '';
-  const OPTIONS = '';
 
   /**
-  * Initializes the class and connects to the database and sets up options.
-  * Example: $UserSystem = new UserSystem ($database, $opts)
+  * Initializes the class and connects to the database.
+  * Example: $UserSystem = new UserSystem ()
   *
   * @access public
-  * @param mixed $dbConn
-  * @param mixed $opts
+  * @param string $database
   * @return void
   */
-  public function __construct ($dbConn, $opts) {
-    if (!$dbConn) {
-      $dbConn = [
-        "location"=>"localhost",
-        "database"=>"",
-        "username"=>"root",
-        "password" =>""
-      ];
-    }
-
+  public function __construct ($dbname = DB_DATABASE) {
     $this->DATABASE = new PDO(
-      "mysql:host=$dbConn[location];dbname=$dbConn[database];
-      charset=utf8", $dbConn['username'], $dbConn['password']
+      "mysql:host=".DB_LOCATION.";dbname=".$dbname.";charset=utf8",
+      DB_USERNAME,
+      DB_PASSWORD
     );
-    $this->OPTIONS = $opts;
+
+    if (!is_object($this->DATABASE)) {
+      throw new Exception ("DB_* constants failed to connect to a database.");
+    }
   }
 
   /**
@@ -80,26 +73,26 @@ class Utils {
   * @return string
   */
   public function encrypt ($decrypted, $username) {
-    $key       = hash('SHA256', $username, true);
+    $key = hash('SHA256', $username, true);
     srand();
-    $initVector        = mcrypt_create_iv(
-    mcrypt_get_iv_size(
-    MCRYPT_RIJNDAEL_128,
-    MCRYPT_MODE_CBC
-    ),
-    MCRYPT_RAND
+    $initVector = mcrypt_create_iv(
+      mcrypt_get_iv_size(
+        MCRYPT_RIJNDAEL_128,
+        MCRYPT_MODE_CBC
+      ),
+      MCRYPT_RAND
     );
     if (strlen($iv_base64 = rtrim(base64_encode($initVector), '=')) != 22) {
       return false;
     }
     $encrypted = base64_encode(
-    mcrypt_encrypt(
-    MCRYPT_RIJNDAEL_128,
-    $key,
-    $decrypted . md5($decrypted),
-    MCRYPT_MODE_CBC,
-    $initVector
-    )
+      mcrypt_encrypt(
+        MCRYPT_RIJNDAEL_128,
+        $key,
+        $decrypted . md5($decrypted),
+        MCRYPT_MODE_CBC,
+        $initVector
+      )
     );
     return $iv_base64 . $encrypted;
   }
@@ -118,16 +111,16 @@ class Utils {
     $initVector  = base64_decode(substr($encrypted, 0, 22) . '==');
     $encrypted = substr($encrypted, 22);
     $decrypted = rtrim(
-    mcrypt_decrypt(
-    MCRYPT_RIJNDAEL_128,
-    $key,
-    base64_decode($encrypted),
-    MCRYPT_MODE_CBC,
-    $initVector
-    ),
-    "\0\4"
+      mcrypt_decrypt(
+        MCRYPT_RIJNDAEL_128,
+        $key,
+        base64_decode($encrypted),
+        MCRYPT_MODE_CBC,
+        $initVector
+      ),
+      "\0\4"
     );
-    $hash      = substr($decrypted, -32);
+    $hash = substr($decrypted, -32);
     $decrypted = substr($decrypted, 0, -32);
     if (md5($decrypted) != $hash) {
       return false;
@@ -148,7 +141,8 @@ class Utils {
       list($utf8) = $match;
       $entity = mb_convert_encoding($utf8, 'HTML-ENTITIES', 'UTF-8');
       return $entity;
-    }, $code);
+    },
+    $code);
   }
 
   /**
@@ -160,7 +154,7 @@ class Utils {
   * @param string $type
   * @return mixed
   */
-  public function sanitize ($data, $type = 's') {
+  public function sanitize ($data, $type = "s") {
     $data = trim($data);
 
     if ($type == "n") {
@@ -200,15 +194,15 @@ class Utils {
       return $data;
     } elseif ($type == "u") {
       if (
-      filter_var(
-      filter_var(
-      $data,
-      FILTER_SANITIZE_URL
-      ),
-      FILTER_VALIDATE_URL
-      )
-      ===
-      true
+        filter_var(
+          filter_var(
+            $data,
+            FILTER_SANITIZE_URL
+          ),
+          FILTER_VALIDATE_URL
+        )
+        ===
+        true
       ) {
         return $data;
       }
@@ -233,57 +227,56 @@ class Utils {
       $col = array_search($item, $data[2]);
       array_push($dataArr, [$col, $item]);
     }
-    $data[1] = $this->sanitize($data[1], "q");
+    $data[1] = DB_PREFACE.$this->sanitize($data[1], "q");
 
     switch ($data[0]) {
       case "i":
-      $cols = "";
-      $entries = "";
-      foreach ($dataArr as $item) {
-        $cols .= $this->sanitize($item[0], "q").", ";
-        $entries .= $this->sanitize($item[1], "q")."', '";
-      }
-      $cols = substr($cols, 0, -2);
-      $entries = substr($entries, 0, -4);
-      print "INSERT INTO $data[1] ($cols) VALUES ('$entries)";
-      $this->DATABASE->query(
-      "INSERT INTO $data[1] ($cols) VALUES ('$entries)"
-      );
-      return true;
-      case "u":
-      $update = "";
-      foreach ($dataArr as $item) {
-        $update .= "`".$this->sanitize($item[0], "q").
-        "`='".$this->sanitize($item[1], "q")."', ";
-      }
-      $equalsArr = [];
-      foreach ($data[3] as $item) {
-        $col = array_search($item, $data[3]);
-        array_push(
-        $equalsArr,
-        [
-        $this->sanitize($col, "q"),
-        $this->sanitize($item, "q")
-        ]
+        $cols = "";
+        $entries = "";
+        foreach ($dataArr as $item) {
+          $cols .= $this->sanitize($item[0], "q").", ";
+          $entries .= $this->sanitize($item[1], "q")."', '";
+        }
+        $cols = substr($cols, 0, -2);
+        $entries = substr($entries, 0, -4);
+        $this->DATABASE->query(
+        "INSERT INTO `$data[1]` ($cols) VALUES ('$entries)"
         );
-      }
-      $equals = "";
-      foreach ($equalsArr as $item) {
-        $equals .= "`".$item[0]."`='".$item[1]."' AND ";
-      }
-      $equals = substr($equals, 0, -5);
-      $update = substr($update, 0, -2);
-      $this->DATABASE->query("UPDATE $data[1] SET $update WHERE $equals");
-      return true;
+        return true;
+      case "u":
+        $update = "";
+        foreach ($dataArr as $item) {
+          $update .= "`".$this->sanitize($item[0], "q").
+          "`='".$this->sanitize($item[1], "q")."', ";
+        }
+        $equalsArr = [];
+        foreach ($data[3] as $item) {
+          $col = array_search($item, $data[3]);
+          array_push(
+            $equalsArr,
+            [
+              $this->sanitize($col, "q"),
+              $this->sanitize($item, "q")
+            ]
+          );
+        }
+        $equals = "";
+        foreach ($equalsArr as $item) {
+          $equals .= "`".$item[0]."`='".$item[1]."' AND ";
+        }
+        $equals = substr($equals, 0, -5);
+        $update = substr($update, 0, -2);
+        $this->DATABASE->query("UPDATE `$data[1]` SET $update WHERE $equals");
+        return true;
       case "d":
-      $equals = "";
-      foreach ($dataArr as $item) {
-        $equals .= "`".$this->sanitize($item[0], "q").
-        "`='".$this->sanitize($item[1], "q")."' AND ";
-      }
-      $equals = substr($equals, 0, -5);
-      $this->DATABASE->query("DELETE FROM $data[1] WHERE $equals");
-      return true;
+        $equals = "";
+        foreach ($dataArr as $item) {
+          $equals .= "`".$this->sanitize($item[0], "q").
+          "`='".$this->sanitize($item[1], "q")."' AND ";
+        }
+        $equals = substr($equals, 0, -5);
+        $this->DATABASE->query("DELETE FROM `$data[1]` WHERE $equals");
+        return true;
       default:
       return false;
     }
@@ -320,10 +313,14 @@ class Utils {
       $equals .= " AND `".$item[0]."`".$ex."'".$item[1]."'";
     }
     $equals = substr($equals, 5);
-    $stmt = $this->DATABASE->query("SELECT * from $data[0] WHERE $equals");
-    $arr = [$stmt->rowCount()];
-    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-      array_push($arr, $row);
+    $stmt = $this->DATABASE->query("
+      SELECT * from `".DB_PREFACE."$data[0]` WHERE $equals
+    ");
+    $arr = [(is_object($stmt) ? $stmt->rowCount() : 0)];
+    if ($arr[0] > 0) {
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        array_push($arr, $row);
+      }
     }
     return $arr;
   }
@@ -341,14 +338,14 @@ class Utils {
   * @return integer
   */
   public function numRows ($table, $thing = false, $answer = false) {
-    $table = $this->sanitize($table, "q");
+    $table = DB_PREFACE.$this->sanitize($table, "q");
     if (!$thing && !$answer) {
       $stmt = $this->DATABASE->query("SELECT * FROM $table");
     } else {
       $thing = $this->sanitize($thing, "q");
       $answer = $this->sanitize($answer, "q");
       $stmt = $this->DATABASE->query(
-      "SELECT * FROM $table WHERE $thing='$answer'"
+        "SELECT * FROM $table WHERE $thing='$answer'"
       );
     }
     $rows =  (is_object($stmt)) ? $stmt->rowCount(): 0;
