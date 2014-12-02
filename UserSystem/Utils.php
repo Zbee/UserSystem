@@ -190,14 +190,7 @@ class Utils {
     } elseif ($type == "h") {
       return $this->handleUTF8($data);
     } elseif ($type == "q") {
-      $data = $this->handleUTF8($data);
-      $bad = "drop database|drop table|show table|`|\*|--|1=1|1='1'|a=a|a='a'|not null|\\\\";
-      $data = preg_replace(
-      "/($bad)/i",
-      "",
-      $data
-      );
-      $data = filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+      $data = htmlentities($this->handleUTF8($data));
       return $data;
     } elseif ($type == "b") {
       $data = (filter_var($data, FILTER_VALIDATE_BOOLEAN)) ? $data : "fail";
@@ -219,5 +212,22 @@ class Utils {
     }
 
     return "FAIL-Sanitization";
+  }
+  
+  function str_replace_arr ($find, $replace, $string) {
+    $x = 0;
+    $n = 0;
+    $str = '';
+    $string = explode($find, $string);
+    foreach ($string as $s) {
+      if ($n > 0) {
+        $str .= $replace[$x].$s;
+        $x += 1;
+      } else {
+        $str .= $s;
+      }
+      $n += 1;
+    }
+    return $str;
   }
 }

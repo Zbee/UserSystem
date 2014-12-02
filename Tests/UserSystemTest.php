@@ -116,9 +116,15 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $a = new UserSystem("");
       $a->DATABASE->query("CREATE DATABASE test");
       $a = new UserSystem("test");
-      $a->DATABASE->query("CREATE TABLE `users` (`id` INT(50) NOT NULL AUTO_INCREMENT,
-      `username` VARCHAR(50) NULL DEFAULT NULL,PRIMARY KEY (`id`))
-      COLLATE='latin1_swedish_ci' ENGINE=MyISAM AUTO_INCREMENT=0;");
+      $a->DATABASE->query("
+        CREATE TABLE `".DB_PREFACE."users` (
+          `id` INT(50) NOT NULL AUTO_INCREMENT,
+          `username` VARCHAR(50) NULL DEFAULT NULL,
+          PRIMARY KEY (`id`)
+        )
+        COLLATE='latin1_swedish_ci'
+        ENGINE=MyISAM
+        AUTO_INCREMENT=0;");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."userblobs` (
           `id` INT(5) NOT NULL AUTO_INCREMENT,
@@ -174,7 +180,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         AUTO_INCREMENT=0;
       ");
       $a->DATABASE->query("
-        CREATE TABLE `users` (
+        CREATE TABLE `".DB_PREFACE."users` (
         	`id` INT(255) NOT NULL AUTO_INCREMENT,
         	`username` VARCHAR(50) NOT NULL,
         	`activated` INT(1) NOT NULL DEFAULT '0',

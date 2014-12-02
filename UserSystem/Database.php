@@ -18,6 +18,18 @@ class Database extends Utils {
   */
 
   /**
+  * A shortcut for easily escaping a table/column name for PDO
+  * Example: $UserSystem->dbIns(["users",["u"=>"Bob","e"=>"bob@ex.com"]])
+  *
+  * @access public
+  * @param string $field
+  * @return string
+  */
+  function quoteIdent ($field) {
+    return "`".str_replace("`","``",$field)."`";
+  }
+
+  /**
   * A shortcut for eaily inserting a new item into a database.
   * Example: $UserSystem->dbIns(["users",["u"=>"Bob","e"=>"bob@ex.com"]])
   *
@@ -31,18 +43,21 @@ class Database extends Utils {
       $col = array_search($item, $data[1]);
       array_push($dataArr, [$col, $item]);
     }
-    $data[0] = DB_PREFACE.$this->sanitize($data[0], "q");
+    $data[0] = "`".DB_PREFACE.$this->quoteIdent($data[0])."`";
     $cols = "";
     $entries = "";
+    $enArr = [];
     foreach ($dataArr as $item) {
-      $cols .= $this->sanitize($item[0], "q").", ";
-      $entries .= $this->sanitize($item[1], "q")."', '";
+      $cols .= $this->quoteIdent($item[0]).", ";
+      $entries .= "?, ";
+      array_push($enArr, $item[1]);
     }
     $cols = substr($cols, 0, -2);
-    $entries = substr($entries, 0, -4);
-    $this->DATABASE->query(
-      "INSERT INTO `$data[0]` ($cols) VALUES ('$entries)"
-    );
+    $entries = substr($entries, 0, -2);
+    $stmt = $this->DATABASE->prepare("
+      INSERT INTO $data[0] ($cols) VALUES ('$entries)
+    ");
+    $stmt->execute($enArr);
     return true;
   }
 
@@ -61,11 +76,12 @@ class Database extends Utils {
       $col = array_search($item, $data[1]);
       array_push($dataArr, [$col, $item]);
     }
-    $data[0] = DB_PREFACE.$this->sanitize($data[0], "q");
+    $data[0] = "`".DB_PREFACE.$data[0]."`";
     $update = "";
+    $qArr = [];
     foreach ($dataArr as $item) {
-      $update .= "`".$this->sanitize($item[0], "q").
-      "`='".$this->sanitize($item[1], "q")."', ";
+      $update .= $this->quoteIdent($item[0])."=?, ";
+      array_push($qArr, $item[1]);
     }
     $equalsArr = [];
     foreach ($data[2] as $item) {
@@ -80,11 +96,13 @@ class Database extends Utils {
     }
     $equals = "";
     foreach ($equalsArr as $item) {
-      $equals .= "`".$item[0]."`='".$item[1]."' AND ";
+      $equals .= $item[0]."=? AND ";
+      array_push($qArr, $item[1]);
     }
     $equals = substr($equals, 0, -5);
     $update = substr($update, 0, -2);
-    $this->DATABASE->query("UPDATE `$data[0]` SET $update WHERE $equals");
+    $stmt = $this->DATABASE->prepare("UPDATE $data[0] SET $update WHERE $equals");
+    $stmt->execute($qArr);
     return true;
   }
 
@@ -103,14 +121,17 @@ class Database extends Utils {
       $col = array_search($item, $data[1]);
       array_push($dataArr, [$col, $item]);
     }
-    $data[0] = DB_PREFACE.$this->sanitize($data[0], "q");
     $equals = "";
+    $eqArr = [];
     foreach ($dataArr as $item) {
-      $equals .= "`".$this->sanitize($item[0], "q").
-      "`='".$this->sanitize($item[1], "q")."' AND ";
+      $equals .= $this->quoteIdent($item[0])."=? AND ";
+      array_push($eqArr, $item[1]);
     }
     $equals = substr($equals, 0, -5);
-    $this->DATABASE->query("DELETE FROM `$data[0]` WHERE $equals");
+    $stmt = $this->DATABASE->prepare("
+      DELETE FROM ".$this->quoteIdent(DB_PREFACE.$data[0])." WHERE $equals
+    ");
+    $stmt->execute($eqArr);
     return true;
   }
 
@@ -130,25 +151,26 @@ class Database extends Utils {
       array_push(
         $dataArr,
         [
-          $this->sanitize($col, "q"),
-          is_array($item) ? "@~#~@".$item[0]."~=exarg@@".
-          $this->sanitize($item[1], "q") : $this->sanitize($item, "q")
+          $col,
+          is_array($item) ? "@~#~@".$item[0]."~=exarg@@".$item[1] : $item
         ]
       );
     }
     $equals = '';
+    $qmark = [];
     foreach ($dataArr as $item) {
       $diff = '=';
       if (substr($item[1], 0, 5) === "@~#~@") {
         $diff = explode("~=exarg@@", substr($item[1], 5))[0];
         $item[1] = explode("~=exarg@@", $item[1])[1];
       }
-      $equals .= " AND `".$item[0]."`".$diff."'".$item[1]."'";
+      $equals .= " AND ".$this->quoteIdent($item[0]).$diff."?";
+      array_push($qmark, $item[1]);
     }
     $equals = substr($equals, 5);
-    $stmt = $this->DATABASE->query("
-    SELECT * from `".DB_PREFACE."$data[0]` WHERE $equals
-    ");
+    $equals = "select * from ".$this->quoteIdent(DB_PREFACE.$data[0])." where $equals";
+    $stmt = $this->DATABASE->prepare($equals);
+    $stmt->execute($qmark);
     $arr = [(is_object($stmt) ? $stmt->rowCount() : 0)];
     if ($arr[0] > 0) {
       while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -171,15 +193,14 @@ class Database extends Utils {
   * @return integer
   */
   public function numRows ($table, $thing = false, $answer = false) {
-    $table = DB_PREFACE.$this->sanitize($table, "q");
+    $table = "`".DB_PREFACE.$this->quoteIdent($table)."`";
     if (!$thing && !$answer) {
       $stmt = $this->DATABASE->query("SELECT * FROM $table");
     } else {
       $thing = $this->sanitize($thing, "q");
       $answer = $this->sanitize($answer, "q");
-      $stmt = $this->DATABASE->query(
-      "SELECT * FROM $table WHERE $thing='$answer'"
-      );
+      $stmt = $this->DATABASE->prepare("SELECT * FROM $table WHERE $thing=?");
+      $stmt->exectue([$answer]);
     }
     $rows =  (is_object($stmt)) ? $stmt->rowCount(): 0;
     return $rows;
