@@ -19,7 +19,9 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
     ");
-    $a->DATABASE->query("INSERT INTO `".DB_PREFACE."users` (username) VALUES ('cake')");
+    $a->DATABASE->query("
+      INSERT INTO `".DB_PREFACE."users` (username) VALUES ('cake')
+    ");
     $b = $a->session("cake")['username'];
     $this->assertEquals("cake", $b);
 
@@ -37,7 +39,11 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
     ");
-    $a->DATABASE->query("INSERT INTO `".DB_PREFACE."userblobs` (user, code, ip, action, date) VALUES ('cake', 'pie', '127.0.0.1', 'session', '1414169627')");
+    $a->DATABASE->query("
+      INSERT INTO `".DB_PREFACE."userblobs`
+      (user, code, ip, action, date) VALUES
+      ('cake', 'pie', '127.0.0.1', 'session', '1414169627')
+    ");
     $_COOKIE['examplecom'] = "pie";
     $b = $a->session()["username"];
     $this->assertEquals("cake", $b);
@@ -104,7 +110,11 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
     ");
-    $a->DATABASE->query("INSERT INTO `".DB_PREFACE."ban` (username, issuer, ip, date, reason, appealed) VALUES ('cake', 'pie', '127.0.0.1', '".(time() - 86400)."', 'Because', 0)");
+    $a->DATABASE->query("
+      INSERT INTO `".DB_PREFACE."ban`
+      (username, issuer, ip, date, reason, appealed) VALUES
+      ('cake', 'pie', '127.0.0.1', '".(time() - 86400)."', 'Because', 0)
+    ");
     $b = $a->checkBan("127.0.0.1");
     $this->assertTrue($b);
     $b = $a->checkBan("127.0.0.1", "cake");

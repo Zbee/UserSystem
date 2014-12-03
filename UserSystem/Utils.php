@@ -6,7 +6,6 @@
 * @author     Ethan Henderson <ethan@zbee.me>
 * @copyright  2014 Ethan Henderson
 * @license    http://aol.nexua.org  AOL v0.6
-* @version    Release: 0.2
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.48
 */
@@ -213,7 +212,7 @@ class Utils {
 
     return "FAIL-Sanitization";
   }
-  
+
   function str_replace_arr ($find, $replace, $string) {
     $x = 0;
     $n = 0;

@@ -6,7 +6,6 @@
 * @author     Ethan Henderson <ethan@zbee.me>
 * @copyright  2014 Ethan Henderson
 * @license    http://aol.nexua.org  AOL v0.6
-* @version    Release: 0.59
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.1
 */
@@ -31,33 +30,31 @@ class UserSystem extends Database {
         "q"
       );
       $time = strtotime('+30 days');
-      $stmt = $this->DATABASE->query("
-        SELECT * FROM `".DB_PREFACE."userblobs`
-        WHERE code='$session' AND date<'$time' AND action='session'
-      ");
-      $rows = is_object($stmt) ? $stmt->rowCount() : 0;
-      while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $username = $row['user'];
-      }
-      if ($rows === 1) {
-        $stmt = $this->DATABASE->query("
-          SELECT * FROM `".DB_PREFACE."users` WHERE username='$username'
-        ");
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-          return $row;
+      $query = $this->dbSel(
+        [
+          "userblobs",
+          [
+            "code"=>$session,
+            "date"=>["<", $time],
+            "action"=>"session"
+          ]
+        ]
+      );
+      if ($query[0] === 1) {
+        $username = $query[1]['user'];
+        $query = $this->dbSel(["users", ["username"=>$username]]);
+        if ($query[0] === 1) {
+          return $query[1];
+        } else {
+          return false;
         }
       } else {
         return false;
       }
     } else {
-      $stmt = $this->DATABASE->query("
-        SELECT * FROM `".DB_PREFACE."users` WHERE username='$session'
-      ");
-      $rows = is_object($stmt) ? $stmt->rowCount(): 0;
-      if ($rows === 1) {
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-          return $row;
-        }
+      $query = $this->dbSel(["users", ["username"=>$session]]);
+      if ($query[0] === 1) {
+        return $query[1];
       } else {
         return false;
       }
@@ -117,11 +114,17 @@ class UserSystem extends Database {
     if (ENCRYPTION === true) {
       $ipAddress = encrypt($ipAddress, $username);
     }
-    $this->DATABASE->query("
-      INSERT INTO `".DB_PREFACE."userblobs`
-      (user, code, action, date, ip) VALUES
-      ('$username', '$hash', '$action', '$time', '$ipAddress')
-    ");
+    $this->dbIns(
+      [
+        "userblobs",
+        [
+          "user"=>$username,
+          "code"=>$hash,
+          "action"=>$action,
+          "ip"=>$ipAddress
+        ]
+      ]
+    );
     return $hash;
   }
 
@@ -218,10 +221,7 @@ class UserSystem extends Database {
           return "ban";
         }
       } else {
-        $this->DATABASE->query("
-          DELETE FROM `".DB_PREFACE."userblobs`
-          WHERE code='$session' AND action='session' LIMIT 1
-        ");
+        $this->dbDel(["userblobs", ["code"=>$session, "action"=>"session"]]);
         return "tamper";
       }
     } else {
@@ -247,6 +247,7 @@ class UserSystem extends Database {
        "email" => $email,
        "salt" => $this->createSalt($username)
      ];
+     $more = $this->sanitize($more, "b");
 
      if ($more !== false && is_array($more)) {
        foreach ($more as $item) {
@@ -366,18 +367,22 @@ class UserSystem extends Database {
   public function logOut ($code, $user, $cursess = false, $all = false) {
     $code = $this->sanitize($code, "q");
     $user = $this->sanitize($user, "q");
+    $cursess = $this->sanitize($cursess, "b");
+    $all = $this->sanitize($all, "b");
 
     if (!$all) {
-      $this->DATABASE->query("
-        DELETE FROM `".DB_PREFACE."userblobs`
-        WHERE code='$code' AND user='$user' AND action='session'
-        LIMIT 1
-      ");
+      $this->dbDel(
+        [
+          "userblobs",
+          [
+            "code"=>$code,
+            "user"=>$user,
+            "action"=>"session"
+          ]
+        ]
+      );
     } else {
-      $this->DATABASE->query("
-        DELETE FROM `".DB_PREFACE."userblobs`
-        WHERE user='$user'
-      ");
+      $this->dbDel(["userblobs", ["user"=>$user]]);
     }
     if ($cursess) {
       setcookie(

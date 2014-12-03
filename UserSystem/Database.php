@@ -6,17 +6,10 @@
 * @author     Ethan Henderson <ethan@zbee.me>
 * @copyright  2014 Ethan Henderson
 * @license    http://aol.nexua.org  AOL v0.1
-* @version    Release: 0.1
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.59
 */
 class Database extends Utils {
-  /*
-  Include sanitization functions for database stuff (sanitization + escaping)
-  Split dbMod into different sections (dbIns, dbDel, etc)
-  Include dbSel
-  */
-
   /**
   * A shortcut for easily escaping a table/column name for PDO
   * Example: $UserSystem->dbIns(["users",["u"=>"Bob","e"=>"bob@ex.com"]])
@@ -43,7 +36,7 @@ class Database extends Utils {
       $col = array_search($item, $data[1]);
       array_push($dataArr, [$col, $item]);
     }
-    $data[0] = "`".DB_PREFACE.$this->quoteIdent($data[0])."`";
+    $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
     $cols = "";
     $entries = "";
     $enArr = [];
@@ -55,7 +48,7 @@ class Database extends Utils {
     $cols = substr($cols, 0, -2);
     $entries = substr($entries, 0, -2);
     $stmt = $this->DATABASE->prepare("
-      INSERT INTO $data[0] ($cols) VALUES ('$entries)
+      INSERT INTO $data[0] ($cols) VALUES ($entries)
     ");
     $stmt->execute($enArr);
     return true;
@@ -101,7 +94,9 @@ class Database extends Utils {
     }
     $equals = substr($equals, 0, -5);
     $update = substr($update, 0, -2);
-    $stmt = $this->DATABASE->prepare("UPDATE $data[0] SET $update WHERE $equals");
+    $stmt = $this->DATABASE->prepare("
+      UPDATE $data[0] SET $update WHERE $equals
+    ");
     $stmt->execute($qArr);
     return true;
   }
@@ -168,8 +163,9 @@ class Database extends Utils {
       array_push($qmark, $item[1]);
     }
     $equals = substr($equals, 5);
-    $equals = "select * from ".$this->quoteIdent(DB_PREFACE.$data[0])." where $equals";
-    $stmt = $this->DATABASE->prepare($equals);
+    $stmt = $this->DATABASE->prepare("
+      select * from ".$this->quoteIdent(DB_PREFACE.$data[0])." where $equals
+    ");
     $stmt->execute($qmark);
     $arr = [(is_object($stmt) ? $stmt->rowCount() : 0)];
     if ($arr[0] > 0) {

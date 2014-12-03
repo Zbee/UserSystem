@@ -19,7 +19,9 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
     ENGINE=MyISAM
     AUTO_INCREMENT=0;
     ");
-    $a->DATABASE->query("INSERT INTO `".DB_PREFACE."test` (test) VALUES ('cake')");
+    $a->DATABASE->query("
+      INSERT INTO `".DB_PREFACE."test` (test) VALUES ('cake')
+    ");
     $b = $a->dbSel(["test", ["id"=>1]]);
     $this->assertEquals(1, $b[0]);
     $this->assertEquals(1, $b[1]['id']);
