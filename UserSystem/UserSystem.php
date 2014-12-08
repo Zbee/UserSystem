@@ -22,12 +22,9 @@ class UserSystem extends Database {
   public function session ($session = false) {
     if (!$session) {
       if (!isset($_COOKIE)) { return false; }
-      $session = $this->sanitize(
-        filter_var(
-            $_COOKIE[SITENAME],
-            FILTER_SANITIZE_FULL_SPECIAL_CHARS
-        ),
-        "q"
+      $session = filter_var(
+        $_COOKIE[SITENAME],
+        FILTER_SANITIZE_FULL_SPECIAL_CHARS
       );
       $time = strtotime('+30 days');
       $query = $this->dbSel(
@@ -102,11 +99,8 @@ class UserSystem extends Database {
    * @return boolean
    */
   public function insertUserBlob ($username, $action = "session") {
-    $username = $this->sanitize($username, "q");
-    $action = $this->sanitize($action, "q");
     $hash = $this->createSalt($username);
     $hash = $hash.md5($username.$hash);
-    $time = time();
     $ipAddress = filter_var(
                     $_SERVER["REMOTE_ADDR"],
                     FILTER_SANITIZE_FULL_SPECIAL_CHARS
@@ -121,7 +115,8 @@ class UserSystem extends Database {
           "user"=>$username,
           "code"=>$hash,
           "action"=>$action,
-          "ip"=>$ipAddress
+          "ip"=>$ipAddress,
+          "date"=>time()
         ]
       ]
     );
@@ -138,7 +133,6 @@ class UserSystem extends Database {
    * @return boolean
    */
   public function checkBan ($ipAddress, $username = false) {
-    $username = $this->sanitize($username, "q");
     $ipAddress = filter_var(
       $ipAddress,
       FILTER_SANITIZE_FULL_SPECIAL_CHARS
@@ -183,12 +177,9 @@ class UserSystem extends Database {
    */
   public function verifySession ($session = false) {
     if (!isset($_COOKIE)) { return false; }
-    $COOKIE = $this->sanitize(
-      filter_var(
-          $_COOKIE[SITENAME],
-          FILTER_SANITIZE_FULL_SPECIAL_CHARS
-      ),
-      "q"
+    $COOKIE = filter_var(
+      $_COOKIE[SITENAME],
+      FILTER_SANITIZE_FULL_SPECIAL_CHARS
     );
     if (!$session) { $session = $COOKIE; }
     $tamper  = substr($session, -32);
@@ -267,7 +258,6 @@ class UserSystem extends Database {
    * @return boolean
    */
   public function activateUser ($code) {
-    $code = $this->sanitize($code, "q");
     $rows = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"activate"]]);
     $rows = $rows[0];
     if ($rows >= 1) {
@@ -295,8 +285,8 @@ class UserSystem extends Database {
    * @param string $password
    * @return boolean
    */
-  public function logIn ($username, $password) {
-    $username = $this->sanitize($username, "q");
+  public function logIn ($username, $password, $ignoreTS = false) {
+    $ignoreTS = $this->sanitize($ignoreTS, "b");
     $ipAddress = filter_var(
       $_SERVER["REMOTE_ADDR"],
       FILTER_SANITIZE_FULL_SPECIAL_CHARS
@@ -307,7 +297,7 @@ class UserSystem extends Database {
       $oldPassword = hash("sha256", $password.$user["oldsalt"]);
       if ($password == $user["password"]) {
         if ($user["activated"] == 1) {
-          if ($this->checkBan($ipAddress, $username) === false) {
+          if ($user["2step"] == 0 || $ignoreTS !== false) {
             if (ENCRYPTION === true) {
               $ipAddress = encrypt($ipAddress, $username);
             }
@@ -336,7 +326,7 @@ class UserSystem extends Database {
               return true;
             }
           } else {
-            return "ban";
+            return "2step";
           }
         } else {
           return "activate";
@@ -365,8 +355,6 @@ class UserSystem extends Database {
    * @return boolean
    */
   public function logOut ($code, $user, $cursess = false, $all = false) {
-    $code = $this->sanitize($code, "q");
-    $user = $this->sanitize($user, "q");
     $cursess = $this->sanitize($cursess, "b");
     $all = $this->sanitize($all, "b");
 
@@ -394,5 +382,43 @@ class UserSystem extends Database {
       );
     }
     return true;
+  }
+
+  /**
+   * Finishes logging a user in if they have 2step enabled.
+   * Example: $UserSystem->twoStep($blob)
+   *
+   * @access public
+   * @param string $code
+   * @return mixed
+   */
+  public function twoStep ($code) {
+    $ipAddress = filter_var(
+      $_SERVER["REMOTE_ADDR"],
+      FILTER_SANITIZE_FULL_SPECIAL_CHARS
+    );
+    $return = "";
+    $select = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"2step"]]);
+    if ($select[0] === 1) {
+      if ($select[1]["date"] > time() - 3600) {
+        if ($select[1]["ip"] == $ipAddress) {
+          $this->logIn(
+            $select[1]["user"],
+            $this->session($select[1]["user"])["password"],
+            true
+          );
+          $return = true;
+        } else {
+          $return = "ip";
+        }
+      } else {
+        $return = "expired";
+      }
+    } else {
+      $return = "code";
+    }
+
+    $this->dbDel(["userblobs", ["code"=>$code, "action"=>"2step"]]);
+    return $return;
   }
 }
