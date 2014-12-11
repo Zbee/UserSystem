@@ -421,4 +421,40 @@ class UserSystem extends Database {
     $this->dbDel(["userblobs", ["code"=>$code, "action"=>"2step"]]);
     return $return;
   }
+
+  /**
+  * Allows a user to reset their password if they forget their password.
+  * Example: $UserSystem->recover("example@pie.com")
+  *
+  * @access public
+  * @param string $email
+  * @return mixed
+  */
+  public function recover ($email) {
+    $select = $this->dbSel(["users", ["email"=>$email]]);
+    if ($select[0] == 1) {
+      $blob = $this->insertUserBlob($select[1]["username"], "recover");
+      $link = $this->sanitize(
+        URL_PREFACE."://".DOMAIN."/".RECOVERY_PG."?blob={$blob}",
+        "u"
+      );
+      $this->sendMail(
+        $email,
+        "Recover your ".SITENAME." account",
+        "        Hello ".$select[1]["username"]."
+
+        To reset your password click the link below.
+        $link
+
+        ======
+
+        If this wasn't you,you should update your password on ".SITENAME.".
+
+        Thank you"
+      );
+      return true;
+    } else {
+      return "email";
+    }
+  }
 }

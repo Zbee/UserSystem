@@ -333,4 +333,54 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($c);
     $a->DATABASE->query("DROP DATABASE test");
   }
+
+  public function testRecover() {
+    $a = new UserSystem("");
+    $a->DATABASE->query("CREATE DATABASE test");
+    $a = new UserSystem("test");
+    $a->DATABASE->query("
+      CREATE TABLE `".DB_PREFACE."userblobs` (
+      `id` INT(5) NOT NULL AUTO_INCREMENT,
+      `user` VARCHAR(100) NOT NULL,
+      `code` VARCHAR(256) NOT NULL,
+      `ip` VARCHAR(256) NOT NULL,
+      `action` VARCHAR(100) NOT NULL,
+      `date` VARCHAR(50) NOT NULL,
+      PRIMARY KEY (`id`)
+      )
+      COLLATE='latin1_swedish_ci'
+      ENGINE=MyISAM
+      AUTO_INCREMENT=0;
+    ");
+    $a->DATABASE->query("
+      CREATE TABLE `".DB_PREFACE."users` (
+      `id` INT(255) NOT NULL AUTO_INCREMENT,
+      `username` VARCHAR(50) NOT NULL,
+      `email` VARCHAR(512) NOT NULL,
+      `oldusername` VARCHAR(50) NOT NULL,
+      `password` VARCHAR(100) NOT NULL,
+      `oldpassword` VARCHAR(100) NOT NULL,
+      `salt` VARCHAR(512) NOT NULL,
+      `oldsalt` VARCHAR(512) NOT NULL,
+      `activated` INT(1) NOT NULL DEFAULT '0',
+      `2step` INT(1) NOT NULL DEFAULT '0',
+      `last_logged_in` VARCHAR(50) NOT NULL DEFAULT '0000000000',
+      `old_last_logged_in` VARCHAR(50) NOT NULL DEFAULT '0000000000',
+      `ip` VARCHAR(64) NOT NULL DEFAULT '',
+      PRIMARY KEY (`id`)
+      )
+      COLLATE='latin1_swedish_ci'
+      ENGINE=MyISAM
+      AUTO_INCREMENT=0;
+    ");
+    $a->DATABASE->query("
+      INSERT INTO `".DB_PREFACE."users`
+      (username, password, email) VALUES
+      ('cake', '".hash("sha256", "pie")."', 'example@pie.com')
+    ");
+    $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
+    $b = $a->recover("example@pie.com");
+    $this->assertEquals(1, $a->dbSel(["userblobs", ["action"=>"recover"]])[0]);
+    $a->DATABASE->query("DROP DATABASE test");
+  }
 }

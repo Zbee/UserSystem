@@ -1,10 +1,10 @@
-[![Build Status](https://travis-ci.org/Zbee/UserSystem.svg)](https://travis-ci.org/Zbee/UserSystem) [![Code Climate](https://codeclimate.com/github/Zbee/UserSystem/badges/gpa.svg)](https://codeclimate.com/github/Zbee/UserSystem)
+[![Build Status](https://travis-ci.org/Zbee/UserSystem.svg)](https://travis-ci.org/Zbee/UserSystem) [![Code Climate](https://codeclimate.com/github/Zbee/UserSystem/badges/gpa.svg)](https://codeclimate.com/github/Zbee/UserSystem) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Zbee/UserSystem/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Zbee/UserSystem/?branch=master)
 
 Runs with PHP 5.4.0+, and makes use of a MySQL database (5.6.20 used in development).
 
 ##Installation & Use
 
-After downloading the [archive file](https://github.com/Zbee/UserSystem/archive/master.zip) you can add the `/UserSystem/ ` and `/Example/` directories to your own site and the example site will work as soon as you update the database information in `/UserSystem/config.php`.
+After downloading the [archive file](https://github.com/Zbee/UserSystem/archive/master.zip) you can add the `/UserSystem/ ` and `/Example/` directories to your own site and the example site will work as soon as you update the information in `/UserSystem/config.php`.
 
 For more detailed information please see the [documentation](https://zbee.github.io/UserSystem/documentation).
 
@@ -24,7 +24,7 @@ For more detailed information please see the [documentation](https://zbee.github
 
 * The hashing and transfer methods are all FIPS 140-2 Level 2 compliant (adapted for software; uses a DoD-approved hashing function, tamper-checking on sessions, and removal of possibly tampered-with sessions).
 
-* Uses a system I like to refer to as a blob system, which is basically thus: The cookie is simply a very long string (more than a googol (3.2e184) of possibilities) that is then stored in the database and hard-coded to the user who owns the code. Furthermore, all blobs that can be are destroyed after use, and have expiration dates.
+* Uses a system I like to refer to as a blob system, which is basically thus: The cookie is simply a very long string (more than a googol of possibilities) that is then stored in the database and hard-coded to the user who owns the code. Furthermore, all blobs that can be are destroyed after use, and have expiration dates.
 
 * Can easily be configured (through the straight-forward configuration file) to use an AES-compliant encryption system for emails and IPs that are stored with the user.
 
@@ -34,7 +34,7 @@ For more detailed information please see the [documentation](https://zbee.github
 
 * The logout file has conventions in place to allow for users to destroy every session tied to their account, increasing their ability to keep their own accounts as secure as possible.
 
-* Rainbow and Lookup tables are halted in their tracks by use of very secure salts which are utilized in the hashing of user's passwords. These salts are recreated every time the user changes their password. In addition to that, the salts alone have nearly a googol (7.6e94) possibilities.
+* Rainbow and Lookup tables are halted in their tracks by use of very secure salts which are utilized in the hashing of user's passwords. These salts are recreated every time the user changes their password. In addition to that, the salts alone have nearly a googol possibilities.
 
 * SQL injection attacks are stopped upfront by sanitizing user input. There's also a fall-back with how the PHP and MySQL commands work together, which does not allow for multiple SQL queries to take place in the same PHP function, disabling an attacker from editing data, grabbing data, or removing data from a database.
 

@@ -210,23 +210,15 @@ class Utils {
       }
     }
 
-    return "FAIL-Sanitization";
+    return "FAILED SANITIZATION";
   }
 
-  function str_replace_arr ($find, $replace, $string) {
-    $x = 0;
-    $n = 0;
-    $str = '';
-    $string = explode($find, $string);
-    foreach ($string as $s) {
-      if ($n > 0) {
-        $str .= $replace[$x].$s;
-        $x += 1;
-      } else {
-        $str .= $s;
-      }
-      $n += 1;
-    }
-    return $str;
+  public function sendMail ($recipient, $subject, $message) {
+    $recipient = $this->sanitize($recipient, "s");
+    $subject = $this->sanitize($subject, "s");
+    $headers = 'From: noreply@'.DOMAIN_SIMPLE."\r\n" .
+    'Reply-To: support@'.DOMAIN_SIMPLE."\r\n" .
+    'X-Mailer: PHP/'.phpversion();
+    mail($recipient, $subject, $message, $headers);
   }
 }
