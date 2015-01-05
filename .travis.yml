@@ -6,4 +6,4 @@ php:
 before_install:
   sudo pip install codecov
 after_success:
-  codecov
+  codecov --token=f291081a-10f3-498b-bc30-f9b3f5a367c0
