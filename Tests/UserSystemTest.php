@@ -381,7 +381,6 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
     $b = $a->sendRecover("example@pie.com");
     $this->assertEquals(1, $a->dbSel(["userblobs", ["action"=>"recover"]])[0]);
-    $this->assertEquals(1, is_dir("mailoutput"));
     $a->DATABASE->query("DROP DATABASE test");
   }
 }
