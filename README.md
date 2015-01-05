@@ -20,6 +20,16 @@ For more detailed information please see the [documentation](https://zbee.github
 
 * Multi-standard compliancy
 
+##Features to come
+
+* Authy integration
+
+* reCAPTCHA integration
+
+* More Encryption
+
+* Option to not store passwords
+
 ##Security
 
 * The hashing and transfer methods are all FIPS 140-2 Level 2 compliant (adapted for software; uses a DoD-approved hashing function, tamper-checking on sessions, and removal of possibly tampered-with sessions).
