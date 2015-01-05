@@ -4,7 +4,7 @@
 *
 * @package    UserSystem
 * @author     Ethan Henderson <ethan@zbee.me>
-* @copyright  2014 Ethan Henderson
+* @copyright  2015 Ethan Henderson
 * @license    http://aol.nexua.org  AOL v0.1
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.59

@@ -4,7 +4,7 @@
 *
 * @package    UserSystem
 * @author     Ethan Henderson <ethan@zbee.me>
-* @copyright  2014 Ethan Henderson
+* @copyright  2015 Ethan Henderson
 * @license    http://aol.nexua.org  AOL v0.6
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.1
@@ -423,14 +423,14 @@ class UserSystem extends Database {
   }
 
   /**
-  * Allows a user to reset their password if they forget their password.
-  * Example: $UserSystem->recover("example@pie.com")
+  * Allows a user to send a link to reset their passsword if they forgot it.
+  * Example: $UserSystem->sendRecover("example@pie.com")
   *
   * @access public
   * @param string $email
   * @return mixed
   */
-  public function recover ($email) {
+  public function sendRecover ($email) {
     $select = $this->dbSel(["users", ["email"=>$email]]);
     if ($select[0] == 1) {
       $blob = $this->insertUserBlob($select[1]["username"], "recover");
@@ -455,6 +455,29 @@ class UserSystem extends Database {
       return true;
     } else {
       return "email";
+    }
+  }
+
+  /**
+  * Allows a user to reset their pass using the link received from sendRecover
+  * Example: $UserSystem->recover("fmg49t4c8u5ym8598yv5")
+  *
+  * @access public
+  * @param string $blob
+  * @param string $pass
+  * @param string $passconf
+  * @return mixed
+  */
+  public function recover ($blob, $pass, $passconf) {
+    if ($pass === $passconf) {
+      $select = $this->dbSel(["userblobs",["code"=>$blob, "action"=>"recovery"]]);
+      if ($select[0] == 1) {
+        $user = $select[1]["user"];
+        $salt = $this->session($user)["salt"];
+        $pass = hash("sha256", $pass.$salt);
+      }
+    } else {
+      return "password";
     }
   }
 }
