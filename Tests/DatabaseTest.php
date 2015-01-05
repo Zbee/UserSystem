@@ -11,9 +11,9 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
     $a = new UserSystem("test");
     $a->DATABASE->query("
     CREATE TABLE `".DB_PREFACE."test` (
-    `id` INT(50) NOT NULL AUTO_INCREMENT,
-    `test` VARCHAR(50) NULL DEFAULT NULL,
-    PRIMARY KEY (`id`)
+      `id` INT NOT NULL AUTO_INCREMENT,
+      `test` VARCHAR(50) NULL DEFAULT NULL,
+      PRIMARY KEY (`id`)
     )
     COLLATE='latin1_swedish_ci'
     ENGINE=MyISAM

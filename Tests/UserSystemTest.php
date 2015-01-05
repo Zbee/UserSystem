@@ -11,7 +11,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $a = new UserSystem("test");
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."users` (
-        `id` INT(50) NOT NULL AUTO_INCREMENT,
+        `id` INT NOT NULL AUTO_INCREMENT,
         `username` VARCHAR(50) NULL DEFAULT NULL,
         PRIMARY KEY (`id`)
       )
@@ -27,12 +27,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
 
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."userblobs` (
-        `id` INT(5) NOT NULL AUTO_INCREMENT,
-        `user` VARCHAR(100) NOT NULL,
-        `code` VARCHAR(256) NOT NULL,
+        `id` INT NOT NULL AUTO_INCREMENT,
+        `user` VARCHAR(50) NOT NULL,
+        `code` VARCHAR(512) NOT NULL,
         `ip` VARCHAR(256) NOT NULL,
         `action` VARCHAR(100) NOT NULL,
-        `date` VARCHAR(50) NOT NULL,
+        `date` INT NOT NULL,
         PRIMARY KEY (`id`)
       )
       COLLATE='latin1_swedish_ci'
@@ -56,7 +56,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $a = new UserSystem("test");
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."users` (
-        `id` INT(50) NOT NULL AUTO_INCREMENT,
+        `id` INT NOT NULL AUTO_INCREMENT,
         `username` VARCHAR(50) NULL DEFAULT NULL,
         PRIMARY KEY (`id`)
       )
@@ -66,12 +66,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     ");
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."userblobs` (
-        `id` INT(5) NOT NULL AUTO_INCREMENT,
-        `user` VARCHAR(100) NOT NULL,
-        `code` VARCHAR(256) NOT NULL,
+        `id` INT NOT NULL AUTO_INCREMENT,
+        `user` VARCHAR(50) NOT NULL,
+        `code` VARCHAR(512) NOT NULL,
         `ip` VARCHAR(256) NOT NULL,
         `action` VARCHAR(100) NOT NULL,
-        `date` VARCHAR(50) NOT NULL,
+        `date` INT NOT NULL,
         PRIMARY KEY (`id`)
       )
       COLLATE='latin1_swedish_ci'
@@ -97,13 +97,13 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $a = new UserSystem("test");
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."ban` (
-      	`id` INT(50) NOT NULL AUTO_INCREMENT,
-      	`date` VARCHAR(50) NULL DEFAULT NULL,
+      	`id` INT NOT NULL AUTO_INCREMENT,
+      	`date` INT NULL DEFAULT NULL,
       	`ip` VARCHAR(50) NULL DEFAULT NULL,
       	`username` VARCHAR(50) NULL DEFAULT NULL,
       	`issuer` VARCHAR(50) NOT NULL DEFAULT 'No issuer provided.',
       	`reason` VARCHAR(512) NOT NULL DEFAULT 'No reason provided.',
-      	`appealed` VARCHAR(50) NOT NULL DEFAULT '0',
+      	`appealed` INT(1) NOT NULL DEFAULT '0',
       	PRIMARY KEY (`id`)
       )
       COLLATE='latin1_swedish_ci'
@@ -128,7 +128,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $a = new UserSystem("test");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."users` (
-          `id` INT(50) NOT NULL AUTO_INCREMENT,
+          `id` INT NOT NULL AUTO_INCREMENT,
           `username` VARCHAR(50) NULL DEFAULT NULL,
           PRIMARY KEY (`id`)
         )
@@ -137,12 +137,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         AUTO_INCREMENT=0;");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."userblobs` (
-          `id` INT(5) NOT NULL AUTO_INCREMENT,
-          `user` VARCHAR(100) NOT NULL,
-          `code` VARCHAR(256) NOT NULL,
+          `id` INT NOT NULL AUTO_INCREMENT,
+          `user` VARCHAR(50) NOT NULL,
+          `code` VARCHAR(512) NOT NULL,
           `ip` VARCHAR(256) NOT NULL,
           `action` VARCHAR(100) NOT NULL,
-          `date` VARCHAR(50) NOT NULL,
+          `date` INT NOT NULL,
           PRIMARY KEY (`id`)
         )
         COLLATE='latin1_swedish_ci'
@@ -151,13 +151,13 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."ban` (
-          `id` INT(50) NOT NULL AUTO_INCREMENT,
-          `date` VARCHAR(50) NULL DEFAULT NULL,
+          `id` INT NOT NULL AUTO_INCREMENT,
+          `date` INT NULL DEFAULT NULL,
           `ip` VARCHAR(50) NULL DEFAULT NULL,
           `username` VARCHAR(50) NULL DEFAULT NULL,
           `issuer` VARCHAR(50) NOT NULL DEFAULT 'No issuer provided.',
           `reason` VARCHAR(512) NOT NULL DEFAULT 'No reason provided.',
-          `appealed` VARCHAR(50) NOT NULL DEFAULT '0',
+          `appealed` INT(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (`id`)
         )
         COLLATE='latin1_swedish_ci'
@@ -177,12 +177,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $a = new UserSystem("test");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."userblobs` (
-          `id` INT(5) NOT NULL AUTO_INCREMENT,
-          `user` VARCHAR(100) NOT NULL,
-          `code` VARCHAR(256) NOT NULL,
+          `id` INT NOT NULL AUTO_INCREMENT,
+          `user` VARCHAR(50) NOT NULL,
+          `code` VARCHAR(512) NOT NULL,
           `ip` VARCHAR(256) NOT NULL,
           `action` VARCHAR(100) NOT NULL,
-          `date` VARCHAR(50) NOT NULL,
+          `date` INT NOT NULL,
           PRIMARY KEY (`id`)
         )
         COLLATE='latin1_swedish_ci'
@@ -191,7 +191,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."users` (
-        	`id` INT(255) NOT NULL AUTO_INCREMENT,
+        	`id` INT NOT NULL AUTO_INCREMENT,
         	`username` VARCHAR(50) NOT NULL,
         	`activated` INT(1) NOT NULL DEFAULT '0',
         	PRIMARY KEY (`id`)
@@ -216,12 +216,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $a = new UserSystem("test");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."userblobs` (
-          `id` INT(5) NOT NULL AUTO_INCREMENT,
-          `user` VARCHAR(100) NOT NULL,
-          `code` VARCHAR(256) NOT NULL,
+          `id` INT NOT NULL AUTO_INCREMENT,
+          `user` VARCHAR(50) NOT NULL,
+          `code` VARCHAR(512) NOT NULL,
           `ip` VARCHAR(256) NOT NULL,
           `action` VARCHAR(100) NOT NULL,
-          `date` VARCHAR(50) NOT NULL,
+          `date` INT NOT NULL,
           PRIMARY KEY (`id`)
         )
         COLLATE='latin1_swedish_ci'
@@ -230,10 +230,10 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."ban` (
-          `date` VARCHAR(50) NULL DEFAULT NULL,
-          `ip` VARCHAR(50) NULL DEFAULT NULL,
+          `date` INT NULL DEFAULT NULL,
+          `ip` VARCHAR(256) NULL DEFAULT NULL,
           `username` VARCHAR(50) NULL DEFAULT NULL,
-          `appealed` VARCHAR(50) NOT NULL DEFAULT '0',
+          `appealed` INT(1) NOT NULL DEFAULT '0',
           PRIMARY KEY (`id`)
         )
         COLLATE='latin1_swedish_ci'
@@ -242,18 +242,17 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."users` (
-          `id` INT(255) NOT NULL AUTO_INCREMENT,
+          `id` INT NOT NULL AUTO_INCREMENT,
           `username` VARCHAR(50) NOT NULL,
-          `oldusername` VARCHAR(50) NOT NULL,
           `password` VARCHAR(100) NOT NULL,
-          `oldpassword` VARCHAR(100) NOT NULL,
+          `oldPassword` VARCHAR(100) NOT NULL,
           `salt` VARCHAR(512) NOT NULL,
-          `oldsalt` VARCHAR(512) NOT NULL,
+          `oldSalt` VARCHAR(512) NOT NULL,
           `activated` INT(1) NOT NULL DEFAULT '0',
-          `2step` INT(1) NOT NULL DEFAULT '0',
-          `last_logged_in` VARCHAR(50) NOT NULL DEFAULT '0000000000',
-          `old_last_logged_in` VARCHAR(50) NOT NULL DEFAULT '0000000000',
-          `ip` VARCHAR(64) NOT NULL DEFAULT '',
+          `twoStep` INT(1) NOT NULL DEFAULT '0',
+          `lastLoggedIn` VARCHAR(50) NOT NULL DEFAULT '0000000000',
+          `oldLastLoggedIn` VARCHAR(50) NOT NULL DEFAULT '0000000000',
+          `ip` VARCHAR(256) NOT NULL DEFAULT '',
           PRIMARY KEY (`id`)
         )
         COLLATE='latin1_swedish_ci'
@@ -277,12 +276,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $a = new UserSystem("test");
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."userblobs` (
-        `id` INT(5) NOT NULL AUTO_INCREMENT,
-        `user` VARCHAR(100) NOT NULL,
-        `code` VARCHAR(256) NOT NULL,
+        `id` INT NOT NULL AUTO_INCREMENT,
+        `user` VARCHAR(50) NOT NULL,
+        `code` VARCHAR(512) NOT NULL,
         `ip` VARCHAR(256) NOT NULL,
         `action` VARCHAR(100) NOT NULL,
-        `date` VARCHAR(50) NOT NULL,
+        `date` INT NOT NULL,
         PRIMARY KEY (`id`)
       )
       COLLATE='latin1_swedish_ci'
@@ -291,10 +290,10 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     ");
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."ban` (
-      `date` VARCHAR(50) NULL DEFAULT NULL,
-      `ip` VARCHAR(50) NULL DEFAULT NULL,
+      `date` INT NULL DEFAULT NULL,
+      `ip` VARCHAR(256) NULL DEFAULT NULL,
       `username` VARCHAR(50) NULL DEFAULT NULL,
-      `appealed` VARCHAR(50) NOT NULL DEFAULT '0',
+      `appealed` INT(1) NOT NULL DEFAULT '0',
       PRIMARY KEY (`id`)
       )
       COLLATE='latin1_swedish_ci'
@@ -305,16 +304,15 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       CREATE TABLE `".DB_PREFACE."users` (
         `id` INT(255) NOT NULL AUTO_INCREMENT,
         `username` VARCHAR(50) NOT NULL,
-        `oldusername` VARCHAR(50) NOT NULL,
         `password` VARCHAR(100) NOT NULL,
-        `oldpassword` VARCHAR(100) NOT NULL,
+        `oldPassword` VARCHAR(100) NOT NULL,
         `salt` VARCHAR(512) NOT NULL,
-        `oldsalt` VARCHAR(512) NOT NULL,
+        `oldSalt` VARCHAR(512) NOT NULL,
         `activated` INT(1) NOT NULL DEFAULT '0',
-        `2step` INT(1) NOT NULL DEFAULT '0',
-        `last_logged_in` VARCHAR(50) NOT NULL DEFAULT '0000000000',
-        `old_last_logged_in` VARCHAR(50) NOT NULL DEFAULT '0000000000',
-        `ip` VARCHAR(64) NOT NULL DEFAULT '',
+        `twoStep` INT(1) NOT NULL DEFAULT '0',
+        `lastLoggedIn` VARCHAR(50) NOT NULL DEFAULT '0000000000',
+        `oldLastLoggedIn` VARCHAR(50) NOT NULL DEFAULT '0000000000',
+        `ip` VARCHAR(256) NOT NULL DEFAULT '',
         PRIMARY KEY (`id`)
       )
       COLLATE='latin1_swedish_ci'
@@ -327,7 +325,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ('cake', '".hash("sha256", "pie")."', 1)
     ");
     $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-    $b = $a->insertUserBlob("cake", "2step");
+    $b = $a->insertUserBlob("cake", "twoStep");
     $c = $a->twoStep($b);
     $this->assertEquals(0, $a->dbSel(["userblobs", ["code"=>$b]])[0]);
     $this->assertTrue($c);
@@ -340,12 +338,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $a = new UserSystem("test");
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."userblobs` (
-        `id` INT(5) NOT NULL AUTO_INCREMENT,
-        `user` VARCHAR(100) NOT NULL,
-        `code` VARCHAR(256) NOT NULL,
+        `id` INT NOT NULL AUTO_INCREMENT,
+        `user` VARCHAR(50) NOT NULL,
+        `code` VARCHAR(512) NOT NULL,
         `ip` VARCHAR(256) NOT NULL,
         `action` VARCHAR(100) NOT NULL,
-        `date` VARCHAR(50) NOT NULL,
+        `date` INT NOT NULL,
         PRIMARY KEY (`id`)
       )
       COLLATE='latin1_swedish_ci'
@@ -354,19 +352,18 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     ");
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."users` (
-        `id` INT(255) NOT NULL AUTO_INCREMENT,
+        `id` INT NOT NULL AUTO_INCREMENT,
         `username` VARCHAR(50) NOT NULL,
         `email` VARCHAR(512) NOT NULL,
-        `oldusername` VARCHAR(50) NOT NULL,
         `password` VARCHAR(100) NOT NULL,
-        `oldpassword` VARCHAR(100) NOT NULL,
+        `oldPassword` VARCHAR(100) NOT NULL,
         `salt` VARCHAR(512) NOT NULL,
-        `oldsalt` VARCHAR(512) NOT NULL,
+        `oldSalt` VARCHAR(512) NOT NULL,
         `activated` INT(1) NOT NULL DEFAULT '0',
-        `2step` INT(1) NOT NULL DEFAULT '0',
-        `last_logged_in` VARCHAR(50) NOT NULL DEFAULT '0000000000',
-        `old_last_logged_in` VARCHAR(50) NOT NULL DEFAULT '0000000000',
-        `ip` VARCHAR(64) NOT NULL DEFAULT '',
+        `twoStep` INT(1) NOT NULL DEFAULT '0',
+        `lastLoggedIn` VARCHAR(50) NOT NULL DEFAULT '0000000000',
+        `oldLastLoggedIn` VARCHAR(50) NOT NULL DEFAULT '0000000000',
+        `ip` VARCHAR(256) NOT NULL DEFAULT '',
         PRIMARY KEY (`id`)
       )
       COLLATE='latin1_swedish_ci'

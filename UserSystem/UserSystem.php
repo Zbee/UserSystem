@@ -91,7 +91,7 @@ class UserSystem extends Database {
 
   /**
    * Inserts a user blob into the database for you
-   * Example: $UserSystem->insertUserBlob("bob", "2step")
+   * Example: $UserSystem->insertUserBlob("bob", "twoStep")
    *
    * @access public
    * @param string $username
@@ -294,10 +294,10 @@ class UserSystem extends Database {
     $user = $this->session($username);
     if (is_array($user)) {
       $password = hash("sha256", $password.$user["salt"]);
-      $oldPassword = hash("sha256", $password.$user["oldsalt"]);
+      $oldPassword = hash("sha256", $password.$user["oldSalt"]);
       if ($password == $user["password"]) {
         if ($user["activated"] == 1) {
-          if ($user["2step"] == 0 || $ignoreTS !== false) {
+          if ($user["twoStep"] == 0 || $ignoreTS !== false) {
             if (ENCRYPTION === true) {
               $ipAddress = encrypt($ipAddress, $username);
             }
@@ -306,8 +306,8 @@ class UserSystem extends Database {
                 "users",
                 [
                   "ip"=>$ipAddress,
-                  "last_logged_in"=>time(),
-                  "old_last_logged_in"=>$user["old_last_logged_in"]
+                  "lastLoggedIn"=>time(),
+                  "oldLastLoggedIn"=>$user["lastLoggedIn"]
                 ],
                 ["username"=>$username]
               ]
@@ -326,14 +326,14 @@ class UserSystem extends Database {
               return true;
             }
           } else {
-            return "2step";
+            return "twoStep";
           }
         } else {
           return "activate";
         }
       } else {
         if ($password == $oldPassword) {
-          return "oldpassword";
+          return "oldPassword";
         } else {
           return "password";
         }
@@ -385,7 +385,7 @@ class UserSystem extends Database {
   }
 
   /**
-   * Finishes logging a user in if they have 2step enabled.
+   * Finishes logging a user in if they have twoStep enabled.
    * Example: $UserSystem->twoStep($blob)
    *
    * @access public
@@ -398,7 +398,7 @@ class UserSystem extends Database {
       FILTER_SANITIZE_FULL_SPECIAL_CHARS
     );
     $return = "";
-    $select = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"2step"]]);
+    $select = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"twoStep"]]);
     if ($select[0] === 1) {
       if ($select[1]["date"] > time() - 3600) {
         if ($select[1]["ip"] == $ipAddress) {
@@ -418,7 +418,7 @@ class UserSystem extends Database {
       $return = "code";
     }
 
-    $this->dbDel(["userblobs", ["code"=>$code, "action"=>"2step"]]);
+    $this->dbDel(["userblobs", ["code"=>$code, "action"=>"twoStep"]]);
     return $return;
   }
 
@@ -444,7 +444,7 @@ class UserSystem extends Database {
         "        Hello ".$select[1]["username"]."
 
         To reset your password click the link below.
-        $link
+        {$link}
 
         ======
 
