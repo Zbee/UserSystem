@@ -70,21 +70,17 @@ class UserSystem extends Database {
   public function createSalt ($username) {
     return hash(
       "sha512",
-      $username.substr(
+      $username.time().substr(
         str_shuffle(
           str_repeat(
             "abcdefghijklmnopqrstuvwxyz
             ABCDEFGHIJKLMNOPQRSTUVWXYZ
             0123456789!@$%^&_+{}[]:<.>?",
-            (
-              rand(15,20)*
-              strlen($username)-
-              preg_match_all('/[aeiou]/i',$username,$matches)
-            )
+            rand(16,32)
           )
         ),
         1,
-        rand(256,1024)
+        rand(1024,2048)
       )
     );
   }
@@ -102,9 +98,9 @@ class UserSystem extends Database {
     $hash = $this->createSalt($username);
     $hash = $hash.md5($username.$hash);
     $ipAddress = filter_var(
-                    $_SERVER["REMOTE_ADDR"],
-                    FILTER_SANITIZE_FULL_SPECIAL_CHARS
-                  );
+      $_SERVER["REMOTE_ADDR"],
+      FILTER_SANITIZE_FULL_SPECIAL_CHARS
+    );
     if (ENCRYPTION === true) {
       $ipAddress = encrypt($ipAddress, $username);
     }
