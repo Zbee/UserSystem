@@ -3,7 +3,3 @@ php:
   - 5.6
   - 5.5
   - 5.4
-before_install:
-  sudo pip install codecov
-after_success:
-  codecov --token=f291081a-10f3-498b-bc30-f9b3f5a367c0
