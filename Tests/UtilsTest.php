@@ -11,7 +11,7 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
   }
 
   public function testCurrentURL() {
-    $a = new UserSystem();
+    $a = new UserSystem("");
     $_SERVER['HTTP_HOST'] = "test";
     $_SERVER['REQUEST_URI'] = "php";
     $b = $a->currentURL();
@@ -19,7 +19,7 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
   }
 
   public function testDefaultRedirect301() {
-    $a = new UserSystem();
+    $a = new UserSystem("");
     $b = $a->redirect301("localhost");
     if ($b) {
       $b = 1;
@@ -31,18 +31,18 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
   }
 
   public function testEncryption() {
-    $a = new UserSystem();
+    $a = new UserSystem("");
     $b = $a->encrypt("cake", "dessert");
     $this->assertNotEquals("cake", $b);
 
-    $a = new UserSystem();
+    $a = new UserSystem("");
     $b = $a->encrypt("cake", "dessert");
     $c = $a->decrypt($b, "dessert");
     $this->assertEquals("cake", $c);
   }
 
   public function testSanitize() {
-    $a = new UserSystem();
+    $a = new UserSystem("");
 
     $t = $a->sanitize("123g", "n");
     $this->assertEquals(123, $t);
