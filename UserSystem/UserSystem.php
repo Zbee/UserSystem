@@ -21,7 +21,7 @@ class UserSystem extends Database {
    */
   public function session ($session = false) {
     if (!$session) {
-      if (!isset($_COOKIE)) { return false; }
+      if (!isset($_COOKIE[SITENAME])) { return false; }
       $session = filter_var(
         $_COOKIE[SITENAME],
         FILTER_SANITIZE_FULL_SPECIAL_CHARS
@@ -165,14 +165,14 @@ class UserSystem extends Database {
 
   /**
    * Verifies a user's session
-   * Example: $UserSystem->verifySession($_COOKIE[$sitename])
+   * Example: $UserSystem->verifySession($_COOKIE[SITENAME])
    *
    * @access public
    * @param mixed $session
    * @return mixed
    */
   public function verifySession ($session = false) {
-    if (!isset($_COOKIE)) { return false; }
+    if (!isset($_COOKIE[SITENAME])) { return false; }
     $COOKIE = filter_var(
       $_COOKIE[SITENAME],
       FILTER_SANITIZE_FULL_SPECIAL_CHARS
@@ -228,21 +228,54 @@ class UserSystem extends Database {
    * @return mixed
    */
    public function addUser ($username, $password, $email, $more = false) {
-     $data = [
-       "username" => $username,
-       "password" => $password,
-       "email" => $email,
-       "salt" => $this->createSalt($username)
-     ];
-     $more = $this->sanitize($more, "b");
+     $usernameUse = $this->dbSel(["users", ["username" => $username]])[0];
+     if ($usernameUse == 0) {
+       $emailUse = $this->dbSel(["users", ["email" => $email]])[0];
+       if ($emailUse == 0) {
+         $salt = $this->createSalt($username);
+         $data = [
+           "username" => $username,
+           "password" => hash("sha256", $password.$salt),
+           "email" => $email,
+           "salt" => $salt,
+           "dateRegistered" => time()
+         ];
 
-     if ($more !== false && is_array($more)) {
-       foreach ($more as $item) {
-         $data[array_search($item, $more)] = $item;
+         $morech = $this->sanitize($more, "b");
+
+         if ($morech !== false && is_array($more)) {
+           foreach ($more as $item) {
+             $data[array_search($item, $more)] = $item;
+           }
+         }
+
+         $this->dbIns(["users", $data]);
+         $blob = $this->insertUserBlob($username, "activate");
+         $link = $this->sanitize(
+           URL_PREFACE."://".DOMAIN."/".ACTIVATE_PG."/?blob={$blob}",
+           "u"
+         );
+         $this->sendMail(
+           $email,
+           "Activate your ".SITENAME." account",
+           "           Hello {$username}
+
+           To activate your account, click the link below.
+           {$link}
+
+           ======
+
+           If this wasn't you, you can ignore this email.
+
+           Thank you"
+         );
+         return true;
+       } else {
+         return "email";
        }
+     } else {
+       return "username";
      }
-
-     $this->dbIns(["users", $data]);
    }
 
   /**

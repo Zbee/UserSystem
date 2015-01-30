@@ -204,7 +204,7 @@ class Utils {
           FILTER_VALIDATE_URL
         )
         ===
-        true
+        $data
       ) {
         return $data;
       }
@@ -214,10 +214,18 @@ class Utils {
   }
 
   public function sendMail ($recipient, $subject, $message) {
-    $recipient = $this->sanitize($recipient, "s");
+    $recipients = "";
+    if (is_array($recipient)) {
+      foreach ($recipient as $r) {
+        $recipients .= $r.", ";
+      }
+    } else {
+      $recipients = $recipient;
+    }
+    $recipient = $this->sanitize($recipients, "s");
     $subject = $this->sanitize($subject, "s");
-    $headers = 'From: noreply@'.DOMAIN_SIMPLE."\r\n" .
-    'Reply-To: support@'.DOMAIN_SIMPLE."\r\n" .
+    $headers = 'From: noreply@'.DOMAIN."\r\n" .
+    'Reply-To: support@'.DOMAIN."\r\n" .
     'X-Mailer: PHP/'.phpversion();
     mail($recipient, $subject, $message, $headers);
   }
