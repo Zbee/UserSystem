@@ -7,8 +7,8 @@ date_default_timezone_set('America/Denver');
 class DatabaseTest extends PHPUnit_Framework_TestCase {
   public function testDB() {
     $a = new UserSystem("");
-    $a->DATABASE->query("CREATE DATABASE test");
-    $a = new UserSystem("test");
+    $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
+    $a = new UserSystem();
     $a->DATABASE->query("
     CREATE TABLE `".DB_PREFACE."test` (
       `id` INT NOT NULL AUTO_INCREMENT,

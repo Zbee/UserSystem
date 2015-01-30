@@ -7,8 +7,8 @@ date_default_timezone_set('America/Denver');
 class UserSystemTest extends PHPUnit_Framework_TestCase {
   public function testSession() {
     $a = new UserSystem("");
-    $a->DATABASE->query("CREATE DATABASE test");
-    $a = new UserSystem("test");
+    $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
+    $a = new UserSystem();
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."users` (
         `id` INT NOT NULL AUTO_INCREMENT,
@@ -52,8 +52,8 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
 
   public function testInsertUserBlob() {
     $a = new UserSystem("");
-    $a->DATABASE->query("CREATE DATABASE test");
-    $a = new UserSystem("test");
+    $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
+    $a = new UserSystem();
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."users` (
         `id` INT NOT NULL AUTO_INCREMENT,
@@ -93,8 +93,8 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
 
   public function testCheckBan() {
     $a = new UserSystem("");
-    $a->DATABASE->query("CREATE DATABASE test");
-    $a = new UserSystem("test");
+    $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
+    $a = new UserSystem();
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."ban` (
       	`id` INT NOT NULL AUTO_INCREMENT,
@@ -272,8 +272,8 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
 
   public function testTwoStep() {
     $a = new UserSystem("");
-    $a->DATABASE->query("CREATE DATABASE test");
-    $a = new UserSystem("test");
+    $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
+    $a = new UserSystem();
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."userblobs` (
         `id` INT NOT NULL AUTO_INCREMENT,
@@ -334,8 +334,8 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
 
   public function testSendRecover() {
     $a = new UserSystem("");
-    $a->DATABASE->query("CREATE DATABASE test");
-    $a = new UserSystem("test");
+    $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
+    $a = new UserSystem();
     $a->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."userblobs` (
         `id` INT NOT NULL AUTO_INCREMENT,
