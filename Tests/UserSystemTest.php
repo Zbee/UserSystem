@@ -5,51 +5,6 @@ require_once("UserSystem/config.php");
 date_default_timezone_set('America/Denver');
 
 class UserSystemTest extends PHPUnit_Framework_TestCase {
-  public function testSession() {
-    $a = new UserSystem("");
-    $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
-    $a = new UserSystem();
-    $a->DATABASE->query("
-      CREATE TABLE `".DB_PREFACE."users` (
-        `id` INT NOT NULL AUTO_INCREMENT,
-        `username` VARCHAR(50) NULL DEFAULT NULL,
-        PRIMARY KEY (`id`)
-      )
-      COLLATE='latin1_swedish_ci'
-      ENGINE=MyISAM
-      AUTO_INCREMENT=0;
-    ");
-    $a->DATABASE->query("
-      INSERT INTO `".DB_PREFACE."users` (username) VALUES ('cake')
-    ");
-    $b = $a->session("cake")['username'];
-    $this->assertEquals("cake", $b);
-
-    $a->DATABASE->query("
-      CREATE TABLE `".DB_PREFACE."userblobs` (
-        `id` INT NOT NULL AUTO_INCREMENT,
-        `user` VARCHAR(50) NOT NULL,
-        `code` VARCHAR(512) NOT NULL,
-        `ip` VARCHAR(256) NOT NULL,
-        `action` VARCHAR(100) NOT NULL,
-        `date` INT NOT NULL,
-        PRIMARY KEY (`id`)
-      )
-      COLLATE='latin1_swedish_ci'
-      ENGINE=MyISAM
-      AUTO_INCREMENT=0;
-    ");
-    $a->DATABASE->query("
-      INSERT INTO `".DB_PREFACE."userblobs`
-      (user, code, ip, action, date) VALUES
-      ('cake', 'pie', '127.0.0.1', 'session', '1414169627')
-    ");
-    $_COOKIE['examplecom'] = "pie";
-    $b = $a->session()["username"];
-    $this->assertEquals("cake", $b);
-    $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
-  }
-
   public function testInsertUserBlob() {
     $a = new UserSystem("");
     $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);

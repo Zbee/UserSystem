@@ -14,7 +14,7 @@ class Utils {
 
   /**
   * Initializes the class and connects to the database.
-  * Example: $UserSystem = new UserSystem ()
+  * Example: $UserSystem = new UserSystem ("")
   *
   * @access public
   * @param string $database
@@ -29,6 +29,79 @@ class Utils {
 
     if (!is_object($this->DATABASE)) {
       throw new Exception ("DB_* constants failed to connect to a database.");
+    }
+  }
+
+  /**
+  * Generates a new salt based off of a username
+  * Example: $UserSystem->createSalt("Bob")
+  *
+  * @access public
+  * @param string $username
+  * @return string
+  */
+  public function createSalt ($username) {
+    return hash(
+      "sha512",
+      $username.time().substr(
+        str_shuffle(
+          str_repeat(
+            "abcdefghijklmnopqrstuvwxyz
+            ABCDEFGHIJKLMNOPQRSTUVWXYZ
+            0123456789!@$%^&_+{}[]:<.>?",
+            rand(16,32)
+          )
+        ),
+        1,
+        rand(1024,2048)
+      )
+    );
+  }
+
+  /**
+  * Returns an array full of the data about a user
+  * Example: $UserSystem->session("bob")
+  *
+  * @access public
+  * @param string $session
+  * @return mixed
+  */
+  public function session ($session = false) {
+    if (!$session) {
+      if (!isset($_COOKIE[SITENAME])) { return false; }
+      $session = filter_var(
+      $_COOKIE[SITENAME],
+      FILTER_SANITIZE_FULL_SPECIAL_CHARS
+    );
+    $time = strtotime('+30 days');
+    $query = $this->dbSel(
+    [
+      "userblobs",
+      [
+        "code" => $session,
+        "date" => ["<", $time],
+        "action" => "session"
+        ]
+        ]
+      );
+      if ($query[0] === 1) {
+        $username = $query[1]['user'];
+        $query = $this->dbSel(["users", ["username" => $username]]);
+        if ($query[0] === 1) {
+          return $query[1];
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      $query = $this->dbSel(["users", ["username" => $session]]);
+      if ($query[0] === 1) {
+        return $query[1];
+      } else {
+        return false;
+      }
     }
   }
 
