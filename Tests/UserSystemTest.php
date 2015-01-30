@@ -47,7 +47,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $_COOKIE['examplecom'] = "pie";
     $b = $a->session()["username"];
     $this->assertEquals("cake", $b);
-    $a->DATABASE->query("DROP DATABASE test");
+    $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
   public function testInsertUserBlob() {
@@ -88,7 +88,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(160, strlen($c[1]["code"]));
     $this->assertEquals("127.0.0.1", $c[1]["ip"]);
     $this->assertEquals("session", $c[1]["action"]);
-    $a->DATABASE->query("DROP DATABASE test");
+    $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
   public function testCheckBan() {
@@ -119,12 +119,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($b);
     $b = $a->checkBan("127.0.0.1", "cake");
     $this->assertTrue($b);
-    $a->DATABASE->query("DROP DATABASE test");
+    $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
   public function testVerifySession() {
       $a = new UserSystem("");
-      $a->DATABASE->query("CREATE DATABASE test");
+      $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
       $a = new UserSystem("test");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."users` (
@@ -168,12 +168,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $_COOKIE['examplecom'] = $a->insertUserBlob("cake");
       $b = $a->verifySession();
       $this->assertTrue($b);
-      $a->DATABASE->query("DROP DATABASE test");
+      $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
   public function testActivateUser() {
       $a = new UserSystem("");
-      $a->DATABASE->query("CREATE DATABASE test");
+      $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
       $a = new UserSystem("test");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."userblobs` (
@@ -207,12 +207,12 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $b = $a->insertUserBlob("cake", "activate");
       $c = $a->activateUser($b);
       $this->assertTrue($c);
-      $a->DATABASE->query("DROP DATABASE test");
+      $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
   public function testLogIn() {
       $a = new UserSystem("");
-      $a->DATABASE->query("CREATE DATABASE test");
+      $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
       $a = new UserSystem("test");
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."userblobs` (
@@ -267,7 +267,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
       $b = $a->logIn("cake", "pie");
       $this->assertTrue($b);
-      $a->DATABASE->query("DROP DATABASE test");
+      $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
   public function testTwoStep() {
@@ -329,7 +329,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $c = $a->twoStep($b);
     $this->assertEquals(0, $a->dbSel(["userblobs", ["code"=>$b]])[0]);
     $this->assertTrue($c);
-    $a->DATABASE->query("DROP DATABASE test");
+    $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
   public function testSendRecover() {
@@ -378,6 +378,6 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
     $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
     $b = $a->sendRecover("example@pie.com");
     $this->assertEquals(1, $a->dbSel(["userblobs", ["action"=>"recover"]])[0]);
-    $a->DATABASE->query("DROP DATABASE test");
+    $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 }

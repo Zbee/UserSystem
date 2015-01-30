@@ -42,6 +42,6 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
 
     $b = $a->numRows("test");
     $this->assertEquals(0, $b);
-    $a->DATABASE->query("DROP DATABASE test");
+    $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 }
