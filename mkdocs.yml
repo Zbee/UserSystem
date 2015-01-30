@@ -3,3 +3,4 @@ pages:
 - ['index.md', 'Home']
 - ['config.md', 'UserSytem', 'Config.php']
 - ['usersystem.md', 'UserSytem', 'UserSystem.php']
+docs_dir: Docs
