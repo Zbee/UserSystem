@@ -12,40 +12,6 @@
 class UserSystem extends Database {
 
   /**
-   * Inserts a user blob into the database for you
-   * Example: $UserSystem->insertUserBlob("bob", "twoStep")
-   *
-   * @access public
-   * @param string $username
-   * @param mixed $action
-   * @return boolean
-   */
-  public function insertUserBlob ($username, $action = "session") {
-    $hash = $this->createSalt($username);
-    $hash = $hash.md5($username.$hash);
-    $ipAddress = filter_var(
-      $_SERVER["REMOTE_ADDR"],
-      FILTER_SANITIZE_FULL_SPECIAL_CHARS
-    );
-    if (ENCRYPTION === true) {
-      $ipAddress = encrypt($ipAddress, $username);
-    }
-    $this->dbIns(
-      [
-        "userblobs",
-        [
-          "user" => $username,
-          "code" => $hash,
-          "action" => $action,
-          "ip" => $ipAddress,
-          "date" => time()
-        ]
-      ]
-    );
-    return $hash;
-  }
-
-  /**
    * Checks if a user is banned
    * Example: $UserSystem->checkBan("127.0.0.1", "bob)
    *

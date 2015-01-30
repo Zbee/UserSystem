@@ -5,47 +5,6 @@ require_once("UserSystem/config.php");
 date_default_timezone_set('America/Denver');
 
 class UserSystemTest extends PHPUnit_Framework_TestCase {
-  public function testInsertUserBlob() {
-    $a = new UserSystem("");
-    $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
-    $a = new UserSystem();
-    $a->DATABASE->query("
-      CREATE TABLE `".DB_PREFACE."users` (
-        `id` INT NOT NULL AUTO_INCREMENT,
-        `username` VARCHAR(50) NULL DEFAULT NULL,
-        PRIMARY KEY (`id`)
-      )
-      COLLATE='latin1_swedish_ci'
-      ENGINE=MyISAM
-      AUTO_INCREMENT=0;
-    ");
-    $a->DATABASE->query("
-      CREATE TABLE `".DB_PREFACE."userblobs` (
-        `id` INT NOT NULL AUTO_INCREMENT,
-        `user` VARCHAR(50) NOT NULL,
-        `code` VARCHAR(512) NOT NULL,
-        `ip` VARCHAR(256) NOT NULL,
-        `action` VARCHAR(100) NOT NULL,
-        `date` INT NOT NULL,
-        PRIMARY KEY (`id`)
-      )
-      COLLATE='latin1_swedish_ci'
-      ENGINE=MyISAM
-      AUTO_INCREMENT=0;
-    ");
-    $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-    $b = $a->insertUserBlob("cake");
-    $c = $a->dbSel(["userblobs", ["user"=>"cake"]]);
-    $this->assertEquals(1, $c[0]);
-    $this->assertEquals(1, $c[1]["id"]);
-    $this->assertEquals("cake", $c[1]["user"]);
-    $this->assertEquals($b, $c[1]["code"]);
-    $this->assertEquals(160, strlen($c[1]["code"]));
-    $this->assertEquals("127.0.0.1", $c[1]["ip"]);
-    $this->assertEquals("session", $c[1]["action"]);
-    $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
-  }
-
   public function testCheckBan() {
     $a = new UserSystem("");
     $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);

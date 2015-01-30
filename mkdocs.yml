@@ -1,5 +1,7 @@
 site_name: UserSystem
 pages:
-- [index.md, Home]
-- [config.md, Config.php]
+- ['index.md', 'Home']
+- ['config.md', 'UserSytem', 'Config.php']
+- ['userystem.md', 'UserSytem', 'UserSystem.php']
 theme: mkdocs
+docs_dir: Docs
