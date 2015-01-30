@@ -1,1 +1,5 @@
-site_name: My Docs
+site_name: UserSystem
+pages:
+- [index.md, Home]
+- [config.md, Config.php]
+theme: mkdocs
