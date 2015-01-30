@@ -125,7 +125,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
   public function testVerifySession() {
       $a = new UserSystem("");
       $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
-      $a = new UserSystem("test");
+      $a = new UserSystem();
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."users` (
           `id` INT NOT NULL AUTO_INCREMENT,
@@ -174,7 +174,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
   public function testActivateUser() {
       $a = new UserSystem("");
       $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
-      $a = new UserSystem("test");
+      $a = new UserSystem();
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."userblobs` (
           `id` INT NOT NULL AUTO_INCREMENT,
@@ -213,7 +213,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
   public function testLogIn() {
       $a = new UserSystem("");
       $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
-      $a = new UserSystem("test");
+      $a = new UserSystem();
       $a->DATABASE->query("
         CREATE TABLE `".DB_PREFACE."userblobs` (
           `id` INT NOT NULL AUTO_INCREMENT,

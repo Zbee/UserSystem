@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Zbee/UserSystem.svg?branch=master)](https://travis-ci.org/Zbee/UserSystem) [![Code Climate](https://codeclimate.com/github/Zbee/UserSystem/badges/gpa.svg)](https://codeclimate.com/github/Zbee/UserSystem) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Zbee/UserSystem/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Zbee/UserSystem/?branch=master)
+[![Build Status](https://img.shields.io/travis/Zbee/UserSystem.svg?style=flat)](https://travis-ci.org/Zbee/UserSystem) [![Code Climate](https://img.shields.io/codeclimate/github/Zbee/UserSystem.svg?style=flat)](https://codeclimate.com/github/Zbee/UserSystem) [![Scrutinizer Code Quality](https://img.shields.io/scrutinizer/g/Zbee/UserSystem.svg?style=flat)](https://scrutinizer-ci.com/g/Zbee/UserSystem/?branch=master)
 
 Runs with PHP 5.4.0+, and makes use of a MySQL database (5.6.20 used in development).
 
