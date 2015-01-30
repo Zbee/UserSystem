@@ -260,11 +260,13 @@ class UserSystem extends Database {
               [
                 "users",
                 [
-                  "ip"=>$ipAddress,
-                  "lastLoggedIn"=>time(),
-                  "oldLastLoggedIn"=>$user["lastLoggedIn"]
+                  "ip" => $ipAddress,
+                  "lastLoggedIn" => time(),
+                  "oldLastLoggedIn" => $user["lastLoggedIn"]
                 ],
-                ["username"=>$username]
+                [
+                  "username" => $username
+                ]
               ]
             );
             $hash = $this->insertUserBlob($username);
