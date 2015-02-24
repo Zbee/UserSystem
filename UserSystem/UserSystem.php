@@ -4,10 +4,26 @@
 *
 * @package    UserSystem
 * @author     Ethan Henderson <ethan@zbee.me>
-* @copyright  2015 Ethan Henderson
-* @license    http://aol.nexua.org  AOL v0.6
+* @copyright  Copyright 2014-2015 Ethan Henderson
+* @license    http://www.gnu.org/copyleft/gpl.html GNU General Public License
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.1
+*/
+/*
+  This file is part of Zbee/UserSystem.
+
+  Zbee/UserSystem is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  Zbee/UserSystem is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
 class UserSystem extends Database {
 
@@ -180,20 +196,17 @@ class UserSystem extends Database {
    */
   public function activateUser ($code) {
     $rows = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"activate"]]);
-    $rows = $rows[0];
-    if ($rows >= 1) {
+    if ($rows[0] == 1) {
       $user = $rows[1]["user"];
-      $this->dbUpd(["users", ["activated"=>1], ["username"=>$user]]);
+      $update = $this->dbUpd(["users", ["activated"=>1], ["username"=>$user]]);
       $noActiv = $this->dbSel(["users", ["username"=>$user,"activated"=>0]])[0];
       $this->dbDel(["userblobs", ["code"=>$code, "action"=>"activate"]]);
       $blob=$this->dbSel(["userblobs",["code"=>$code,"action"=>"activate"]])[0];
-      if ($noActiv === 0 && $blob === 0) {
-        return true;
-      } else {
-        return false;
-      }
+      if ($noActiv !== 0) return "NotActivated";
+      if ($blob !== 0) return "BlobNotRemoved";
+      return true;
     } else {
-      return false;
+      return "InvalidBlob";
     }
   }
 

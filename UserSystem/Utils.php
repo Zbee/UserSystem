@@ -4,10 +4,26 @@
 *
 * @package    UserSystem
 * @author     Ethan Henderson <ethan@zbee.me>
-* @copyright  2015 Ethan Henderson
-* @license    http://aol.nexua.org  AOL v0.6
+* @copyright  Copyright 2014-2015 Ethan Henderson
+* @license    http://www.gnu.org/copyleft/gpl.html GNU General Public License
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.48
+*/
+/*
+  This file is part of Zbee/UserSystem.
+
+  Zbee/UserSystem is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  Zbee/UserSystem is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
 class Utils {
   var $DATABASE = '';
@@ -30,6 +46,71 @@ class Utils {
     if (!is_object($this->DATABASE)) {
       throw new Exception ("DB_* constants failed to connect to a database.");
     }
+  }
+
+  /**
+  * Encrypts any data and makes it only decryptable by the same user.
+  * Example: $UserSystem->encrypt("myEmail", "bob")
+  *
+  * @access public
+  * @param string $decrypted
+  * @param string $username
+  * @return string
+  */
+  public function encrypt ($decrypted, $username) {
+    $key = hash('SHA256', $username, true);
+    srand();
+    $initVector = mcrypt_create_iv(
+      mcrypt_get_iv_size(
+        MCRYPT_RIJNDAEL_128,
+        MCRYPT_MODE_CBC
+      ),
+      MCRYPT_RAND
+    );
+    if (strlen($iv_base64 = rtrim(base64_encode($initVector), '=')) != 22) {
+      return false;
+    }
+    $encrypted = base64_encode(
+      mcrypt_encrypt(
+        MCRYPT_RIJNDAEL_128,
+        $key,
+        $decrypted . md5($decrypted),
+        MCRYPT_MODE_CBC,
+        $initVector
+      )
+    );
+    return $iv_base64 . $encrypted;
+  }
+
+  /**
+  * Decrypts any data that belongs to a set user
+  * Example: $UserSystem->decrypt("4lj84mui4htwyi58g7gh5y8hvn8t", "bob")
+  *
+  * @access public
+  * @param string $encrypted
+  * @param string $username
+  * @return string
+  */
+  public function decrypt ($encrypted, $username) {
+    $key = hash('SHA256', $username, true);
+    $initVector  = base64_decode(substr($encrypted, 0, 22) . '==');
+    $encrypted = substr($encrypted, 22);
+    $decrypted = rtrim(
+      mcrypt_decrypt(
+        MCRYPT_RIJNDAEL_128,
+        $key,
+        base64_decode($encrypted),
+        MCRYPT_MODE_CBC,
+        $initVector
+      ),
+      "\0\4"
+    );
+    $hash = substr($decrypted, -32);
+    $decrypted = substr($decrypted, 0, -32);
+    if (md5($decrypted) != $hash) {
+      return false;
+    }
+    return $decrypted;
   }
 
   /**
@@ -70,18 +151,18 @@ class Utils {
     if (!$session) {
       if (!isset($_COOKIE[SITENAME])) { return false; }
       $session = filter_var(
-      $_COOKIE[SITENAME],
-      FILTER_SANITIZE_FULL_SPECIAL_CHARS
-    );
-    $time = strtotime('+30 days');
-    $query = $this->dbSel(
-    [
-      "userblobs",
-      [
-        "code" => $session,
-        "date" => ["<", $time],
-        "action" => "session"
-        ]
+        $_COOKIE[SITENAME],
+        FILTER_SANITIZE_FULL_SPECIAL_CHARS
+      );
+      $time = strtotime('+30 days');
+      $query = $this->dbSel(
+        [
+          "userblobs",
+          [
+            "code" => $session,
+            "date" => ["<", $time],
+            "action" => "session"
+          ]
         ]
       );
       if ($query[0] === 1) {
@@ -177,71 +258,6 @@ class Utils {
     } else {
       return false;
     }
-  }
-
-  /**
-  * Encrypts any data and makes it only decryptable by the same user.
-  * Example: $UserSystem->encrypt("myEmail", "bob")
-  *
-  * @access public
-  * @param string $decrypted
-  * @param string $username
-  * @return string
-  */
-  public function encrypt ($decrypted, $username) {
-    $key = hash('SHA256', $username, true);
-    srand();
-    $initVector = mcrypt_create_iv(
-      mcrypt_get_iv_size(
-        MCRYPT_RIJNDAEL_128,
-        MCRYPT_MODE_CBC
-      ),
-      MCRYPT_RAND
-    );
-    if (strlen($iv_base64 = rtrim(base64_encode($initVector), '=')) != 22) {
-      return false;
-    }
-    $encrypted = base64_encode(
-      mcrypt_encrypt(
-        MCRYPT_RIJNDAEL_128,
-        $key,
-        $decrypted . md5($decrypted),
-        MCRYPT_MODE_CBC,
-        $initVector
-      )
-    );
-    return $iv_base64 . $encrypted;
-  }
-
-  /**
-  * Decrypts any data that belongs to a set user
-  * Example: $UserSystem->decrypt("4lj84mui4htwyi58g7gh5y8hvn8t", "bob")
-  *
-  * @access public
-  * @param string $encrypted
-  * @param string $username
-  * @return string
-  */
-  public function decrypt ($encrypted, $username) {
-    $key = hash('SHA256', $username, true);
-    $initVector  = base64_decode(substr($encrypted, 0, 22) . '==');
-    $encrypted = substr($encrypted, 22);
-    $decrypted = rtrim(
-      mcrypt_decrypt(
-        MCRYPT_RIJNDAEL_128,
-        $key,
-        base64_decode($encrypted),
-        MCRYPT_MODE_CBC,
-        $initVector
-      ),
-      "\0\4"
-    );
-    $hash = substr($decrypted, -32);
-    $decrypted = substr($decrypted, 0, -32);
-    if (md5($decrypted) != $hash) {
-      return false;
-    }
-    return $decrypted;
   }
 
   /**

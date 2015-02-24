@@ -4,9 +4,9 @@ Runs with PHP 5.4.0+, and makes use of a MySQL database (5.6.20 used in developm
 
 ##Installation & Use
 
-After downloading the [archive file](https://github.com/Zbee/UserSystem/archive/master.zip) you can add the `/UserSystem/ ` and `/Example/` directories to your own site and the example site will work as soon as you update the information in `/UserSystem/config.php`.
+After downloading the [archive file](https://github.com/Zbee/UserSystem/archive/master.zip) you can add the `/UserSystem/ ` and `/Example/` directories to your own site and the example site will work as soon as you update the information in `/UserSystem/config.php` and run `/UserSystem/setup.php`.
 
-For more detailed information please see the [documentation](https://zbee.github.io/UserSystem/documentation).
+For more detailed information please see the [documentation](http://usersystem.rtfd.org).
 
 ##Features
 
@@ -21,8 +21,6 @@ For more detailed information please see the [documentation](https://zbee.github
 * Multi-standard compliancy
 
 ##Features to come
-
-* Authy integration
 
 * reCAPTCHA integration
 
@@ -65,6 +63,8 @@ For more detailed information please see the [documentation](https://zbee.github
 * Stores valuable data that can be used in many other systems and is vital for many circumstances. Data such as IPs, one previous password, one previous email, the first email, the first username, when they last logged on, when they last changed their password, when they last changed their email, and more!
 
 ##License
-Author: Ethan Henderson [ethan@zbee.me](mailto:ethan@zbee.me) [twitter.com/zbee_](https://twitter.com/zbee_)
 
-Licensed under AOL [http://aol.nexua.org](http://aol.nexua.org)
+Copyright 2014-2015 Ethan Henderson.
+
+[![GPLv3](https://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/copyleft/gpl.html)
+See the [`COPYING`](https://github.com/Zbee/UserSystem/blob/master/COPYING) file for the text of this license.

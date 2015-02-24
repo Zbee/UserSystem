@@ -4,10 +4,26 @@
 *
 * @package    UserSystem
 * @author     Ethan Henderson <ethan@zbee.me>
-* @copyright  2015 Ethan Henderson
-* @license    http://aol.nexua.org  AOL v0.1
+* @copyright  Copyright 2014-2015 Ethan Henderson
+* @license    http://www.gnu.org/copyleft/gpl.html GNU General Public License
 * @link       https://github.com/zbee/usersystem
 * @since      Class available since Release 0.59
+*/
+/*
+  This file is part of Zbee/UserSystem.
+
+  Zbee/UserSystem is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  Zbee/UserSystem is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
 class Database extends Utils {
   /**
@@ -19,7 +35,7 @@ class Database extends Utils {
   * @return string
   */
   function quoteIdent ($field) {
-    return "`".str_replace("`","``",$field)."`";
+    return "`".str_replace("`", "``", $field)."`";
   }
 
   /**
@@ -31,12 +47,11 @@ class Database extends Utils {
   * @return boolean
   */
   public function dbIns ($data) {
+    $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
     $dataArr = [];
-    foreach ($data[1] as $item) {
-      $col = array_search($item, $data[1]);
+    foreach ($data[1] as $col => $item) {
       array_push($dataArr, [$col, $item]);
     }
-    $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
     $cols = "";
     $entries = "";
     $enArr = [];
@@ -50,8 +65,8 @@ class Database extends Utils {
     $stmt = $this->DATABASE->prepare("
       INSERT INTO $data[0] ($cols) VALUES ($entries)
     ");
-    $stmt->execute($enArr);
-    return true;
+    $stmt = $stmt->execute($enArr);
+    return $stmt;
   }
 
 
@@ -64,12 +79,11 @@ class Database extends Utils {
   * @return boolean
   */
   public function dbUpd ($data) {
+    $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
     $dataArr = [];
-    foreach ($data[1] as $item) {
-      $col = array_search($item, $data[1]);
+    foreach ($data[1] as $col => $item) {
       array_push($dataArr, [$col, $item]);
     }
-    $data[0] = "`".DB_PREFACE.$data[0]."`";
     $update = "";
     $qArr = [];
     foreach ($dataArr as $item) {
@@ -77,19 +91,18 @@ class Database extends Utils {
       array_push($qArr, $item[1]);
     }
     $equalsArr = [];
-    foreach ($data[2] as $item) {
-      $col = array_search($item, $data[2]);
+    foreach ($data[2] as $col => $item) {
       array_push(
         $equalsArr,
         [
           $this->sanitize($col, "q"),
           $this->sanitize($item, "q")
-          ]
+        ]
       );
     }
     $equals = "";
     foreach ($equalsArr as $item) {
-      $equals .= $item[0]."=? AND ";
+      $equals .= $this->quoteIdent($item[0])."=? AND ";
       array_push($qArr, $item[1]);
     }
     $equals = substr($equals, 0, -5);
@@ -97,8 +110,8 @@ class Database extends Utils {
     $stmt = $this->DATABASE->prepare("
       UPDATE $data[0] SET $update WHERE $equals
     ");
-    $stmt->execute($qArr);
-    return true;
+    $stmt = $stmt->execute($qArr);
+    return $stmt;
   }
 
 
@@ -111,9 +124,9 @@ class Database extends Utils {
   * @return boolean
   */
   public function dbDel ($data) {
+    $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
     $dataArr = [];
-    foreach ($data[1] as $item) {
-      $col = array_search($item, $data[1]);
+    foreach ($data[1] as $col => $item) {
       array_push($dataArr, [$col, $item]);
     }
     $equals = "";
@@ -124,10 +137,10 @@ class Database extends Utils {
     }
     $equals = substr($equals, 0, -5);
     $stmt = $this->DATABASE->prepare("
-      DELETE FROM ".$this->quoteIdent(DB_PREFACE.$data[0])." WHERE $equals
+      DELETE FROM ".$data[0]." WHERE $equals
     ");
-    $stmt->execute($eqArr);
-    return true;
+    $stmt = $stmt->execute($eqArr);
+    return $stmt;
   }
 
   /**
@@ -140,9 +153,9 @@ class Database extends Utils {
   * @return array
   */
   public function dbSel ($data) {
+    $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
     $dataArr = [];
-    foreach ($data[1] as $item) {
-      $col = array_search($item, $data[1]);
+    foreach ($data[1] as $col => $item) {
       array_push(
         $dataArr,
         [
@@ -164,7 +177,7 @@ class Database extends Utils {
     }
     $equals = substr($equals, 5);
     $stmt = $this->DATABASE->prepare("
-      select * from ".$this->quoteIdent(DB_PREFACE.$data[0])." where $equals
+      select * from ".$data[0]." where $equals
     ");
     $stmt->execute($qmark);
     $arr = [(is_object($stmt) ? $stmt->rowCount() : 0)];
@@ -174,31 +187,5 @@ class Database extends Utils {
       }
     }
     return $arr;
-  }
-
-  /**
-  * Returns the number of rows for a given search.
-  * Example: $UserSystem->numberOfRows("users", "username", $enteredUsername)
-  * Should follow pattern of dbMod() so as to support more $thing/$answer
-  * combos.
-  *
-  * @access public
-  * @param string $table
-  * @param mixed $thing
-  * @param mixed $answer
-  * @return integer
-  */
-  public function numRows ($table, $thing = false, $answer = false) {
-    $table = "`".DB_PREFACE.$this->quoteIdent($table)."`";
-    if (!$thing && !$answer) {
-      $stmt = $this->DATABASE->query("SELECT * FROM $table");
-    } else {
-      $thing = $this->sanitize($thing, "q");
-      $answer = $this->sanitize($answer, "q");
-      $stmt = $this->DATABASE->prepare("SELECT * FROM $table WHERE $thing=?");
-      $stmt->exectue([$answer]);
-    }
-    $rows =  (is_object($stmt)) ? $stmt->rowCount(): 0;
-    return $rows;
   }
 }
