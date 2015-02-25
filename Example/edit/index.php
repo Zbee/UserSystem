@@ -16,22 +16,52 @@ You should have received a copy of the GNU General Public License
 along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
 require_once("../../UserSystem/config.php");
+
 $verify = $UserSystem->verifySession();
-if ($verify !== false) {
-  $UserSystem->redirect301("../");
-}
+if ($verify !== true) $UserSystem->redirect301("../");
+$session = $UserSystem->session();
 
 $error = "";
-if (isset($_POST["u"])) {
-  $register = $UserSystem->addUser($_POST["u"], $_POST["p"], $_POST["e"]);
 
-  if ($register === true) {
-    $error = "<div class='alert alert-success'>Successfully registered. Check
-      your email.</div>";
-  } elseif ($register === "username") {
-    $error = "<div class='alert alert-danger'>Email in use.</div>";
-  } elseif ($register === "email") {
-    $error = "<div class='alert alert-danger'>Username taken.</div>";
+if (isset($_POST["c"])) {
+  $_POST["c"] = hash("sha256", $_POST["c"].$session["salt"]);
+  if ($_POST["c"] === $session["password"]) {
+    if ($_POST["p"] === $_POST["cp"]) {
+      $salt = $UserSystem->createSalt($session["username"]);
+      $pass = hash("sha256", $_POST["p"].$salt);
+      $UserSystem->dbUpd(
+        [
+          "users",
+          [
+            "salt" => $salt,
+            "password" => $pass,
+            "oldPassword" => $session["password"],
+            "oldSalt" => $session["salt"],
+            "passwordChanged" => time()
+          ],
+          [
+            "username" => $session["username"]
+          ]
+        ]
+      );
+      $error = '
+        <div class="alert alert-success">
+          Password has been updated.
+        </div>
+      ';
+    } else {
+      $error = '
+        <div class="alert alert-error">
+          Passwords did not match.
+        </div>
+      ';
+    }
+  } else {
+    $error = '
+      <div class="alert alert-error">
+        Current password is incorrect.
+      </div>
+    ';
   }
 }
 ?>
@@ -50,7 +80,7 @@ if (isset($_POST["u"])) {
 
   <!-- Bootstrap core CSS -->
   <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"
-  rel="stylesheet">
+    rel="stylesheet">
   <style>body { margin-top: 75px; }</style>
 
   <!--[if lt IE 9]>
@@ -60,13 +90,12 @@ if (isset($_POST["u"])) {
 </head>
 
 <body>
-
   <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed"
-        data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-        aria-controls="navbar">
+            data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+            aria-controls="navbar">
           <span class="sr-only">Toggle navigation</span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
@@ -80,38 +109,52 @@ if (isset($_POST["u"])) {
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a href="../login">Login</a></li>
-          <li class="active"><a href="../register">Register</a></li>
+          <li><a href="../register">Register</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
   <div class="container">
-    <div class="col-md-4 col-md-offset-4 text-center">
+    <div class="col-md-4 col-md-offset-4">
       <?=$error?>
-      <div class="well">
-        <form class="form form-horizontal" method="post" action="">
+      <div class="well text-center">
+        <b>Update password</b>
+        <br>
+        <?=$session["passwordChanged"] == 0 ? "Never changed" : 
+        "Last changed " . date("Y-m-d\THi", $session["passwordChanged"])?>
+        <br><br>
+        <form class="form form-horizontal text-left" method="post" action="">
           <div class="form-group">
-            <label for="u" class="col-sm-4 control-label">Username</label>
-            <div class="col-sm-8">
-              <input type="text" class="form-control" id="u" name="u">
+            <label for="c" class="col-xs-12 col-sm-4 control-label">
+              Current
+            </label>
+            <div class="col-xs-12 col-sm-8">
+              <input type="password" class="form-control" id="c" name="c">
             </div>
           </div>
+          <br>
           <div class="form-group">
-            <label for="e" class="col-sm-4 control-label">Email</label>
-            <div class="col-sm-8">
-              <input type="email" class="form-control" id="e" name="e">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="p" class="col-sm-4 control-label">Password</label>
-            <div class="col-sm-8">
+            <label for="p" class="col-xs-12 col-sm-4 control-label">
+              New
+            </label>
+            <div class="col-xs-12 col-sm-8">
               <input type="password" class="form-control" id="p" name="p">
             </div>
           </div>
           <div class="form-group">
-            <div class="col-sm-offset-4 col-sm-8">
-              <button type="submit" class="btn btn-default">Register</button>
+            <label for="cp" class="col-xs-12 col-sm-4 control-label">
+              Confirm
+            </label>
+            <div class="col-xs-12 col-sm-8">
+              <input type="password" class="form-control" id="cp" name="cp">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-xs-12 text-center">
+              <button type="submit" class="btn btn-default">
+                Update Password
+              </button>
             </div>
           </div>
         </form>

@@ -22,7 +22,8 @@ if ($verify === false) {
   ."<br><br><a href='login' class='btn btn-block btn-default'>Login</a>";
 } else {
   $session = $UserSystem->session();
-  $body = "You are currently logged in as ".$session["username"];
+  $body = "You are currently logged in as ".$session["username"].".".
+  "<a href='edit' class='btn btn-block btn-default'>Edit</a>";
 }
 ?>
 
@@ -72,7 +73,7 @@ if ($verify === false) {
           <li><a href="login">Login</a></li>
           <li><a href="register">Register</a></li>
         </ul>
-      </div><!--/.nav-collapse -->
+      </div>
     </div>
   </nav>
 
@@ -91,12 +92,10 @@ if ($verify === false) {
       </div>
 
       <div class="well">
-        <br>
         <?=$body?>
       </div>
     </div>
-
-  </div><!-- /.container -->
+  </div>
 
   <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js">
