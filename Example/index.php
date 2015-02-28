@@ -34,8 +34,8 @@ if ($verify === false) {
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="">
-  <meta name="author" content="">
+  <meta name="description" content="Example website running UserSystem">
+  <meta name="author" content="Zbee (Ethan Henderson)">
 
   <title>Zbee/UserSystem</title>
 
@@ -81,14 +81,14 @@ if ($verify === false) {
 
     <div class="col-md-4 col-md-offset-4 text-center">
       <div class="alert alert-info">
-        If you haven't yet, you need to run the setup file.
+        You need to edit the config file in
+        <code>/UserSystem/config.php</code>
+        <hr>
+        If you haven't yet, you also need to run the setup file.
         <br>
         <a href="../UserSystem/setup.php" class="btn btn-block btn-info">
           Setup
         </a>
-        <hr>
-        You also need to edit the config file in
-        <code>/UserSystem/config.php</code>
       </div>
 
       <div class="well">

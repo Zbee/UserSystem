@@ -23,7 +23,7 @@ $session = $UserSystem->session();
 
 $error = "";
 
-if (isset($_POST["c"])) {
+if (isset($_POST["p"])) {
   $_POST["c"] = hash("sha256", $_POST["c"].$session["salt"]);
   if ($_POST["c"] === $session["password"]) {
     if ($_POST["p"] === $_POST["cp"]) {
@@ -44,6 +44,7 @@ if (isset($_POST["c"])) {
           ]
         ]
       );
+      $session["passwordChanged"] = time();
       $error = '
         <div class="alert alert-success">
           Password has been updated.
@@ -56,6 +57,39 @@ if (isset($_POST["c"])) {
         </div>
       ';
     }
+  } else {
+    $error = '
+      <div class="alert alert-error">
+        Current password is incorrect.
+      </div>
+    ';
+  }
+}
+
+if (isset($_POST["e"])) {
+  $_POST["c"] = hash("sha256", $_POST["c"].$session["salt"]);
+  if ($_POST["c"] === $session["password"]) {
+    $e = $UserSystem->sanitize($_POST["e"]);
+    $UserSystem->dbUpd(
+      [
+        "users",
+        [
+          "email" => $e,
+          "oldEmail" => $session["email"],
+          "emailChanged" => time()
+        ],
+        [
+          "username" => $session["username"]
+        ]
+      ]
+    );
+    $session["email"] = $e;
+    $session["emailChanged"] = time();
+    $error = '
+      <div class="alert alert-success">
+        Password has been updated.
+      </div>
+    ';
   } else {
     $error = '
       <div class="alert alert-error">
@@ -154,6 +188,41 @@ if (isset($_POST["c"])) {
             <div class="col-xs-12 text-center">
               <button type="submit" class="btn btn-default">
                 Update Password
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <br>
+      <div class="well text-center">
+        <b>Update email</b>
+        <br>
+        <?=($session["emailChanged"] == 0 ? "Never changed" : 
+        "Last changed " . date("Y-m-d\THi", $session["emailChanged"]))
+        . "<Br>Is currently " . $session["email"]?>
+        <br><br>
+        <form class="form form-horizontal text-left" method="post" action="">
+          <div class="form-group">
+            <label for="c" class="col-xs-12 col-sm-4 control-label">
+              Password
+            </label>
+            <div class="col-xs-12 col-sm-8">
+              <input type="password" class="form-control" id="c" name="c">
+            </div>
+          </div>
+          <br>
+          <div class="form-group">
+            <label for="e" class="col-xs-12 col-sm-4 control-label">
+              New Email
+            </label>
+            <div class="col-xs-12 col-sm-8">
+              <input type="text" class="form-control" id="e" name="e">
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-xs-12 text-center">
+              <button type="submit" class="btn btn-default">
+                Update Email
               </button>
             </div>
           </div>
