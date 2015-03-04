@@ -70,8 +70,12 @@ if ($verify === false) {
           <li class="active"><a href="../Example">Home</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
+          <?php if (isset($session) && is_array($session)): ?>
+          <li><a href="logout">Logout</a></li>
+          <?php else: ?>
           <li><a href="login">Login</a></li>
           <li><a href="register">Register</a></li>
+          <?php endif; ?>
         </ul>
       </div>
     </div>
