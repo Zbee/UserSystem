@@ -227,6 +227,39 @@ if (isset($_POST["e"])) {
           </div>
         </form>
       </div>
+      <br>
+      <div class="well text-center">
+        <b>Sessions</b>
+        <br>
+        <?php
+        $rows = $UserSystem->dbSel(
+          ["userblobs", ["user" => $session["username"], "action" => "session"]]
+        );
+        echo "You have $rows[0] active sessions."
+          . '<br><br><a href="../logout?all" class="btn btn-block btn-default">'
+          . "Log out all sessions</a><br><br>";
+        if ($rows[0] > 0) {
+          echo '<table class="table table-responsive table-striped 
+            tabled-bordered">';
+          foreach ($rows as $key => $row) {
+            if ($key === 0) continue;
+            $row["date"] = date("Y-m-d\THi", $row["date"]);
+            echo "
+              <tr>
+                <td>$row[date]</td>
+                <td>$row[ip]</td>
+                <td>
+                  <a href='../logout?specific=$row[code]'>
+                    <i class='glyphicon glyphicon-remove'></i>
+                  </a>
+                </td>
+              </tr>
+            ";
+          }
+          echo "</table>";
+        }
+        ?>
+      </div>
     </div>
   </div>
 

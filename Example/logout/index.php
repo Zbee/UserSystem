@@ -21,7 +21,9 @@ $verify = $UserSystem->verifySession();
 $session = $UserSystem->session();
 if ($verify === true && is_array($session)) {
   if (isset($_GET["specific"])) {
-    $logout = $UserSystem->logOut($_GET["specific"], $session["id"], false);
+    $logout = $UserSystem->logOut(
+      $_GET["specific"], $session["username"], false
+    );
     $UserSystem->redirect301("../");
   } elseif (isset($_GET["all"])) {
     $logout = $UserSystem->logOut(
@@ -33,7 +35,9 @@ if ($verify === true && is_array($session)) {
     if ($logout === true)
     $UserSystem->redirect301("/");
   } else {
-    $logout = $UserSystem->logOut($_COOKIE[SITENAME], $session["id"], true);
+    $logout = $UserSystem->logOut(
+      $_COOKIE[SITENAME], $session["username"], true
+    );
     $UserSystem->redirect301("../");
   }
 } else {

@@ -301,16 +301,16 @@ class UserSystem extends Database {
         [
           "userblobs",
           [
-            "code"=>$code,
-            "user"=>$user,
-            "action"=>"session"
+            "code" => $code,
+            "user" => $user,
+            "action" => "session"
           ]
         ]
       );
     } else {
       $this->dbDel(["userblobs", ["user"=>$user]]);
     }
-    if ($cursess) {
+    if ($cursess === true) {
       setcookie(
         SITENAME,
         null,
