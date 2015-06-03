@@ -22,10 +22,10 @@ date_default_timezone_set('America/Denver');
 
 class DatabaseTest extends PHPUnit_Framework_TestCase {
   public function testDB() {
-    $a = new UserSystem("");
-    $a->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
-    $a = new UserSystem();
-    $a->DATABASE->query("
+    $user = new UserSystem("");
+    $user->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
+    $user = new UserSystem();
+    $user->DATABASE->query("
     CREATE TABLE `".DB_PREFACE."test` (
       `id` INT NOT NULL AUTO_INCREMENT,
       `test` VARCHAR(50) NULL DEFAULT NULL,
@@ -35,27 +35,27 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
     ENGINE=MyISAM
     AUTO_INCREMENT=0;
     ");
-    $a->DATABASE->query("
+    $user->DATABASE->query("
       INSERT INTO `".DB_PREFACE."test` (test) VALUES ('cake')
     ");
-    $b = $a->dbSel(["test", ["id"=>1]]);
-    $this->assertEquals(1, $b[0]);
-    $this->assertEquals(1, $b[1]['id']);
-    $this->assertEquals("cake", $b[1]['test']);
+    $test = $user->dbSel(["test", ["id"=>1]]);
+    $this->assertEquals(1, $test[0]);
+    $this->assertEquals(1, $test[1]['id']);
+    $this->assertEquals("cake", $test[1]['test']);
 
-    $a->dbUpd(["test", ["test"=>"pie"], ["test"=>"cake"]]);
-    $b = $a->dbSel(["test", ["id"=>1]]);
-    $this->assertEquals(1, $b[0]);
-    $this->assertEquals(1, $b[1]['id']);
-    $this->assertEquals("pie", $b[1]['test']);
+    $user->dbUpd(["test", ["test"=>"pie"], ["test"=>"cake"]]);
+    $test = $user->dbSel(["test", ["id"=>1]]);
+    $this->assertEquals(1, $test[0]);
+    $this->assertEquals(1, $test[1]['id']);
+    $this->assertEquals("pie", $test[1]['test']);
 
-    $a->dbDel(["test", ["id"=>1]]);
-    $b = $a->dbSel(["test1", ["id"=>1]]);
-    $this->assertEquals(0, $b[0]);
+    $user->dbDel(["test", ["id"=>1]]);
+    $test = $user->dbSel(["test1", ["id"=>1]]);
+    $this->assertEquals(0, $test[0]);
 
-    $b = $a->dbSel(["test", ["id"=>1]]);
-    $this->assertEquals(0, $b[0]);
+    $test = $user->dbSel(["test", ["id"=>1]]);
+    $this->assertEquals(0, $test[0]);
 
-    $a->DATABASE->query("DROP DATABASE ".DB_DATABASE);
+    $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 }
