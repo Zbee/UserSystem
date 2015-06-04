@@ -19,5 +19,5 @@ dependencies:
 test:
   post:
     - cd UserSystem
-    - vendor/bin/codacycoverage clover UserSystem/build/logs/clover.xml
+    - vendor/bin/codacycoverage clover
     - vendor/bin/test-reporter
