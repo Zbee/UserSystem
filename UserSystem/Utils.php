@@ -199,17 +199,17 @@ class Utils {
       .($str = substr(
         str_shuffle(
           str_repeat(
-            "abcdefghijklmnopqrstuvwxyz
-            ABCDEFGHIJKLMNOPQRSTUVWXYZ
-            0123456789!@$%^&_+{}[]:<.>?",
-            mt_rand(16+strlen($username),32+strlen($username))
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            . "`~0123456789!@$%^&*()-_+={}[]\\|:;'\"<,>."
+            . bin2hex(openssl_random_pseudo_bytes(64)),
+            mt_rand(32+strlen($username), 64+strlen(SITENAME.$username))
           )
         ),
         1,
-        mt_rand(1024,2048)
+        mt_rand(2048, 8192)
       ))
       .($strt = bin2hex(openssl_random_pseudo_bytes(strlen($str)/8)))
-      .$this->sanitize($this->getIP(), "n")*strlen($strt)*mt_rand(2,512)
+      .$this->sanitize($this->getIP(), "n")*strlen($strt)*mt_rand(4, 128)
     );
   }
 
@@ -240,10 +240,8 @@ class Utils {
   * @return mixed
   */
   public function sanitize ($data, $type = "s") {
-    $data = trim($data);
-
     if ($type == "n") {
-      $data = filter_var($data, FILTER_SANITIZE_NUMBER_FLOAT);
+      $data = filter_var(trim($data), FILTER_SANITIZE_NUMBER_FLOAT);
       $data = preg_replace("/[^0-9]/", "", $data);
       return intval($data);
     } elseif ($type == "s") {
@@ -251,25 +249,20 @@ class Utils {
       $data = filter_var($data, FILTER_SANITIZE_STRING);
       return filter_var($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     } elseif ($type == "d") {
-      $data = preg_replace("/[^0-9\-\s\+a-zA-Z]/", "", $data);
-      if (is_numeric($data) !== true) {
-        $data = strtotime($data);
-      }
+      $data = preg_replace("/[^0-9\-\s\+a-zA-Z]/", "", trim($data));
+      if (is_numeric($data) !== true) $data = strtotime($data);
       $month = date("n", $data);
       $day = date("j", $data);
       $year = date("Y", $data);
 
-      if (checkdate($month, $day, $year) === true) {
-        return $data;
-      }
+      if (checkdate($month, $day, $year) === true) return $data;
     } elseif ($type == "h") {
-      return $this->handleUTF8($data);
+      return $this->handleUTF8(trim($data));
     } elseif ($type == "q") {
       $data = htmlentities($this->handleUTF8($data));
       return $data;
     } elseif ($type == "b") {
-      $data = (filter_var($data, FILTER_VALIDATE_BOOLEAN)) ? $data : "fail";
-      return $data;
+      if ($data === true || $data === false) return $data;
     } elseif ($type == "u") {
       if (
         filter_var(
@@ -281,20 +274,16 @@ class Utils {
         )
         ===
         $data
-      ) {
-        return $data;
-      }
+      ) return $data;
     }
 
-    return "FAILED SANITIZATION";
+    return "FAILED";
   }
 
   public function sendMail ($recipient, $subject, $message) {
     $recipients = "";
     if (is_array($recipient)) {
-      foreach ($recipient as $r) {
-        $recipients .= $r.", ";
-      }
+      foreach ($recipient as $r) $recipients .= $r . ", ";
     } else {
       $recipients = $recipient;
     }

@@ -85,7 +85,7 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
     $user->DATABASE->query("
       INSERT INTO `".DB_PREFACE."ban`
       (username, issuer, ip, date, reason, appealed) VALUES
-      ('cake', 'pie', ".$user->getIP()."', '".(time() - 86400)."', 'Because', 0)
+      ('cake', 'pie', '".$user->getIP()."', '".(time() - 86400)."', 'Cuz', 0)
     ");
     $test = $user->checkBan("cake");
     $this->assertTrue($test);
