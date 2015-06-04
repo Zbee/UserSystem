@@ -9,8 +9,14 @@ machine:
   php:
     version: 5.6.2
 
+dependencies:
+  override:
+    - pecl install xdebug
+    - cat ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini | sed -e "s/;//" > xdebug.ini
+    - mv xdebug.ini ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini
+
 test:
   post:
     - cd UserSystem
-    - vendor/bin/codacycoverage clover
+    - vendor/bin/codacycoverage clover UserSystem/build/logs/clover.xml
     - vendor/bin/test-reporter
