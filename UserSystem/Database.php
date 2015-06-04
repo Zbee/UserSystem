@@ -141,7 +141,7 @@ class Database extends Utils {
   */
   public function dbSel ($data) {
     $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
-    $dataArr = $qMark = [];
+    $dataArr = $qmark = [];
     foreach ($data[1] as $col => $item) {
       array_push(
         $dataArr,
