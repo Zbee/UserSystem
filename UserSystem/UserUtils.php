@@ -39,7 +39,7 @@ class UserUtils extends Database {
   public function insertUserBlob ($username, $action = "session") {
     $hash = $this->createSalt($username);
     $hash = $hash.md5($username.$hash);
-    $ipAddress = getIP();
+    $ipAddress = $this->getIP();
     if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
     $this->dbIns(
       [
@@ -66,7 +66,7 @@ class UserUtils extends Database {
    * @return boolean
    */
   public function checkBan ($ipAddress, $username = false) {
-    $ipAddress = getIP();
+    $ipAddress = $this->getIP();
     if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
     $stmt = $this->dbSel(["ban", ["ip" => $ipAddress]]);
     $rows = $stmt[0];

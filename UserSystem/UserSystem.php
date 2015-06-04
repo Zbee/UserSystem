@@ -90,7 +90,7 @@ class UserSystem extends UserUtils {
     );
     if (!$session) { $session = $COOKIE; }
     $tamper  = substr($session, -32);
-    $ipAddress = getIP();
+    $ipAddress = $this->getIP();
     if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
     $time = strtotime("+30 days");
     $stmt = $this->dbSel(
