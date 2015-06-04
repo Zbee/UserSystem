@@ -58,16 +58,17 @@ class UserUtils extends Database {
 
   /**
    * Checks if a user is banned
-   * Example: $UserSystem->checkBan("127.0.0.1", "bob)
+   * Example: $UserSystem->checkBan("bob)
    *
    * @access public
    * @param string $ip
    * @param mixed $username
    * @return boolean
    */
-  public function checkBan ($ipAddress, $username = false) {
+  public function checkBan ($username) {
     $ipAddress = $this->getIP();
     if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
+
     $stmt = $this->dbSel(["ban", ["ip" => $ipAddress]]);
     $rows = $stmt[0];
     if ($rows > 0) {

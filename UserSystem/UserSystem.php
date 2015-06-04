@@ -108,7 +108,7 @@ class UserSystem extends UserUtils {
     if ($rows == 1) {
       $username = $stmt[1]['user'];
       if (md5($username.substr($session, 0, 128)) == $tamper) {
-        if ($this->checkBan($ipAddress) === false) {
+        if ($this->checkBan($username) === false) {
           return true;
         } else {
           return "ban";

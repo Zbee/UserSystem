@@ -112,7 +112,7 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
     $user = new UserSystem("");
 
     $test = $user->sanitize("123g", "n");
-    $this->assertEquals(123, $t);
+    $this->assertEquals(123, $test);
 
     $test = $user->sanitize("g", "n");
     $this->assertEquals(0, $test);

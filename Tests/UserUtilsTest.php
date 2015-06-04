@@ -85,11 +85,11 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
     $user->DATABASE->query("
       INSERT INTO `".DB_PREFACE."ban`
       (username, issuer, ip, date, reason, appealed) VALUES
-      ('cake', 'pie', '127.0.0.1', '".(time() - 86400)."', 'Because', 0)
+      ('cake', 'pie', ".$user->getIP()."', '".(time() - 86400)."', 'Because', 0)
     ");
-    $test = $user->checkBan("127.0.0.1");
+    $test = $user->checkBan();
     $this->assertTrue($test);
-    $test = $user->checkBan("127.0.0.1", "cake");
+    $test = $user->checkBan("cake");
     $this->assertTrue($test);
     $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
