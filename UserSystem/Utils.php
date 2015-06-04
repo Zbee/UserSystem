@@ -187,15 +187,15 @@ class Utils {
   */
   function openssl_rand($min, $max) {
     $range = $max - $min;
-    if ($range == 0) return $min;
+    if ($range < 1) return $min;
     $log = log($range, 2);
     $bytes = (int) ($log / 8) + 1;
     $bits = (int) $log + 1;
     $filter = (int) (1 << $bits) - 1;
-    while ($rnd >= $range) {
+    do {
       $rnd = hexdec(bin2hex(openssl_random_pseudo_bytes($bytes, $s)));
       $rnd = $rnd & $filter;
-    }
+    } while ($rnd >= $range);
     return $min + $rnd;
   }
 

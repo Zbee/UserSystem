@@ -29,7 +29,9 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
   public function testCreateSalt() {
     $user = new UserSystem("");
     $test = $user->createSalt("bob");
+    $testdos = $user->createSalt("bob");
     $this->assertEquals(128, strlen($test));
+    $this->assertFalse($test === $testdos);
   }
 
   public function testSession() {
