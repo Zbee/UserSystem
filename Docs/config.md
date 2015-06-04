@@ -44,13 +44,9 @@ These settings are for extra features that aren't even required to be changed fo
 
 - `ENCRYPTION` This is just a boolean of whether or not your would like the system to encrypt some of your users' data in the MySQL tables with AES encryption.
 
-- `AUTHY_2STEP` (Not currently employed) This is just a boolean of whether or not you would like for Authy to be used for two step authentication instead of the standard email-to-the-user-to-finish-logging-in system. This requires an Authy API key, the ability to send SMS (undecided how the system will send these), and storing of users' phone numbers.
-
 - `RECAPTCHA_LEVEL` (Not currently employed) This is an integer between 0 and 3 (inclusive: 0, 1, 2, or 3) that dictates how often reCAPTCHAs come up for users. 0 = never; 1 = at registration; 2 = registration + logging in; 3 = registration + login + setting changes. You'll have to be mindful of what you set this to, because you're responsible for placing the reCAPTCHA forms on the pages that will need the reCAPTCHAs, the system will be checking if the reCAPTCHA was right, and if you didn't provide one then users' actions will fail 100% of the time.
 
 The following settings are only even necessary if you turned on 1 of the previous 2 settings.
-
-- `AUTHY_API_KEY` (Not currently employed, is environment variable, so you could set it elsewhere) This is your API key from Authy. This is only necessary if you enabled the `AUTHY_2STEP` setting.
 
 - `RECAPTCHA_SITE_KEY` (Not currently employed, is environment variable, so you could set it elsewhere) This is your site key from reCAPTCHA. This is only necessary if you set `RECAPTHCA_LEVEL` to >= 1.
 
