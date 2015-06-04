@@ -25,50 +25,53 @@
   You should have received a copy of the GNU General Public License
   along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
-class UserSystem extends Database {
+class UserSystem extends UserUtils {
 
   /**
-   * Checks if a user is banned
-   * Example: $UserSystem->checkBan("127.0.0.1", "bob)
-   *
-   * @access public
-   * @param string $ip
-   * @param mixed $username
-   * @return boolean
-   */
-  public function checkBan ($ipAddress, $username = false) {
-    $ipAddress = filter_var(
-      $ipAddress,
-      FILTER_SANITIZE_FULL_SPECIAL_CHARS
-    );
-    if (ENCRYPTION === true) {
-      $ipAddress = encrypt($ipAddress, $username);
-    }
-    $stmt = $this->dbSel(["ban", ["ip" => $ipAddress]]);
-    $rows = $stmt[0];
-    if ($rows > 0) {
-      if ($stmt[1]['appealed'] == 0) {
-        $thing = true;
+  * Returns an array full of the data about a user
+  * Example: $UserSystem->session("bob")
+  *
+  * @access public
+  * @param string $session
+  * @return mixed
+  */
+  public function session ($session = false) {
+    if (!$session) {
+      if (!isset($_COOKIE[SITENAME])) { return false; }
+      $session = filter_var(
+        $_COOKIE[SITENAME],
+        FILTER_SANITIZE_FULL_SPECIAL_CHARS
+      );
+      $time = strtotime('+30 days');
+      $query = $this->dbSel(
+        [
+          "userblobs",
+          [
+            "code" => $session,
+            "date" => ["<", $time],
+            "action" => "session"
+          ]
+        ]
+      );
+      if ($query[0] === 1) {
+        $username = $query[1]['user'];
+        $query = $this->dbSel(["users", ["username" => $username]]);
+        if ($query[0] === 1) {
+          return $query[1];
+        } else {
+          return false;
+        }
       } else {
-        $thing = false;
+        return false;
       }
     } else {
-      $thing = false;
-    }
-
-    if ($username !== false) {
-      $stmt = $this->dbSel(["ban", ["username" => $username]]);
-      $rows = $stmt[0];
-      if ($rows > 0) {
-        if ($stmt[1]['appealed'] == 0) {
-          $thing = true;
-        } else {
-          $thing = false;
-        }
+      $query = $this->dbSel(["users", ["username" => $session]]);
+      if ($query[0] === 1) {
+        return $query[1];
+      } else {
+        return false;
       }
     }
-
-    return $thing;
   }
 
   /**
@@ -358,42 +361,6 @@ class UserSystem extends Database {
 
     $this->dbDel(["userblobs", ["code"=>$code, "action"=>"twoStep"]]);
     return $return;
-  }
-
-  /**
-  * Allows a user to send a link to reset their passsword if they forgot it.
-  * Example: $UserSystem->sendRecover("example@pie.com")
-  *
-  * @access public
-  * @param string $email
-  * @return mixed
-  */
-  public function sendRecover ($email) {
-    $select = $this->dbSel(["users", ["email"=>$email]]);
-    if ($select[0] == 1) {
-      $blob = $this->insertUserBlob($select[1]["username"], "recover");
-      $link = $this->sanitize(
-        URL_PREFACE."://".DOMAIN."/".RECOVERY_PG."?blob={$blob}",
-        "u"
-      );
-      $this->sendMail(
-        $email,
-        "Recover your ".SITENAME." account",
-        "        Hello ".$select[1]["username"]."
-
-        To reset your password click the link below.
-        {$link}
-
-        ======
-
-        If this wasn't you,you should update your password on ".SITENAME.".
-
-        Thank you"
-      );
-      return true;
-    } else {
-      return "email";
-    }
   }
 
   /**
