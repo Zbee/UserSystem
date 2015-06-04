@@ -34,7 +34,7 @@ class Database extends Utils {
   * @param string $field
   * @return string
   */
-  function quoteIdent ($field) {
+  private function quoteIdent ($field) {
     return "`".str_replace("`", "``", $field)."`";
   }
 

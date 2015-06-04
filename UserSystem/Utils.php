@@ -26,7 +26,7 @@
   along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
 class Utils {
-  var $DATABASE = '';
+  var $DATABASE = new stdClass();
 
   /**
   * Initializes the class and connects to the database.
@@ -34,7 +34,6 @@ class Utils {
   *
   * @access public
   * @param string $database
-  * @return void
   */
   public function __construct ($dbname = DB_DATABASE) {
     $this->DATABASE = new PDO(
@@ -118,7 +117,7 @@ class Utils {
   * Example: $UserSystem->getIP()
   *
   * @access public
-  * @return string
+  * @return mixed
   */
   public function getIP () {
     $srcs = [
@@ -195,8 +194,8 @@ class Utils {
     return hash(
       "sha512",
       $username
-      .time()*sqrt(strlen($username))
-      .($str = substr(
+      . time()*sqrt(strlen($username.DOMAIN))
+      . ($str = substr(
         str_shuffle(
           str_repeat(
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -208,8 +207,9 @@ class Utils {
         1,
         mt_rand(2048, 8192)
       ))
-      .($strt = bin2hex(openssl_random_pseudo_bytes(strlen($str)/8)))
-      .$this->sanitize($this->getIP(), "n")*strlen($strt)*mt_rand(4, 128)
+      . ($strt = bin2hex(openssl_random_pseudo_bytes(strlen($str)/8)))
+      . strlen($strt)*mt_rand(4, 128)
+      . $this->getIP()
     );
   }
 
@@ -254,8 +254,7 @@ class Utils {
       $month = date("n", $data);
       $day = date("j", $data);
       $year = date("Y", $data);
-
-      if (checkdate($month, $day, $year) === true) return $data;
+      if (checkdate($month, $day, $year)) return $data;
     } elseif ($type == "h") {
       return $this->handleUTF8(trim($data));
     } elseif ($type == "q") {
