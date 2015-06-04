@@ -26,7 +26,7 @@
   along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
 class Utils {
-  var $DATABASE = new stdClass();
+  var $DATABASE = "";
 
   /**
   * Initializes the class and connects to the database.
