@@ -52,3 +52,21 @@ $RECYCLE.BIN/
 # =========================
 
 .c9/
+
+# =========================
+# Program Files
+# =========================
+
+
+# Composer
+# =========================
+
+composer.lock
+composer.phar
+vendor/
+
+# PHPUnit
+# =========================
+
+clover.xml
+mailoutput/
