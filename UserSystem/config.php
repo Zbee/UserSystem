@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
-ob_start();
 
 #These constants are used to connect to your MySQL database.
 define("DB_PREFACE", "us_");               #A preface to database table names

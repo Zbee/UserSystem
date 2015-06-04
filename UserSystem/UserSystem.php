@@ -90,13 +90,8 @@ class UserSystem extends UserUtils {
     );
     if (!$session) { $session = $COOKIE; }
     $tamper  = substr($session, -32);
-    $ipAddress = filter_var(
-      $_SERVER["REMOTE_ADDR"],
-      FILTER_SANITIZE_FULL_SPECIAL_CHARS
-    );
-    if (ENCRYPTION === true) {
-      $ipAddress = encrypt($ipAddress, $username);
-    }
+    $ipAddress = getIP();
+    if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
     $time = strtotime("+30 days");
     $stmt = $this->dbSel(
       [
@@ -226,10 +221,7 @@ class UserSystem extends UserUtils {
    */
   public function logIn ($username, $password, $ignoreTS = false) {
     $ignoreTS = $this->sanitize($ignoreTS, "b");
-    $ipAddress = filter_var(
-      $_SERVER["REMOTE_ADDR"],
-      FILTER_SANITIZE_FULL_SPECIAL_CHARS
-    );
+    $ipAddress = $this->getIP();
     $user = $this->session($username);
     if (is_array($user)) {
       $password = hash("sha256", $password.$user["salt"]);
@@ -237,9 +229,7 @@ class UserSystem extends UserUtils {
       if ($password == $user["password"]) {
         if ($user["activated"] == 1) {
           if ($user["twoStep"] == 0 || $ignoreTS !== false) {
-            if (ENCRYPTION === true) {
-              $ipAddress = encrypt($ipAddress, $username);
-            }
+            if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
             $this->dbUpd(
               [
                 "users",
@@ -334,10 +324,7 @@ class UserSystem extends UserUtils {
    * @return mixed
    */
   public function twoStep ($code) {
-    $ipAddress = filter_var(
-      $_SERVER["REMOTE_ADDR"],
-      FILTER_SANITIZE_FULL_SPECIAL_CHARS
-    );
+    $ipAddress = $this->getIP();
     $return = "";
     $select = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"twoStep"]]);
     if ($select[0] === 1) {
@@ -375,7 +362,12 @@ class UserSystem extends UserUtils {
   */
   public function recover ($blob, $pass, $passconf) {
     if ($pass === $passconf) {
-      $select = $this->dbSel(["userblobs",["code"=>$blob, "action"=>"recovery"]]);
+      $select = $this->dbSel(
+        [
+          "userblobs",
+          [ "code"=>$blob,"action"=>"recovery" ]
+        ]
+      );
       if ($select[0] == 1) {
         $user = $select[1]["user"];
         $salt = $this->session($user)["salt"];

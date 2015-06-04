@@ -77,47 +77,6 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
     $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
-  public function testInsertUserBlob() {
-    $user = new UserSystem("");
-    $user->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
-    $user = new UserSystem();
-    $user->DATABASE->query("
-      CREATE TABLE `".DB_PREFACE."users` (
-      `id` INT NOT NULL AUTO_INCREMENT,
-      `username` VARCHAR(50) NULL DEFAULT NULL,
-      PRIMARY KEY (`id`)
-      )
-      COLLATE='latin1_swedish_ci'
-      ENGINE=MyISAM
-      AUTO_INCREMENT=0;
-    ");
-    $user->DATABASE->query("
-      CREATE TABLE `".DB_PREFACE."userblobs` (
-      `id` INT NOT NULL AUTO_INCREMENT,
-      `user` VARCHAR(50) NOT NULL,
-      `code` VARCHAR(512) NOT NULL,
-      `ip` VARCHAR(256) NOT NULL,
-      `action` VARCHAR(100) NOT NULL,
-      `date` INT NOT NULL,
-      PRIMARY KEY (`id`)
-      )
-      COLLATE='latin1_swedish_ci'
-      ENGINE=MyISAM
-      AUTO_INCREMENT=0;
-    ");
-    $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-    $test = $user->insertUserBlob("cake");
-    $testdos = $user->dbSel(["userblobs", ["user"=>"cake"]]);
-    $this->assertEquals(1, $testdos[0]);
-    $this->assertEquals(1, $testdos[1]["id"]);
-    $this->assertEquals("cake", $testdos[1]["user"]);
-    $this->assertEquals($test, $testdos[1]["code"]);
-    $this->assertEquals(160, strlen($testdos[1]["code"]));
-    $this->assertEquals("127.0.0.1", $testdos[1]["ip"]);
-    $this->assertEquals("session", $testdos[1]["action"]);
-    $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
-  }
-
   public function testCurrentURL() {
     $user = new UserSystem("");
     $_SERVER['HTTP_HOST'] = "test";
@@ -152,37 +111,37 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
   public function testSanitize() {
     $user = new UserSystem("");
 
-    $t = $user->sanitize("123g", "n");
+    $test = $user->sanitize("123g", "n");
     $this->assertEquals(123, $t);
 
-    $t = $user->sanitize("g", "n");
-    $this->assertEquals(0, $t);
+    $test = $user->sanitize("g", "n");
+    $this->assertEquals(0, $test);
 
-    $t = $user->sanitize("g", "s");
-    $this->assertEquals("g", $t);
+    $test = $user->sanitize("g", "s");
+    $this->assertEquals("g", $test);
 
-    $t = $user->sanitize("g'°", "s");
-    $this->assertEquals("g&#39;&deg;", $t);
+    $test = $user->sanitize("g'°", "s");
+    $this->assertEquals("g&#39;&deg;", $test);
 
-    $t = $user->sanitize(1414035554, "d");
-    $this->assertEquals(1414035554, $t);
+    $test = $user->sanitize(1414035554, "d");
+    $this->assertEquals(1414035554, $test);
 
-    $t = $user->sanitize("1414;035554", "d");
-    $this->assertEquals(1414035554, $t);
+    $test = $user->sanitize("1414;035554", "d");
+    $this->assertEquals(1414035554, $test);
 
-    $t = $user->sanitize("2014-10-21", "d");
-    $this->assertEquals(1413871200, $t);
+    $test = $user->sanitize("2014-10-21", "d");
+    $this->assertEquals(1413871200, $test);
 
-    $t = $user->sanitize("+1 week 2 days 4 hours 2 seconds", "d");
-    $this->assertEquals(strtotime("+1 week 2 days 4 hours 2 seconds"), $t);
+    $test = $user->sanitize("+1 week 2 days 4 hours 2 seconds", "d");
+    $this->assertEquals(strtotime("+1 week 2 days 4 hours 2 seconds"), $test);
 
-    $t = $user->sanitize("next Thursday", "d");
-    $this->assertEquals(strtotime("next Thursday"), $t);
+    $test = $user->sanitize("next Thursday", "d");
+    $this->assertEquals(strtotime("next Thursday"), $test);
 
-    $t = $user->sanitize("<span>cake</span>", "h");
-    $this->assertEquals("<span>cake</span>", $t);
+    $test = $user->sanitize("<span>cake</span>", "h");
+    $this->assertEquals("<span>cake</span>", $test);
 
-    $t = $user->sanitize("g'°", "h");
-    $this->assertEquals("g'&deg;", $t);
+    $test = $user->sanitize("g'°", "h");
+    $this->assertEquals("g'&deg;", $test);
   }
 }

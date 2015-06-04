@@ -114,29 +114,32 @@ class Utils {
   }
 
   /**
-  * Generates a new salt based off of a username
-  * Example: $UserSystem->createSalt("Bob")
+  * Gets the IP of the current user
+  * Example: $UserSystem->getIP()
   *
   * @access public
-  * @param string $username
   * @return string
   */
-  public function createSalt ($username) {
-    return hash(
-      "sha512",
-      $username.time().substr(
-        str_shuffle(
-          str_repeat(
-            "abcdefghijklmnopqrstuvwxyz
-            ABCDEFGHIJKLMNOPQRSTUVWXYZ
-            0123456789!@$%^&_+{}[]:<.>?",
-            rand(16,32)
-          )
-        ),
-        1,
-        rand(1024,2048)
-      )
-    );
+  public function getIP () {
+    $srcs = [
+      'HTTP_CLIENT_IP',
+      'HTTP_X_FORWARDED_FOR',
+      'HTTP_X_FORWARDED',
+      'HTTP_X_CLUSTER_CLIENT_IP',
+      'HTTP_FORWARDED_FOR',
+      'HTTP_FORWARDED',
+      'REMOTE_ADDR'
+    ];
+    foreach ($srcs as $key) {
+      if (array_key_exists($key, $_SERVER) === true) {
+        foreach (explode(',', $_SERVER[$key]) as $ip) {
+          if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+            return $ip;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   /**
@@ -147,17 +150,19 @@ class Utils {
   * @return string
   */
   public function currentURL () {
-    $hh = htmlspecialchars(
+    $domain = htmlspecialchars(
       $_SERVER['HTTP_HOST'],
       ENT_QUOTES,
       "utf-8"
     );
-    $ri = htmlspecialchars(
+    $page = htmlspecialchars(
       $_SERVER['REQUEST_URI'],
       ENT_QUOTES,
       "utf-8"
     );
-    return (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$hh$ri";
+    $http = isset($_SERVER['HTTPS'])
+      || $_SERVER["HTTP_X_FORWARDED_PROTO"] == "https" ? "https" : "http";
+    return "$http://$domain$page";
   }
 
   /**
@@ -177,6 +182,36 @@ class Utils {
     } else {
       return false;
     }
+  }
+
+  /**
+  * Generates a new salt based off of a username
+  * Example: $UserSystem->createSalt("Bob")
+  *
+  * @access public
+  * @param string $username
+  * @return string
+  */
+  public function createSalt ($username) {
+    return hash(
+      "sha512",
+      $username
+      .time()*sqrt(strlen($username))
+      .($str = substr(
+        str_shuffle(
+          str_repeat(
+            "abcdefghijklmnopqrstuvwxyz
+            ABCDEFGHIJKLMNOPQRSTUVWXYZ
+            0123456789!@$%^&_+{}[]:<.>?",
+            mt_rand(16+strlen($username),32+strlen($username))
+          )
+        ),
+        1,
+        mt_rand(1024,2048)
+      ))
+      .($strt = bin2hex(openssl_random_pseudo_bytes(strlen($str)/8)))
+      .$this->sanitize($this->getIP(), "n")*strlen($strt)*mt_rand(2,512)
+    );
   }
 
   /**

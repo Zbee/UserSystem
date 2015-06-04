@@ -154,7 +154,7 @@ if (isset($_POST["e"])) {
       <div class="well text-center">
         <b>Update password</b>
         <br>
-        <?=$session["passwordChanged"] == 0 ? "Never changed" : 
+        <?=$session["passwordChanged"] == 0 ? "Never changed" :
         "Last changed " . date("Y-m-d\THi", $session["passwordChanged"])?>
         <br><br>
         <form class="form form-horizontal text-left" method="post" action="">
@@ -196,7 +196,7 @@ if (isset($_POST["e"])) {
       <div class="well text-center">
         <b>Update email</b>
         <br>
-        <?=($session["emailChanged"] == 0 ? "Never changed" : 
+        <?=($session["emailChanged"] == 0 ? "Never changed" :
         "Last changed " . date("Y-m-d\THi", $session["emailChanged"]))
         . "<Br>Is currently " . $session["email"]?>
         <br><br>
@@ -239,7 +239,7 @@ if (isset($_POST["e"])) {
           . '<br><br><a href="../logout?all" class="btn btn-block btn-default">'
           . "Log out all sessions</a><br><br>";
         if ($rows[0] > 0) {
-          echo '<table class="table table-responsive table-striped 
+          echo '<table class="table table-responsive table-striped
             tabled-bordered">';
           foreach ($rows as $key => $row) {
             if ($key === 0) continue;
