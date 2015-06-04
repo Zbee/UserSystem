@@ -1,6 +1,7 @@
 machine:
   environment:
     CODACY_PROJECT_TOKEN: 81cec07ef21e412e9c8a5f4c940fb481
+    CODECLIMATE_REPO_TOKEN: fad48f021619166d9612e9937c6d7b6cbf02c90d893bb13f8dc053e77d0279d7
 
   timezone:
     America/Denver
@@ -8,7 +9,8 @@ machine:
   php:
     version: 5.6.2
 
-dependencies:
+test:
   post:
     - cd UserSystem
-    - vendor/bin/codacycoverage clover clover.xml
+    - vendor/bin/codacycoverage clover
+    - vendor/bin/test-reporter

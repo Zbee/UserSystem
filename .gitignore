@@ -68,5 +68,5 @@ vendor/
 # PHPUnit
 # =========================
 
-clover.xml
 mailoutput/
+build/
