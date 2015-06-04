@@ -5,4 +5,7 @@ php:
   - 5.4
 
 after_script:
-  - php vendor/bin/codacycoverage clover
+  - php vendor/bin/codacycoverage clover clover.xml
+
+notifications:
+  email: false
