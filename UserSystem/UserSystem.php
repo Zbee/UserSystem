@@ -56,22 +56,14 @@ class UserSystem extends UserUtils {
       if ($query[0] === 1) {
         $username = $query[1]['user'];
         $query = $this->dbSel(["users", ["username" => $username]]);
-        if ($query[0] === 1) {
-          return $query[1];
-        } else {
-          return false;
-        }
-      } else {
-        return false;
+        if ($query[0] === 1) return $query[1];
       }
     } else {
       $query = $this->dbSel(["users", ["username" => $session]]);
-      if ($query[0] === 1) {
-        return $query[1];
-      } else {
-        return false;
-      }
+      if ($query[0] === 1) return $query[1];
     }
+
+    return false;
   }
 
   /**

@@ -26,6 +26,7 @@
   along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
 class Database extends Utils {
+
   /**
   * A shortcut for easily escaping a table/column name for PDO
   * Example: $UserSystem->dbIns(["users",["u"=>"Bob","e"=>"bob@ex.com"]])
@@ -48,13 +49,9 @@ class Database extends Utils {
   */
   public function dbIns ($data) {
     $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
-    $dataArr = [];
-    foreach ($data[1] as $col => $item) {
-      array_push($dataArr, [$col, $item]);
-    }
-    $cols = "";
-    $entries = "";
-    $enArr = [];
+    $dataArr = $enArr = [];
+    foreach ($data[1] as $col => $item) array_push($dataArr, [$col, $item]);
+    $cols = $entries = "";
     foreach ($dataArr as $item) {
       $cols .= $this->quoteIdent($item[0]).", ";
       $entries .= "?, ";
@@ -65,8 +62,7 @@ class Database extends Utils {
     $stmt = $this->DATABASE->prepare("
       INSERT INTO $data[0] ($cols) VALUES ($entries)
     ");
-    $stmt = $stmt->execute($enArr);
-    return $stmt;
+    return $stmt->execute($enArr);
   }
 
 
@@ -80,12 +76,9 @@ class Database extends Utils {
   */
   public function dbUpd ($data) {
     $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
-    $dataArr = [];
-    foreach ($data[1] as $col => $item) {
-      array_push($dataArr, [$col, $item]);
-    }
-    $update = "";
-    $qArr = [];
+    $dataArr = $qArr = [];
+    foreach ($data[1] as $col => $item) array_push($dataArr, [$col, $item]);
+    $update = $equals = "";
     foreach ($dataArr as $item) {
       $update .= $this->quoteIdent($item[0])."=?, ";
       array_push($qArr, $item[1]);
@@ -100,7 +93,6 @@ class Database extends Utils {
         ]
       );
     }
-    $equals = "";
     foreach ($equalsArr as $item) {
       $equals .= $this->quoteIdent($item[0])."=? AND ";
       array_push($qArr, $item[1]);
@@ -110,8 +102,7 @@ class Database extends Utils {
     $stmt = $this->DATABASE->prepare("
       UPDATE $data[0] SET $update WHERE $equals
     ");
-    $stmt = $stmt->execute($qArr);
-    return $stmt;
+    return $stmt->execute($qArr);
   }
 
 
@@ -125,12 +116,9 @@ class Database extends Utils {
   */
   public function dbDel ($data) {
     $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
-    $dataArr = [];
-    foreach ($data[1] as $col => $item) {
-      array_push($dataArr, [$col, $item]);
-    }
+    $dataArr = $eqArr = [];
+    foreach ($data[1] as $col => $item) array_push($dataArr, [$col, $item]);
     $equals = "";
-    $eqArr = [];
     foreach ($dataArr as $item) {
       $equals .= $this->quoteIdent($item[0])."=? AND ";
       array_push($eqArr, $item[1]);
@@ -139,8 +127,7 @@ class Database extends Utils {
     $stmt = $this->DATABASE->prepare("
       DELETE FROM ".$data[0]." WHERE $equals
     ");
-    $stmt = $stmt->execute($eqArr);
-    return $stmt;
+    return $stmt->execute($eqArr);
   }
 
   /**
@@ -154,7 +141,7 @@ class Database extends Utils {
   */
   public function dbSel ($data) {
     $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
-    $dataArr = [];
+    $dataArr = $qMark = [];
     foreach ($data[1] as $col => $item) {
       array_push(
         $dataArr,
@@ -164,8 +151,7 @@ class Database extends Utils {
         ]
       );
     }
-    $equals = '';
-    $qmark = [];
+    $equals = "";
     foreach ($dataArr as $item) {
       $diff = '=';
       if (substr($item[1], 0, 5) === "@~#~@") {
@@ -181,11 +167,8 @@ class Database extends Utils {
     ");
     $stmt->execute($qmark);
     $arr = [(is_object($stmt) ? $stmt->rowCount() : 0)];
-    if ($arr[0] > 0) {
-      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        array_push($arr, $row);
-      }
-    }
+    if ($arr[0] > 0)
+      while($row = $stmt->fetch(PDO::FETCH_ASSOC)) array_push($arr, $row);
     return $arr;
   }
 }

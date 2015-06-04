@@ -26,6 +26,7 @@
   along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
 class Utils {
+
   var $DATABASE = "";
 
   /**
@@ -66,9 +67,8 @@ class Utils {
       ),
       MCRYPT_RAND
     );
-    if (strlen($iv_base64 = rtrim(base64_encode($initVector), '=')) != 22) {
+    if (strlen($iv_base64 = rtrim(base64_encode($initVector), '=')) != 22)
       return false;
-    }
     $encrypted = base64_encode(
       mcrypt_encrypt(
         MCRYPT_RIJNDAEL_128,
@@ -129,15 +129,10 @@ class Utils {
       'HTTP_FORWARDED',
       'REMOTE_ADDR'
     ];
-    foreach ($srcs as $key) {
-      if (array_key_exists($key, $_SERVER) === true) {
-        foreach (explode(',', $_SERVER[$key]) as $ip) {
-          if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
-            return $ip;
-          }
-        }
-      }
-    }
+    foreach ($srcs as $key)
+      if (array_key_exists($key, $_SERVER) === true)
+        foreach (explode(',', $_SERVER[$key]) as $ip)
+          if (filter_var($ip, FILTER_VALIDATE_IP) !== false) return $ip;
     return false;
   }
 
@@ -190,6 +185,28 @@ class Utils {
   * @param string $username
   * @return string
   */
+  function openssl_rand($min, $max) {
+    $range = $max - $min;
+    if ($range == 0) return $min;
+    $log = log($range, 2);
+    $bytes = (int) ($log / 8) + 1;
+    $bits = (int) $log + 1;
+    $filter = (int) (1 << $bits) - 1;
+    while ($rnd >= $range) {
+      $rnd = hexdec(bin2hex(openssl_random_pseudo_bytes($bytes, $s)));
+      $rnd = $rnd & $filter;
+    }
+    return $min + $rnd;
+  }
+
+  /**
+  * Generates a new salt based off of a username
+  * Example: $UserSystem->createSalt("Bob")
+  *
+  * @access public
+  * @param string $username
+  * @return string
+  */
   public function createSalt ($username) {
     return hash(
       "sha512",
@@ -201,14 +218,14 @@ class Utils {
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             . "`~0123456789!@$%^&*()-_+={}[]\\|:;'\"<,>."
             . bin2hex(openssl_random_pseudo_bytes(64)),
-            mt_rand(32+strlen($username), 64+strlen(SITENAME.$username))
+            $this->openssl_rand(32, 64+strlen(SITENAME))
           )
         ),
         1,
-        mt_rand(2048, 8192)
+        $this->openssl_rand(2048, 8192)
       ))
       . ($strt = bin2hex(openssl_random_pseudo_bytes(strlen($str)/8)))
-      . strlen($strt)*mt_rand(4, 128)
+      . strlen($strt)*$this->openssl_rand(4, 128)
       . $this->getIP()
     );
   }
@@ -224,8 +241,7 @@ class Utils {
   public function handleUTF8 ($code) {
     return preg_replace_callback('/[\x{80}-\x{10FFFF}]/u', function($match) {
       list($utf8) = $match;
-      $entity = mb_convert_encoding($utf8, 'HTML-ENTITIES', 'UTF-8');
-      return $entity;
+      return mb_convert_encoding($utf8, 'HTML-ENTITIES', 'UTF-8');
     },
     $code);
   }
