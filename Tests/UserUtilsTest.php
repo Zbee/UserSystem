@@ -87,8 +87,6 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
       (username, issuer, ip, date, reason, appealed) VALUES
       ('cake', 'pie', ".$user->getIP()."', '".(time() - 86400)."', 'Because', 0)
     ");
-    $test = $user->checkBan();
-    $this->assertTrue($test);
     $test = $user->checkBan("cake");
     $this->assertTrue($test);
     $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);

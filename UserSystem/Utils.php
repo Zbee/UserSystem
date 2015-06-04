@@ -160,8 +160,7 @@ class Utils {
       ENT_QUOTES,
       "utf-8"
     );
-    $http = isset($_SERVER['HTTPS'])
-      || $_SERVER["HTTP_X_FORWARDED_PROTO"] == "https" ? "https" : "http";
+    $http = isset($_SERVER['HTTPS']) ? "https" : "http";
     return "$http://$domain$page";
   }
 
