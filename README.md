@@ -42,8 +42,7 @@ For more detailed information please see the
  expiration dates.
 
 * Can easily be configured (through the straight-forward configuration file) to
- use an AES-compliant encryption system for emails and IPs that are stored with
- the user.
+ use an AES-compliant encryption system for IPs that are stored with the user.
 
 * Has a very simple 2Step Authentication system that will delay login of users
  with it activated and require them to follow a link in an email sent to them,
