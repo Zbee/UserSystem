@@ -9,7 +9,7 @@ Every method is public, and should be used by you as a developer utilizing this 
 ### checkBan
 This checks whether or not the specified user is listed as banned in the database (without having been appealed).
 
-#### Arguments
+#### Parameters
 - `$username` The user's username you want to search for. It does not need to be set, but if it is then a second search is conducted for the useranme as well as the username.
 
 #### Return

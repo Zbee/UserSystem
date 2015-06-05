@@ -63,7 +63,7 @@ class Utils {
   * @access public
   * @param string $decrypted
   * @param string $username
-  * @return string
+  * @return mixed
   */
   public function encrypt ($decrypted, $username) {
     $key = hash('SHA256', $username, true);
@@ -400,6 +400,17 @@ class Utils {
     return "FAILED";
   }
 
+
+  /**
+  * Sends properly formatted emails out from the system to many or just one user
+  * Example: $UserSystem->sendMail(["bob@ex.com", "rob@ex.com"], "Hi", "Hello!")
+  *
+  * @access public
+  * @param mixed recipient
+  * @param string subject
+  * @param string message
+  * @return bool
+  */
   public function sendMail ($recipient, $subject, $message) {
     $recipients = "";
     if (is_array($recipient)) {
@@ -412,6 +423,6 @@ class Utils {
     $headers = 'From: noreply@'.DOMAIN."\n" .
     'Reply-To: support@'.DOMAIN."\n" .
     'X-Mailer: PHP/'.phpversion();
-    mail($recipient, $subject, $message, $headers);
+    return mail($recipient, $subject, $message, $headers);
   }
 }
