@@ -218,7 +218,7 @@ class UserSystem extends UserUtils {
     $user = $this->session($username);
     if (is_array($user)) {
       $password = hash("sha256", $password.$user["salt"]);
-      $oldPassword = hash("sha256", $password.$user["oldSalt"]);
+      $oldPassword = hash("sha256", $password.$user["salt"]);
       if ($password == $user["password"]) {
         if ($user["activated"] == 1) {
           if ($user["twoStep"] == 0 || $ignoreTS !== false) {

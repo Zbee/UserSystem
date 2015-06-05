@@ -19,7 +19,7 @@ along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 #These constants are used to connect to your MySQL database.
 define("DB_PREFACE", "us_");                 #A preface to database table names
 define("DB_LOCATION", "127.0.0.1");          #The location of the database
-define("DB_USERNAME", "root");               #The username for the database
+define("DB_USERNAME", "zbee");               #The username for the database
 define("DB_PASSWORD", "");                   #The password for the database
 define("DB_DATABASE", "us");                 #The name of the database
 

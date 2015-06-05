@@ -29,6 +29,72 @@
 class UserUtils extends Database {
 
   /**
+  * Encrypts any data and makes it only decryptable by the same user.
+  * Example: $UserSystem->encrypt("myEmail", "bob")
+  *
+  * @access public
+  * @param string $decrypted
+  * @param string $username
+  * @return mixed
+  */
+  public function encrypt ($decrypted, $username) {
+    $salt = $this->dbSel(["users", ["username" => $username]]);
+    if ($salt[0] == 0) return "user";
+    $key = hash('SHA256', $salt[1]["salt"], true);
+    srand();
+    $initVector = mcrypt_create_iv(
+      mcrypt_get_iv_size(
+        MCRYPT_RIJNDAEL_128,
+        MCRYPT_MODE_CBC
+      ),
+      MCRYPT_RAND
+    );
+    if (strlen($iv_base64 = rtrim(base64_encode($initVector), '=')) != 22)
+      return false;
+    $encrypted = base64_encode(
+      mcrypt_encrypt(
+        MCRYPT_RIJNDAEL_128,
+        $key,
+        $decrypted . md5($decrypted),
+        MCRYPT_MODE_CBC,
+        $initVector
+      )
+    );
+    return $iv_base64 . $encrypted;
+  }
+
+  /**
+  * Decrypts any data that belongs to a set user
+  * Example: $UserSystem->decrypt("4lj84mui4htwyi58g7gh5y8hvn8t", "bob")
+  *
+  * @access public
+  * @param string $encrypted
+  * @param string $username
+  * @return string
+  */
+  public function decrypt ($encrypted, $username) {
+    $salt = $this->dbSel(["users", ["username" => $username]]);
+    if ($salt[0] == 0) return "user";
+    $key = hash('SHA256', $salt[1]["salt"], true);
+    $initVector  = base64_decode(substr($encrypted, 0, 22) . '==');
+    $encrypted = substr($encrypted, 22);
+    $decrypted = rtrim(
+      mcrypt_decrypt(
+        MCRYPT_RIJNDAEL_128,
+        $key,
+        base64_decode($encrypted),
+        MCRYPT_MODE_CBC,
+        $initVector
+      ),
+      "\0\4"
+    );
+    $hash = substr($decrypted, -32);
+    $decrypted = substr($decrypted, 0, -32);
+    if (md5($decrypted) != $hash) return false;
+    return $decrypted;
+  }
+
+  /**
   * Inserts a user blob into the database for you
   * Example: $UserSystem->insertUserBlob("bob", "twoStep")
   *

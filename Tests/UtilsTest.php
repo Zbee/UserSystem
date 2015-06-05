@@ -48,8 +48,8 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
       COLLATE='latin1_swedish_ci'
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
-      ");
-      $user->DATABASE->query("
+    ");
+    $user->DATABASE->query("
       INSERT INTO `".DB_PREFACE."users` (username) VALUES ('cake')
     ");
     $test = $user->session("cake")['username'];
@@ -98,17 +98,6 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
       $test = 0;
     }
     $this->assertLessThan(2, $test);
-  }
-
-  public function testEncryption() {
-    $user = new UserSystem("");
-    $test = $user->encrypt("cake", "dessert");
-    $this->assertNotEquals("cake", $test);
-
-    $user = new UserSystem("");
-    $test = $user->encrypt("cake", "dessert");
-    $testdos = $user->decrypt($test, "dessert");
-    $this->assertEquals("cake", $testdos);
   }
 
   public function testSanitize() {

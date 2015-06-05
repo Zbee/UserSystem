@@ -22,6 +22,35 @@ date_default_timezone_set('America/Denver');
 
 class UserUtilsTest extends PHPUnit_Framework_TestCase {
 
+  public function testEncryption() {
+    $user = new UserSystem("");
+    $user->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
+    $user = new UserSystem();
+    $user->DATABASE->query("
+      CREATE TABLE `".DB_PREFACE."users` (
+      `id` INT NOT NULL AUTO_INCREMENT,
+      `username` VARCHAR(50) NULL DEFAULT NULL,
+      `salt` VARCHAR(50) NULL DEFAULT NULL,
+      PRIMARY KEY (`id`)
+      )
+      COLLATE='latin1_swedish_ci'
+      ENGINE=MyISAM
+      AUTO_INCREMENT=0;
+    ");
+    $user->DATABASE->query("
+      INSERT INTO `".DB_PREFACE."users` (username, salt) VALUES ('dessert', 'c')
+    ");
+
+    $test = $user->encrypt("cake", "dessert");
+    $this->assertNotEquals("cake", $test);
+
+    $test = $user->encrypt("cake", "dessert");
+    $testdos = $user->decrypt($test, "dessert");
+    $this->assertEquals("cake", $testdos);
+
+    $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
+  }
+
   public function testInsertUserBlob() {
     $user = new UserSystem("");
     $user->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
