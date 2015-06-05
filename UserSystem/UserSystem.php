@@ -351,7 +351,7 @@ class UserSystem extends UserUtils {
       $select = $this->dbSel(
         [
           "userblobs",
-          [ "code"=>$blob,"action"=>"recovery" ]
+          [ "code"=>$blob, "action"=>"recovery" ]
         ]
       );
       if ($select[0] == 1) {

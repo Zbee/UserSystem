@@ -18,7 +18,7 @@ along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 require_once("../../UserSystem/config.php");
 
 $verify = $UserSystem->verifySession();
-if ($verify !== false) $UserSystem->redirect301("../");
+if ($verify) $UserSystem->redirect301("../");
 
 if (isset($_POST["u"])) {
   $login = $UserSystem->logIn($_POST["u"], $_POST["p"]);
@@ -99,6 +99,7 @@ if (isset($_POST["u"])) {
           <div class="form-group">
             <div class="col-sm-offset-4 col-sm-8">
               <button type="submit" class="btn btn-default">Log in</button>
+              <a href="../recover">Forgot Password</a>
             </div>
           </div>
         </form>
