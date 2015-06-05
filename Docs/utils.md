@@ -1,4 +1,3 @@
-# Methods
 The Utils class is the base class and holds a bunch of essential methods for
 dealing with input and creating or manipulating data.
 
@@ -10,11 +9,13 @@ data on their own, they accept the user input and use it that way.
 This is run when you create the class. It attempts to connect to the database,
 and if it cannot then it stops everything by throwing errors
 
-## Parameters
+**Parameters**
+
 - `$dbname` The name of the database you want to use in this instanct of
  UserSystem
 
-## Return
+**Return**
+
 This either returns nothing or throws this error: "DB_* constants in config.php
 failed to connect to a database. " and then whatever PDO has to add.
 
@@ -22,11 +23,13 @@ failed to connect to a database. " and then whatever PDO has to add.
 # encrypt
 This encrypts data for a specific user.
 
-## Parameters
+**Parameters**
+
 - `$decrypted` The raw data you would like to encrypt
 - `$username` The username of the user you would like to encrypt the data for
 
-## Return
+**Return**
+
 This returns one of two different things, a string or false.
 
 `false` is when the IV was created incorrectly, which will only ever be if
@@ -36,7 +39,8 @@ A string is returned when encryption works, and it'll be the encrypted string
 including 32 characters on the end which is an md5 of the original data, used
 by the decrypt function to verify that everyone whent smoothly.
 
-## Notes
+**Notes**
+
 Presently if you just know the user's username and have this code then you
 could decrypt any user data.
 
@@ -48,11 +52,13 @@ salt does not change, which would be fine.
 # decrypt
 This decrypts data from the encrypt function.
 
-## Parameters
+**Parameters**
+
 - `$encrypted` The encrypted data you would like to decrypt
 - `$username` The username of the user you would like to decrypt the data for
 
-## Return
+**Return**
+
 This returns one of two different things, a string or false.
 
 `false` is when the hash of the decrypted data does not match the hash of the
