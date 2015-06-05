@@ -25,6 +25,10 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
     $user = new UserSystem("");
     $user->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
     $user = new UserSystem();
+
+    $test = $user->dbIns(["test", ["test"=>"cake"]]);
+    $this->assertFalse($test);
+
     $user->DATABASE->query("
     CREATE TABLE `".DB_PREFACE."test` (
       `id` INT NOT NULL AUTO_INCREMENT,
@@ -35,9 +39,9 @@ class DatabaseTest extends PHPUnit_Framework_TestCase {
     ENGINE=MyISAM
     AUTO_INCREMENT=0;
     ");
-    $user->DATABASE->query("
-      INSERT INTO `".DB_PREFACE."test` (test) VALUES ('cake')
-    ");
+    $test = $user->dbIns(["test", ["test"=>"cake"]]);
+    $this->assertEquals(1, $test);
+
     $test = $user->dbSel(["test", ["id"=>1]]);
     $this->assertEquals(1, $test[0]);
     $this->assertEquals(1, $test[1]['id']);

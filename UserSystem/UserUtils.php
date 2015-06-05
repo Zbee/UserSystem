@@ -87,7 +87,6 @@ class UserUtils extends Database {
             return true;
     }
 
-
     return is_numeric($thing) ? true : false;
   }
 

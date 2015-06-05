@@ -382,7 +382,7 @@ class Utils {
         $data
       ) return $data;
     } elseif ($type == "i") {
-      if (filter_var($ip, FILTER_VALIDATE_IP) !== false) return $data;
+      if (filter_var($data, FILTER_VALIDATE_IP) !== false) return $data;
     } elseif ($type == "e") {
       if (
         filter_var(

@@ -64,6 +64,7 @@ class Database extends Utils {
       INSERT INTO $data[0] ($cols) VALUES ($entries)
     ");
     $stmt = $stmt->execute($enArr);
+
     if ($stmt) return $this->DATABASE->lastInsertId();
     return false;
   }
