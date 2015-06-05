@@ -25,6 +25,7 @@
   You should have received a copy of the GNU General Public License
   along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 class UserUtils extends Database {
 
   /**
@@ -39,8 +40,6 @@ class UserUtils extends Database {
   public function insertUserBlob ($username, $action = "session") {
     $hash = $this->createSalt($username);
     $hash = $hash.md5($username.$hash);
-    $ipAddress = $this->getIP();
-    if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
     $this->dbIns(
       [
         "userblobs",
@@ -48,7 +47,6 @@ class UserUtils extends Database {
           "user" => $username,
           "code" => $hash,
           "action" => $action,
-          "ip" => $ipAddress,
           "date" => time()
         ]
       ]
@@ -58,42 +56,39 @@ class UserUtils extends Database {
 
   /**
    * Checks if a user is banned
-   * Example: $UserSystem->checkBan("bob)
+   * Example: $UserSystem->checkBan("bob")
    *
    * @access public
-   * @param string $ip
    * @param mixed $username
    * @return boolean
    */
-  public function checkBan ($username) {
+  public function checkBan ($username = false) {
     $ipAddress = $this->getIP();
     if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
 
+    $thing = false;
+
     $stmt = $this->dbSel(["ban", ["ip" => $ipAddress]]);
     $rows = $stmt[0];
-    if ($rows > 0) {
-      if ($stmt[1]['appealed'] == 0) {
-        $thing = true;
-      } else {
-        $thing = false;
-      }
-    } else {
-      $thing = false;
-    }
+    unset($stmt[0]);
+    if ($rows > 0)
+      foreach ($stmt as $ban)
+        if ($ban['appealed'] === 0)
+          if ($thing === false || (is_numeric($thing) && $ban["date"]>$thing))
+            $thing = $ban["date"];
 
     if ($username !== false) {
       $stmt = $this->dbSel(["ban", ["username" => $username]]);
       $rows = $stmt[0];
-      if ($rows > 0) {
-        if ($stmt[1]['appealed'] == 0) {
-          $thing = true;
-        } else {
-          $thing = false;
-        }
-      }
+      unset($stmt[0]);
+      if ($rows > 0)
+        foreach ($stmt as $ban)
+          if ($thing === false || (is_numeric($thing) && $ban["date"]>$thing))
+            return true;
     }
 
-    return $thing;
+
+    return is_numeric($thing) ? true : false;
   }
 
   /**
@@ -109,7 +104,7 @@ class UserUtils extends Database {
     if ($select[0] == 1) {
       $blob = $this->insertUserBlob($select[1]["username"], "recover");
       $link = $this->sanitize(
-        URL_PREFACE."://".DOMAIN."/".RECOVERY_PG."?blob={$blob}",
+        URL_PREFACE."://".DOMAIN."/".RECOVERY_PG."?blob=$blob",
         "u"
       );
       $this->sendMail(
@@ -118,7 +113,7 @@ class UserUtils extends Database {
         "        Hello ".$select[1]["username"]."
 
         To reset your password click the link below.
-        {$link}
+        $link
 
         ======
 
@@ -127,8 +122,7 @@ class UserUtils extends Database {
         Thank you"
       );
       return true;
-    } else {
-      return "email";
     }
+    return "email";
   }
 }

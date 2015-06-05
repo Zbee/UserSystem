@@ -25,6 +25,7 @@
   You should have received a copy of the GNU General Public License
   along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 class UserSystem extends UserUtils {
 
   /**
@@ -316,26 +317,19 @@ class UserSystem extends UserUtils {
    * @return mixed
    */
   public function twoStep ($code) {
-    $ipAddress = $this->getIP();
-    $return = "";
+    $return = "code";
     $select = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"twoStep"]]);
     if ($select[0] === 1) {
       if ($select[1]["date"] > time() - 3600) {
-        if ($select[1]["ip"] == $ipAddress) {
-          $this->logIn(
-            $select[1]["user"],
-            $this->session($select[1]["user"])["password"],
-            true
-          );
-          $return = true;
-        } else {
-          $return = "ip";
-        }
+        $this->logIn(
+          $select[1]["user"],
+          $this->session($select[1]["user"])["password"],
+          true
+        );
+        $return = true;
       } else {
         $return = "expired";
       }
-    } else {
-      $return = "code";
     }
 
     $this->dbDel(["userblobs", ["code"=>$code, "action"=>"twoStep"]]);

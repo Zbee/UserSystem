@@ -41,7 +41,6 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
       `id` INT NOT NULL AUTO_INCREMENT,
       `user` VARCHAR(50) NOT NULL,
       `code` VARCHAR(512) NOT NULL,
-      `ip` VARCHAR(256) NOT NULL,
       `action` VARCHAR(100) NOT NULL,
       `date` INT NOT NULL,
       PRIMARY KEY (`id`)
@@ -50,7 +49,6 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
     ");
-    $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
     $test = $user->insertUserBlob("cake");
     $testdos = $user->dbSel(["userblobs", ["user"=>"cake"]]);
     $this->assertEquals(1, $testdos[0]);
@@ -58,7 +56,6 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals("cake", $testdos[1]["user"]);
     $this->assertEquals($test, $testdos[1]["code"]);
     $this->assertEquals(160, strlen($testdos[1]["code"]));
-    $this->assertEquals("127.0.0.1", $testdos[1]["ip"]);
     $this->assertEquals("session", $testdos[1]["action"]);
     $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }

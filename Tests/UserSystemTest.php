@@ -224,7 +224,6 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       (username, password, activated) VALUES
       ('cake', '".hash("sha256", "pie")."', 1)
     ");
-    $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
     $test = $user->insertUserBlob("cake", "twoStep");
     $testdos = $user->twoStep($test);
     $this->assertEquals(0, $user->dbSel(["userblobs", ["code"=>$test]])[0]);

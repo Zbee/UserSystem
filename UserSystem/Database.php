@@ -25,13 +25,14 @@
   You should have received a copy of the GNU General Public License
   along with Zbee/UserSystem.  If not, see <http://www.gnu.org/licenses/>.
 */
+
 class Database extends Utils {
 
   /**
   * A shortcut for easily escaping a table/column name for PDO
   * Example: $UserSystem->dbIns(["users",["u"=>"Bob","e"=>"bob@ex.com"]])
   *
-  * @access public
+  * @access private
   * @param string $field
   * @return string
   */
@@ -45,7 +46,7 @@ class Database extends Utils {
   *
   * @access public
   * @param array $data
-  * @return boolean
+  * @return mixed
   */
   public function dbIns ($data) {
     $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
@@ -62,7 +63,9 @@ class Database extends Utils {
     $stmt = $this->DATABASE->prepare("
       INSERT INTO $data[0] ($cols) VALUES ($entries)
     ");
-    return $stmt->execute($enArr);
+    $stmt = $stmt->execute($enArr);
+    if ($stmt) return $this->DATABASE->lastInsertId();
+    return false;
   }
 
 
@@ -108,7 +111,7 @@ class Database extends Utils {
 
   /**
   * A shortcut for eaily deleting an item in a database.
-  * Example: $UserSystem->dbDel(["users",["u"=>"Bob"]])
+  * Example: $UserSystem->dbDel(["users",["u"=>"Bob"],1])
   *
   * @access public
   * @param array $data
@@ -116,6 +119,7 @@ class Database extends Utils {
   */
   public function dbDel ($data) {
     $data[0] = $this->quoteIdent(DB_PREFACE.$data[0]);
+    $limit = isset($data[2]) ? "limit " . $this->santize($data[2], "n") : "";
     $dataArr = $eqArr = [];
     foreach ($data[1] as $col => $item) array_push($dataArr, [$col, $item]);
     $equals = "";
@@ -125,7 +129,7 @@ class Database extends Utils {
     }
     $equals = substr($equals, 0, -5);
     $stmt = $this->DATABASE->prepare("
-      DELETE FROM ".$data[0]." WHERE $equals
+      DELETE FROM ".$data[0]." WHERE $equals $limit
     ");
     return $stmt->execute($eqArr);
   }
@@ -133,7 +137,7 @@ class Database extends Utils {
   /**
   * Returns an array for the database search performed, again, just a shortcut
   * for hitting required functions
-  * Example: $UserSystem->dbSel(["users", ["username"=>"Bob","id"=>0]])
+  * Example: $UserSystem->dbSel(["users", ["username"=>Bob","id"=>0]])
   *
   * @access public
   * @param array $data
