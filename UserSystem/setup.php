@@ -43,11 +43,11 @@ $ban =
 #Ban table: Stores basic user information about each user that is banned
 $UserSystem->DATABASE->query("
 CREATE TABLE IF NOT EXISTS `".DB_PREFACE."ban` (
-	`id` INT NOT NULL AUTO_INCREMENT,
-	`date` VARCHAR(50) NULL DEFAULT NULL,
-	`ip` VARCHAR(256) NULL DEFAULT NULL,
-	`username` VARCHAR(50) NULL DEFAULT NULL,
-	`issuer` VARCHAR(50) NOT NULL DEFAULT 'No issuer provided.',
+	`id` INT(20) NOT NULL AUTO_INCREMENT,
+	`date` INT(20) NULL DEFAULT NULL,
+	`ip` VARCHAR(60) NULL DEFAULT NULL,
+	`user` INT(11) NULL DEFAULT NULL,
+	`issuer` INT(11) NOT NULL DEFAULT 'No issuer provided.',
 	`reason` VARCHAR(512) NOT NULL DEFAULT 'No reason provided.',
 	`appealed` INT(1) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`)
@@ -67,11 +67,11 @@ $userblobs =
 #Userblobs table: Active session codes
 $UserSystem->DATABASE->query("
 CREATE TABLE IF NOT EXISTS `".DB_PREFACE."userblobs` (
-	`id` INT NOT NULL AUTO_INCREMENT,
-	`user` VARCHAR(100) NOT NULL,
-	`code` VARCHAR(512) NOT NULL,
-	`action` VARCHAR(100) NOT NULL,
-	`date` INT NOT NULL,
+	`id` INT(20) NOT NULL AUTO_INCREMENT,
+	`user` INT(11) NOT NULL,
+	`code` VARCHAR(160) NOT NULL,
+	`action` VARCHAR(20) NOT NULL,
+	`date` INT(20) NOT NULL,
 	PRIMARY KEY (`id`)
 )
 COLLATE='latin1_swedish_ci'
@@ -89,25 +89,25 @@ $users =
 #Users table: Stores all information about users
 $UserSystem->DATABASE->query("
 CREATE TABLE IF NOT EXISTS `".DB_PREFACE."users` (
-	`id` INT NOT NULL AUTO_INCREMENT,
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
 	`username` VARCHAR(50) NOT NULL,
 	`firstName` VARCHAR(256) NOT NULL,
 	`lastName` VARCHAR(256) NOT NULL,
 	`password` VARCHAR(100) NOT NULL,
 	`oldPassword` VARCHAR(100) NOT NULL,
-	`passwordChanged` VARCHAR(50) NOT NULL DEFAULT '0000000000',
+	`passwordChanged` VARCHAR(20) NOT NULL DEFAULT '0000000000',
 	`salt` VARCHAR(512) NOT NULL,
 	`email` VARCHAR(256) NOT NULL,
 	`oldEmail` VARCHAR(512) NOT NULL,
-	`emailchanged` INT NOT NULL DEFAULT '0000000000',
+	`emailchanged` INT(2) NOT NULL DEFAULT '0000000000',
 	`phone` INT(11) NOT NULL DEFAULT '0',
-	`dateRegistered` INT NOT NULL,
+	`dateRegistered` INT(20) NOT NULL,
 	`activated` INT(1) NOT NULL DEFAULT '0',
 	`title` VARCHAR(50) NOT NULL DEFAULT '',
 	`twoStep` INT(1) NOT NULL DEFAULT '0',
-	`lastLoggedIn` INT NOT NULL DEFAULT '0000000000',
-	`oldLastLoggedIn` INT NOT NULL DEFAULT '0000000000',
-	`ip` VARCHAR(256) NOT NULL DEFAULT '',
+	`lastLoggedIn` INT(20) NOT NULL DEFAULT '0000000000',
+	`oldLastLoggedIn` INT(20) NOT NULL DEFAULT '0000000000',
+	`ip` VARCHAR(60) NOT NULL DEFAULT '',
 	PRIMARY KEY (`id`)
 )
 COLLATE='latin1_swedish_ci'
