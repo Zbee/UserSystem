@@ -52,7 +52,7 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
     $user->DATABASE->query("
       INSERT INTO `".DB_PREFACE."users` (username) VALUES ('cake')
     ");
-    $test = $user->session("cake")['username'];
+    $test = $user->session(1)['username'];
     $this->assertEquals("cake", $test);
 
     $user->DATABASE->query("
@@ -60,7 +60,6 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
       `id` INT NOT NULL AUTO_INCREMENT,
       `user` VARCHAR(50) NOT NULL,
       `code` VARCHAR(512) NOT NULL,
-      `ip` VARCHAR(256) NOT NULL,
       `action` VARCHAR(100) NOT NULL,
       `date` INT NOT NULL,
       PRIMARY KEY (`id`)
@@ -71,11 +70,11 @@ class UtilsTest extends PHPUnit_Framework_TestCase {
     ");
     $user->DATABASE->query("
       INSERT INTO `".DB_PREFACE."userblobs`
-      (user, code, ip, action, date) VALUES
-      ('cake', 'pie', '127.0.0.1', 'session', '1414169627')
+      (user, code, action, date) VALUES
+      ('cake', 'pie', 'session', '14000')
     ");
     $_COOKIE['examplecom'] = "pie";
-    $test = $user->session()["username"];
+    $test = $user->session(1)["username"];
     $this->assertEquals("cake", $test);
     $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }

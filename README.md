@@ -16,6 +16,16 @@ site will work as soon as you update the information in
 For more detailed information please see the
 [documentation](http://l.zbee.me/1KPsvcy).
 
+##Todo
+ * Make the database tighter (user blobs are 160 characters, make that column
+ 160 characters, etc.) and create cascading deletions
+ * Made the same database standard inside of tests (preferably without having
+ to recreate the databases for each test)
+ * Write more tests and make them work for every possible return as well as
+ tests trying to dangerous code run or inserted into the database
+ * Write documentation for all of the files
+ * Split this repository into a stable (master) branch and a development branch
+
 ##Features
 * 2-step Logins
 * User Settings

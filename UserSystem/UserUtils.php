@@ -34,12 +34,12 @@ class UserUtils extends Database {
   *
   * @access public
   * @param string $decrypted
-  * @param string $username
+  * @param int $id
   * @return mixed
   */
-  public function encrypt ($decrypted, $username) {
-    $salt = $this->dbSel(["users", ["username" => $username]]);
-    if ($salt[0] == 0) return "user";
+  public function encrypt ($decrypted, $id) {
+    $salt = $this->dbSel(["users", ["id" => $id]]);
+    if ($salt[0] == 0) return false;
     $key = hash('SHA256', $salt[1]["salt"], true);
     srand();
     $initVector = mcrypt_create_iv(
@@ -69,12 +69,12 @@ class UserUtils extends Database {
   *
   * @access public
   * @param string $encrypted
-  * @param string $username
+  * @param int $id
   * @return string
   */
-  public function decrypt ($encrypted, $username) {
-    $salt = $this->dbSel(["users", ["username" => $username]]);
-    if ($salt[0] == 0) return "user";
+  public function decrypt ($encrypted, $id) {
+    $salt = $this->dbSel(["users", ["id" => $id]]);
+    if ($salt[0] == 0) return false;
     $key = hash('SHA256', $salt[1]["salt"], true);
     $initVector  = base64_decode(substr($encrypted, 0, 22) . '==');
     $encrypted = substr($encrypted, 22);
@@ -99,18 +99,20 @@ class UserUtils extends Database {
   * Example: $UserSystem->insertUserBlob("bob", "twoStep")
   *
   * @access public
-  * @param string $username
+  * @param int $id
   * @param mixed $action
   * @return boolean
   */
-  public function insertUserBlob ($username, $action = "session") {
-    $hash = $this->createSalt($username);
-    $hash = $hash.md5($username.$hash);
+  public function insertUserBlob ($id, $action = "session") {
+    $salt = $this->dbSel(["users", ["id" => $id]]);
+    if ($salt[0] == 0) return false;
+    $hash = $this->createSalt();
+    $hash = $hash.md5($salt[1]["salt"].$hash);
     $this->dbIns(
       [
         "userblobs",
         [
-          "user" => $username,
+          "user" => $id,
           "code" => $hash,
           "action" => $action,
           "date" => time()
@@ -125,12 +127,12 @@ class UserUtils extends Database {
    * Example: $UserSystem->checkBan("bob")
    *
    * @access public
-   * @param mixed $username
+   * @param mixed $id
    * @return boolean
    */
-  public function checkBan ($username = false) {
+  public function checkBan ($id = false) {
     $ipAddress = $this->getIP();
-    if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
+    if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $id);
 
     $thing = false;
 
@@ -143,8 +145,11 @@ class UserUtils extends Database {
           if ($thing === false || (is_numeric($thing) && $ban["date"]>$thing))
             $thing = $ban["date"];
 
-    if ($username !== false) {
-      $stmt = $this->dbSel(["ban", ["username" => $username]]);
+    if ($id !== false) {
+      $id = $this->sanitize($id, "n");
+      $user = $this->dbSel(["users", ["id" => $id]])[0];
+      if ($user != 1) return "user";
+      $stmt = $this->dbSel(["ban", ["user" => $id]]);
       $rows = $stmt[0];
       unset($stmt[0]);
       if ($rows > 0)
@@ -165,9 +170,10 @@ class UserUtils extends Database {
   * @return mixed
   */
   public function sendRecover ($email) {
+    $email = $this->sanitize($email, "e");
     $select = $this->dbSel(["users", ["email"=>$email]]);
     if ($select[0] == 1) {
-      $blob = $this->insertUserBlob($select[1]["username"], "recover");
+      $blob = $this->insertUserBlob($select[1]["id"], "recover");
       $link = $this->sanitize(
         URL_PREFACE."://".DOMAIN."/".RECOVERY_PG."?blob=$blob",
         "u"

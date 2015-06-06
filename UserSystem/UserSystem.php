@@ -30,15 +30,15 @@ class UserSystem extends UserUtils {
 
   /**
   * Returns an array full of the data about a user
-  * Example: $UserSystem->session("bob")
+  * Example: $UserSystem->session(972)
   *
   * @access public
-  * @param string $session
+  * @param mixed $session
   * @return mixed
   */
   public function session ($session = false) {
     if (!$session) {
-      if (!isset($_COOKIE[SITENAME])) { return false; }
+      if (!isset($_COOKIE[SITENAME])) return "cookie";
       $session = filter_var(
         $_COOKIE[SITENAME],
         FILTER_SANITIZE_FULL_SPECIAL_CHARS
@@ -55,12 +55,12 @@ class UserSystem extends UserUtils {
         ]
       );
       if ($query[0] === 1) {
-        $username = $query[1]['user'];
-        $query = $this->dbSel(["users", ["username" => $username]]);
+        $id = $query[1]['user'];
+        $query = $this->dbSel(["users", ["id" => $id]]);
         if ($query[0] === 1) return $query[1];
       }
     } else {
-      $query = $this->dbSel(["users", ["username" => $session]]);
+      $query = $this->dbSel(["users", ["id" => $session]]);
       if ($query[0] === 1) return $query[1];
     }
 
@@ -76,15 +76,15 @@ class UserSystem extends UserUtils {
    * @return mixed
    */
   public function verifySession ($session = false) {
-    if (!isset($_COOKIE[SITENAME])) { return false; }
+    if (!isset($_COOKIE[SITENAME])) return false;
     $COOKIE = filter_var(
       $_COOKIE[SITENAME],
       FILTER_SANITIZE_FULL_SPECIAL_CHARS
     );
-    if (!$session) { $session = $COOKIE; }
+    if (!$session) $session = $COOKIE;
+    $session = $this->sanitize($session, "s");
+
     $tamper  = substr($session, -32);
-    $ipAddress = $this->getIP();
-    if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
     $time = strtotime("+30 days");
     $stmt = $this->dbSel(
       [
@@ -99,20 +99,18 @@ class UserSystem extends UserUtils {
 
     $rows = $stmt[0];
     if ($rows == 1) {
-      $username = $stmt[1]['user'];
-      if (md5($username.substr($session, 0, 128)) == $tamper) {
-        if ($this->checkBan($username) === false) {
-          return true;
-        } else {
-          return "ban";
-        }
+      $id = $stmt[1]['user'];
+      $select = $this->dbSel(["users", ["id" => $id]]);
+      if ($select[0] !== 1) return "user";
+      if (md5($select[1]["salt"].substr($session, 0, 128)) == $tamper) {
+        if ($this->checkBan($id) === false) return true;
+        return "ban";
       } else {
         $this->dbDel(["userblobs", ["code"=>$session, "action"=>"session"]]);
         return "tamper";
       }
-    } else {
-      return "session";
     }
+    return "session";
   }
 
   /**
@@ -127,11 +125,13 @@ class UserSystem extends UserUtils {
    * @return mixed
    */
    public function addUser ($username, $password, $email, $more = false) {
+     $username = $this->sanitize($username, "s");
+     $email = $this->santize($email, "e");
      $usernameUse = $this->dbSel(["users", ["username" => $username]])[0];
      if ($usernameUse == 0) {
        $emailUse = $this->dbSel(["users", ["email" => $email]])[0];
        if ($emailUse == 0) {
-         $salt = $this->createSalt($username);
+         $salt = $this->createSalt();
          $data = [
            "username" => $username,
            "password" => hash("sha256", $password.$salt),
@@ -142,25 +142,24 @@ class UserSystem extends UserUtils {
 
          $morech = $this->sanitize($more, "b");
 
-         if ($morech !== false && is_array($more)) {
-           foreach ($more as $item) {
+         if ($morech !== false && is_array($more))
+           foreach ($more as $item)
              $data[array_search($item, $more)] = $item;
-           }
-         }
 
-         $this->dbIns(["users", $data]);
-         $blob = $this->insertUserBlob($username, "activate");
+         $id = $this->dbIns(["users", $data]);
+
+         $blob = $this->insertUserBlob($id, "activate");
          $link = $this->sanitize(
-           URL_PREFACE."://".DOMAIN."/".ACTIVATE_PG."/?blob={$blob}",
+           URL_PREFACE."://".DOMAIN."/".ACTIVATE_PG."/?blob=$blob",
            "u"
          );
          $this->sendMail(
            $email,
            "Activate your ".SITENAME." account",
-           "           Hello {$username}
+           "           Hello $username
 
            To activate your account, click the link below.
-           {$link}
+           $link
 
            ======
 
@@ -168,7 +167,8 @@ class UserSystem extends UserUtils {
 
            Thank you"
          );
-         return true;
+
+         return $id;
        } else {
          return "email";
        }
@@ -186,21 +186,21 @@ class UserSystem extends UserUtils {
    * @return boolean
    */
   public function activateUser ($code) {
+    $code = $this->sanitize($code, "s");
     $rows = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"activate"]]);
     if ($rows[0] == 1) {
       $user = $rows[1]["user"];
-      $update = $this->dbUpd(["users", ["activated"=>1], ["username"=>$user]]);
+      $update = $this->dbUpd(["users", ["activated"=>1], ["id"=>$user]]);
       if ($update !== true) return "UpdateFailed";
-      $noActiv = $this->dbSel(["users", ["username"=>$user,"activated"=>0]])[0];
+      $noActiv = $this->dbSel(["users", ["id"=>$user,"activated"=>0]])[0];
       if ($noActiv !== 0) return "NotActivated";
       $del=$this->dbDel(["userblobs", ["code"=>$code, "action"=>"activate"]]);
       if ($del !== true) return "DeleteFailed";
       $blob=$this->dbSel(["userblobs",["code"=>$code,"action"=>"activate"]])[0];
       if ($blob !== 0) return "BlobNotRemoved";
       return true;
-    } else {
-      return "InvalidBlob";
     }
+    return "InvalidBlob";
   }
 
   /**
@@ -215,14 +215,16 @@ class UserSystem extends UserUtils {
   public function logIn ($username, $password, $ignoreTS = false) {
     $ignoreTS = $this->sanitize($ignoreTS, "b");
     $ipAddress = $this->getIP();
-    $user = $this->session($username);
-    if (is_array($user)) {
+    $username = $this->sanitize($username, "s");
+    $user = $this->dbSel(["users", ["username" => $username]]);
+    if ($user[0] == 1) {
+      $user = $user[1];
       $password = hash("sha256", $password.$user["salt"]);
       $oldPassword = hash("sha256", $password.$user["salt"]);
       if ($password == $user["password"]) {
         if ($user["activated"] == 1) {
           if ($user["twoStep"] == 0 || $ignoreTS !== false) {
-            if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $username);
+            if (ENCRYPTION === true) $ipAddress=encrypt($ipAddress,$user["id"]);
             $this->dbUpd(
               [
                 "users",
@@ -232,11 +234,11 @@ class UserSystem extends UserUtils {
                   "oldLastLoggedIn" => $user["lastLoggedIn"]
                 ],
                 [
-                  "username" => $username
+                  "id" => $user["id"]
                 ]
               ]
             );
-            $hash = $this->insertUserBlob($username);
+            $hash = $this->insertUserBlob($user["id"]);
             if (!headers_sent()) {
               setcookie(
                 SITENAME,
@@ -245,10 +247,8 @@ class UserSystem extends UserUtils {
                 "/",
                 DOMAIN_SIMPLE
               );
-              return true;
-            } else {
-              return true;
             }
+            return true;
           } else {
             return "twoStep";
           }
@@ -256,15 +256,11 @@ class UserSystem extends UserUtils {
           return "activate";
         }
       } else {
-        if ($password == $oldPassword) {
-          return "oldPassword";
-        } else {
-          return "password";
-        }
+        if ($password == $oldPassword) return "oldPassword";
+        return "password";
       }
-    } else {
-      return "username";
     }
+    return "username";
   }
 
   /**
@@ -273,17 +269,29 @@ class UserSystem extends UserUtils {
    *
    * @access public
    * @param string $code
-   * @param string $user
+   * @param int $user
    * @param mixed $cursess
    * @param mixed $all
    * @return boolean
    */
   public function logOut ($code, $user, $cursess = false, $all = false) {
+    $code = $this->sanitize($code, "s");
+    $user = $this->sanitize($user, "n");
     $cursess = $this->sanitize($cursess, "b");
     $all = $this->sanitize($all, "b");
 
+    if ($cursess === true) {
+      setcookie(
+        SITENAME,
+        null,
+        strtotime('-60 days'),
+        "/",
+        DOMAIN_SIMPLE
+      );
+    }
+
     if (!$all) {
-      $this->dbDel(
+      return $this->dbDel(
         [
           "userblobs",
           [
@@ -294,18 +302,10 @@ class UserSystem extends UserUtils {
         ]
       );
     } else {
-      $this->dbDel(["userblobs", ["user"=>$user]]);
+      return $this->dbDel(["userblobs", ["user"=>$user]]);
     }
-    if ($cursess === true) {
-      setcookie(
-        SITENAME,
-        null,
-        strtotime('-60 days'),
-        "/",
-        DOMAIN_SIMPLE
-      );
-    }
-    return true;
+
+    return false;
   }
 
   /**
@@ -317,6 +317,7 @@ class UserSystem extends UserUtils {
    * @return mixed
    */
   public function twoStep ($code) {
+    $code = $this->sanitize($code, "s");
     $return = "code";
     $select = $this->dbSel(["userblobs", ["code"=>$code, "action"=>"twoStep"]]);
     if ($select[0] === 1) {
@@ -347,6 +348,7 @@ class UserSystem extends UserUtils {
   * @return mixed
   */
   public function recover ($blob, $pass, $passconf) {
+    $blob = $this->sanitize($blob, "s");
     if ($pass === $passconf) {
       $select = $this->dbSel(
         [

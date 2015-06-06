@@ -30,6 +30,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         CREATE TABLE `".DB_PREFACE."users` (
           `id` INT NOT NULL AUTO_INCREMENT,
           `username` VARCHAR(50) NULL DEFAULT NULL,
+          `salt` VARCHAR(50) NULL DEFAULT NULL,
           PRIMARY KEY (`id`)
         )
         COLLATE='latin1_swedish_ci'
@@ -64,8 +65,8 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         ENGINE=MyISAM
         AUTO_INCREMENT=0;
       ");
-      $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-      $_COOKIE['examplecom'] = $user->insertUserBlob("cake");
+      $user->dbIns(["users", ["username" => "cake", "salt" => "1234"]]);
+      $_COOKIE['examplecom'] = $user->insertUserBlob(1);
       $test = $user->verifySession();
       $this->assertTrue($test);
       $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
@@ -93,6 +94,7 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         CREATE TABLE `".DB_PREFACE."users` (
         	`id` INT NOT NULL AUTO_INCREMENT,
         	`username` VARCHAR(50) NOT NULL,
+        	`salt` VARCHAR(50) NOT NULL,
         	`activated` INT(1) NOT NULL DEFAULT '0',
         	PRIMARY KEY (`id`)
         )
@@ -100,11 +102,8 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         ENGINE=MyISAM
         AUTO_INCREMENT=0;
       ");
-      $user->DATABASE->query("
-        INSERT INTO `".DB_PREFACE."users` (user, activated) VALUES ('cake', 0)
-      ");
-      $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-      $test = $user->insertUserBlob("cake", "activate");
+      $user->dbIns(["users", ["username"=>"cake","salt"=>"c","activated"=>0]]);
+      $test = $user->insertUserBlob(1, "activate");
       $testdos = $user->activateUser($test);
       $this->assertTrue($testdos);
       $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
@@ -119,7 +118,6 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
           `id` INT NOT NULL AUTO_INCREMENT,
           `user` VARCHAR(50) NOT NULL,
           `code` VARCHAR(512) NOT NULL,
-          `ip` VARCHAR(256) NOT NULL,
           `action` VARCHAR(100) NOT NULL,
           `date` INT NOT NULL,
           PRIMARY KEY (`id`)
@@ -147,7 +145,6 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
           `password` VARCHAR(100) NOT NULL,
           `oldPassword` VARCHAR(100) NOT NULL,
           `salt` VARCHAR(512) NOT NULL,
-          `oldSalt` VARCHAR(512) NOT NULL,
           `activated` INT(1) NOT NULL DEFAULT '0',
           `twoStep` INT(1) NOT NULL DEFAULT '0',
           `lastLoggedIn` VARCHAR(50) NOT NULL DEFAULT '0000000000',
@@ -159,12 +156,17 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         ENGINE=MyISAM
         AUTO_INCREMENT=0;
       ");
-      $user->DATABASE->query("
-        INSERT INTO `".DB_PREFACE."users`
-        (username, password, activated) VALUES
-        ('cake', '".hash("sha256", "pie")."', 1)
-      ");
-      $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
+      $test = $user->dbIns(
+        [
+          "users",
+          [
+            "username" => "cake",
+            "password" => hash("sha256", "pie"),
+            "activated" => 1,
+            "salt" => ""
+          ]
+        ]
+      );
       $test = $user->logIn("cake", "pie");
       $this->assertTrue($test);
       $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
@@ -207,7 +209,6 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
         `password` VARCHAR(100) NOT NULL,
         `oldPassword` VARCHAR(100) NOT NULL,
         `salt` VARCHAR(512) NOT NULL,
-        `oldSalt` VARCHAR(512) NOT NULL,
         `activated` INT(1) NOT NULL DEFAULT '0',
         `twoStep` INT(1) NOT NULL DEFAULT '0',
         `lastLoggedIn` VARCHAR(50) NOT NULL DEFAULT '0000000000',
@@ -219,12 +220,17 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
     ");
-    $user->DATABASE->query("
-      INSERT INTO `".DB_PREFACE."users`
-      (username, password, activated) VALUES
-      ('cake', '".hash("sha256", "pie")."', 1)
-    ");
-    $test = $user->insertUserBlob("cake", "twoStep");
+    $user->dbIns(
+      [
+        "users",
+        [
+          "username" => "cake",
+          "password" => hash("sha256", "pie"),
+          "activated" => 1
+        ]
+      ]
+    );
+    $test = $user->insertUserBlob(1, "twoStep");
     $testdos = $user->twoStep($test);
     $this->assertEquals(0, $user->dbSel(["userblobs", ["code"=>$test]])[0]);
     $this->assertTrue($testdos);

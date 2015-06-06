@@ -37,15 +37,12 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
     ");
-    $user->DATABASE->query("
-      INSERT INTO `".DB_PREFACE."users` (username, salt) VALUES ('dessert', 'c')
-    ");
+    $user->dbIns(["users", ["username" => "dessert", "salt" => "c"]]);
 
-    $test = $user->encrypt("cake", "dessert");
+    $test = $user->encrypt("cake", 1);
     $this->assertNotEquals("cake", $test);
 
-    $test = $user->encrypt("cake", "dessert");
-    $testdos = $user->decrypt($test, "dessert");
+    $testdos = $user->decrypt($test, 1);
     $this->assertEquals("cake", $testdos);
 
     $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
@@ -59,6 +56,7 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
       CREATE TABLE `".DB_PREFACE."users` (
       `id` INT NOT NULL AUTO_INCREMENT,
       `username` VARCHAR(50) NULL DEFAULT NULL,
+      `salt` VARCHAR(50) NULL DEFAULT NULL,
       PRIMARY KEY (`id`)
       )
       COLLATE='latin1_swedish_ci'
@@ -78,11 +76,11 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
     ");
-    $test = $user->insertUserBlob("cake");
-    $testdos = $user->dbSel(["userblobs", ["user"=>"cake"]]);
+    $user->dbIns(["users", ["username" => "cake", "salt" => "c"]]);
+    $test = $user->insertUserBlob(1);
+    $testdos = $user->dbSel(["userblobs", ["user" => 1]]);
     $this->assertEquals(1, $testdos[0]);
     $this->assertEquals(1, $testdos[1]["id"]);
-    $this->assertEquals("cake", $testdos[1]["user"]);
     $this->assertEquals($test, $testdos[1]["code"]);
     $this->assertEquals(160, strlen($testdos[1]["code"]));
     $this->assertEquals("session", $testdos[1]["action"]);
@@ -94,11 +92,22 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
     $user->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
     $user = new UserSystem();
     $user->DATABASE->query("
+      CREATE TABLE `".DB_PREFACE."users` (
+      `id` INT NOT NULL AUTO_INCREMENT,
+      `username` VARCHAR(50) NULL DEFAULT NULL,
+      `salt` VARCHAR(50) NULL DEFAULT NULL,
+      PRIMARY KEY (`id`)
+      )
+      COLLATE='latin1_swedish_ci'
+      ENGINE=MyISAM
+      AUTO_INCREMENT=0;
+    ");
+    $user->DATABASE->query("
       CREATE TABLE `".DB_PREFACE."ban` (
       	`id` INT NOT NULL AUTO_INCREMENT,
       	`date` INT NULL DEFAULT NULL,
       	`ip` VARCHAR(50) NULL DEFAULT NULL,
-      	`username` VARCHAR(50) NULL DEFAULT NULL,
+      	`user` VARCHAR(50) NULL DEFAULT NULL,
       	`issuer` VARCHAR(50) NOT NULL DEFAULT 'No issuer provided.',
       	`reason` VARCHAR(512) NOT NULL DEFAULT 'No reason provided.',
       	`appealed` INT(1) NOT NULL DEFAULT '0',
@@ -108,12 +117,21 @@ class UserUtilsTest extends PHPUnit_Framework_TestCase {
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
     ");
-    $user->DATABASE->query("
-      INSERT INTO `".DB_PREFACE."ban`
-      (username, issuer, ip, date, reason, appealed) VALUES
-      ('cake', 'pie', '".$user->getIP()."', '".(time() - 86400)."', 'Cuz', 0)
-    ");
-    $test = $user->checkBan("cake");
+    $user->dbIns(["users", ["username" => "cake", "salt" => ""]]);
+    $user->dbIns(
+      [
+        "ban",
+        [
+          "user" => "1",
+          "issuer" => "2",
+          "ip" => $user->getIP(),
+          "date" => time() - 86400,
+          "reason" => "cuz",
+          "appealed" => 0
+        ]
+      ]
+    );
+    $test = $user->checkBan(1);
     $this->assertTrue($test);
     $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
