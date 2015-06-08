@@ -1,4 +1,3 @@
-[![Documentation Status](https://readthedocs.org/projects/usersystem/badge/?version=latest)](http://l.zbee.me/1KPsvcy)
 [![Build Status](https://img.shields.io/circleci/project/Zbee/UserSystem.svg?style=flat)](http://l.zbee.me/1ANkrWS)
 [![Codacy Badge](https://www.codacy.com/project/badge/a1e608648cd84fafa12ac64c18284c6f)](http://l.zbee.me/1cAI6Oi)
 [![Test Coverage](https://codeclimate.com/github/Zbee/UserSystem/badges/coverage.svg)](http://l.zbee.me/1HO3gRX)
@@ -37,6 +36,13 @@ For more detailed information please see the
 * reCAPTCHA integration
 * More Encryption
 * Option to not store passwords
+* Option to allow storage of public key prints so that a 2Step login email can
+ be encrypted
+* Locout people after so many failed attempts at forms
+* Option to allow users to be able to login with just their emails (enter email,
+ get an email with link, follow link, you're logged in)
+* Option to turn off confirming that a user exists ("Useranme or Password was
+ incorrect," versus "No such user")
 * Ability to login/register with other services
 
 ##Security
@@ -45,11 +51,8 @@ For more detailed information please see the
  for software; uses a DoD-approved hashing function, tamper-checking on
  sessions, and removal of possibly tampered-with sessions).
 
-* Uses a system I like to refer to as a blob system, which is basically thus:
- The cookie is simply a very long string (more than a googol of possibilities)
- that is then stored in the database and hard-coded to the user who owns the
- code. Furthermore, all blobs that can be are destroyed after use, and have
- expiration dates.
+* Uses a cookie system where all cookies are hard-coded to users and expiration
+ dates, no amount of tampering with them will give any different access.
 
 * Can easily be configured (through the straight-forward configuration file) to
  use an AES-compliant encryption system for IPs that are stored with the user.

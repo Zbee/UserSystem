@@ -28,16 +28,21 @@ define("SITENAME", "examplecom");            #Name of your site (no symbols)
 define("URL_PREFACE", "http");               #If http or https is used
 define("DOMAIN_SIMPLE", "example.com");      #The root url of your website
 define("DOMAIN", "accounts.example.com");    #The url holding the system
-define("SYSTEM_LOC", "/UserSystem");         #The folder path to the class file
 define("ACTIVATE_PG", "Example/activate");   #Activation page relative to DOMAIN
 define("RECOVERY_PG", "Example/recover");    #Recovery page relative to DOMAIN
 define("TWOSTEP_PG", "Example/twostep");     #Two step page relative to DOMAIN
 
-#These constants are all optional, they could be left as-is.
+#Optional security constants that can be left as-is.
 define("ENCRYPTION", false);                 #Whether or not encryption is used
-define("RECAPTCHA_LEVEL", 0);                #Level of use of reCAPTCHA (0-3)
+define("LOCKOUT_ATTEMPTS", 4);               #Number of attempts before temp-ban
+define("USERNAME_LOGIN", true);              #If users can login with usernames
 
-#Leave these environment variables as-is if RECAPTCHA_LEVEL is 0.
+define("PASSWORDLESS_EMAIL_LOGIN", false);   #If users can login with just email
+define("CONFIRM_USER_EXISTENCE", true);      #If US confirms that users exist
+define("PGP_USER_INTERACTION", false);       #If users can have emails encrypted
+
+#Google reCAPTCHA on forms; any level above 0 requires valid keys to work.
+define("RECAPTCHA_LEVEL", 0);                #Level of use of reCAPTCHA (0-3)
 putenv("RECAPTHCA_SITE_KEY=");               #Your reCATPCHA Site Key
 putenv("RECAPTCHA_SECRET=");                 #Your reCAPTCHA Secret
 

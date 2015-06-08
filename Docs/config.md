@@ -31,8 +31,6 @@ These settings are used in displaying links to your users, setting cookies for y
 
 - `DOMAIN` This is the URL to where the UserSystem resides. If you have the UserSystem on `accounts.example.com` your would want to put exactly that for this setting. This is used just for displaying links to your users such as: `URL_PREFACE://DOMAIN/activate-your-account`.
 
-- `SYSTEM_LOC` This is the location of the UserSystem code relative to the `DOMAIN` setting. If your UserSystem is on `accounts.example.com` (that would be the `DOMAIN`) but your code is in the `/UserSystem/` folder, you'd want to put `/UserSystem`. It is used like this: `URL_PREFACE://DOMAIN SYSTEM_LOC`, so if you want the code in the root of your directory, you can just set this setting to `/`.
-
 - `ACTIVATE_PG` The location of the page you set up for user activation relative to the `DOMAIN` setting. This is only used for displaying links to users like this: `URL_PREFACE://DOMAIN/ACTIVATE_PG`. So if your activation script is `activate.php` then you'll use exactly that; if your activation script is `/activate/index.php` you can simply put `activate` for this setting.
 
 - `RECOVERY_PG` This is the same as the `ACTIVATE_PG` setting, but for the user account recovery script.
@@ -44,7 +42,7 @@ These settings are for extra features that aren't even required to be changed fo
 
 - `ENCRYPTION` This is just a boolean of whether or not your would like the system to encrypt some of your users' data in the MySQL tables with AES encryption.
 
-- `RECAPTCHA_LEVEL` (Not currently employed) This is an integer between 0 and 3 (inclusive: 0, 1, 2, or 3) that dictates how often reCAPTCHAs come up for users. 0 = never; 1 = at registration; 2 = registration + logging in; 3 = registration + login + setting changes. You'll have to be mindful of what you set this to, because you're responsible for placing the reCAPTCHA forms on the pages that will need the reCAPTCHAs, the system will be checking if the reCAPTCHA was right, and if you didn't provide one then users' actions will fail 100% of the time.
+- `RECAPTCHA_LEVEL` (Not currently employed) This is an integer between 0 and 3 (inclusive: 0, 1, 2, or 3) that dictates how often reCAPTCHAs come up for users. 0 = never; 1 = at registration; 2 = registration + logging in; 3 = registration + login + setting changes.
 
 The following settings are only even necessary if you turned on the previous setting.
 
