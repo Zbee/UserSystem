@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `".DB_PREFACE."ban` (
 	`date` INT(20) NULL DEFAULT NULL,
 	`ip` VARCHAR(60) NULL DEFAULT NULL,
 	`user` INT(11) NULL DEFAULT NULL,
-	`issuer` INT(11) NOT NULL DEFAULT 'No issuer provided.',
+	`issuer` INT(11) NOT NULL DEFAULT '0',
 	`reason` VARCHAR(512) NOT NULL DEFAULT 'No reason provided.',
 	`appealed` INT(1) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`)
