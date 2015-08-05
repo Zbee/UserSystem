@@ -2,8 +2,10 @@
 [![Codacy Badge](https://www.codacy.com/project/badge/a1e608648cd84fafa12ac64c18284c6f)](http://l.zbee.me/1cAI6Oi)
 [![Test Coverage](https://codeclimate.com/github/Zbee/UserSystem/badges/coverage.svg)](http://l.zbee.me/1HO3gRX)
 
-Runs with PHP 5.4.0+, and makes use of a MySQL database (5.5.43, 5.6.20 used in
+Runs with PHP 5.4+, and makes use of a MySQL database (5.5, 5.6 used in
 development).
+
+[Todo List](https://trello.com/b/F3zUXNeK)
 
 ##Installation & Use
 
@@ -15,35 +17,12 @@ site will work as soon as you update the information in
 For more detailed information please see the
 [documentation](http://l.zbee.me/1KPsvcy).
 
-##Todo
- * ~~Make the database tighter (user blobs are 160 characters, make that column
- 160 characters, etc.)~~ and create cascading deletions
- * Made the same database standard inside of tests (preferably without having
- to recreate the databases for each test)
- * Write more tests and make them work for every possible return as well as
- tests trying to dangerous code run or inserted into the database
- * Write documentation for all of the files
- * Split this repository into a stable (master) branch and a development branch
-
 ##Features
 * 2-step Logins
 * User Settings
 * Email Verification
 * Password Recovery
 * Multi-standard compliancy
-
-##Features to come
-* reCAPTCHA integration
-* More Encryption
-* Option to not store passwords
-* Option to allow storage of public key prints so that a 2Step login email can
- be encrypted
-* Locout people after so many failed attempts at forms
-* Option to allow users to be able to login with just their emails (enter email,
- get an email with link, follow link, you're logged in)
-* Option to turn off confirming that a user exists ("Useranme or Password was
- incorrect," versus "No such user")
-* Ability to login/register with other services
 
 ##Security
 
