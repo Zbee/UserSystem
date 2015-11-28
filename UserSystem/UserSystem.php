@@ -58,6 +58,8 @@ class UserSystem extends UserUtils {
         $id = $query[1]['user'];
         $query = $this->dbSel(["users", ["id" => $id]]);
         if ($query[0] === 1) return $query[1];
+      } else {
+        return "blob";
       }
     } else {
       $query = $this->dbSel(["users", ["id" => $session]]);
