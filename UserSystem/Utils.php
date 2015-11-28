@@ -54,6 +54,13 @@ class Utils {
         "DB_* constants in config.php failed to connect to a database. " . $pdo
       );
     }
+
+    $checkTables = $this->DATABASE->query("show tables like users");
+    if (!$checkTables || $checkTables->rowCount() <= 0) {
+      throw new Exception (
+        "Tables have not been set up, please run setup.php."
+      );
+    }
   }
 
   /**
