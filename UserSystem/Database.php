@@ -138,7 +138,8 @@ class Database extends Utils {
   /**
   * Returns an array for the database search performed, again, just a shortcut
   * for hitting required functions
-  * Example: $UserSystem->dbSel(["users", ["username"=>Bob","id"=>0]])
+  * Example:
+  * $UserSystem->dbSel(["users",["username"=>Bob","id"=>0],["id","desc"]])
   *
   * @access public
   * @param array $data
@@ -167,6 +168,9 @@ class Database extends Utils {
       array_push($qmark, $item[1]);
     }
     $equals = substr($equals, 5);
+    if (array_key_exists(2, $data))
+      $sort = "sort by " . $this->quoteIdent($data[2][0])
+        . ($data[2][1] == "desc" ? "desc" : "asc");
     $stmt = $this->DATABASE->prepare("
       select * from ".$data[0]." where $equals
     ");
