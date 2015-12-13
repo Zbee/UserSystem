@@ -128,7 +128,7 @@ class UserSystem extends UserUtils {
    */
    public function addUser ($username, $password, $email, $more = false) {
      $username = $this->sanitize($username, "s");
-     $email = $this->santize($email, "e");
+     $email = $this->sanitize($email, "e");
      $usernameUse = $this->dbSel(["users", ["username" => $username]])[0];
      if ($usernameUse == 0) {
        $emailUse = $this->dbSel(["users", ["email" => $email]])[0];

@@ -72,6 +72,30 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
+  public function testAddUser() {
+    $user = new UserSystem("");
+    $user->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
+    $user = new UserSystem();
+    $user->DATABASE->query("
+      CREATE TABLE `".DB_PREFACE."users` (
+      `id` INT NOT NULL AUTO_INCREMENT,
+      `username` VARCHAR(50) NULL DEFAULT NULL,
+      `password` VARCHAR(512) NULL DEFAULT NULL,
+      `salt` VARCHAR(512) NULL DEFAULT NULL,
+      `email` VARCHAR(50) NULL DEFAULT NULL,
+      `dateRegistered` INT(20) NULL DEFAULT NULL,
+      PRIMARY KEY (`id`)
+      )
+      COLLATE='latin1_swedish_ci'
+      ENGINE=MyISAM
+      AUTO_INCREMENT=0;
+    ");
+    $user->addUser("cake", "cheese", "test@example.com");
+    $test = $user->session(1)['username'];
+    $this->assertEquals("cake", $test);
+    $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
+  }
+
   public function testActivateUser() {
       $user = new UserSystem("");
       $user->DATABASE->query("CREATE DATABASE ".DB_DATABASE);
