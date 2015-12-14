@@ -90,9 +90,27 @@ class UserSystemTest extends PHPUnit_Framework_TestCase {
       ENGINE=MyISAM
       AUTO_INCREMENT=0;
     ");
+    $user->DATABASE->query("
+      CREATE TABLE `".DB_PREFACE."userblobs` (
+      `id` INT NOT NULL AUTO_INCREMENT,
+      `user` VARCHAR(50) NOT NULL,
+      `code` VARCHAR(512) NOT NULL,
+      `action` VARCHAR(100) NOT NULL,
+      `date` INT NOT NULL,
+      PRIMARY KEY (`id`)
+      )
+      COLLATE='latin1_swedish_ci'
+      ENGINE=MyISAM
+      AUTO_INCREMENT=0;
+    ");
     $user->addUser("cake", "cheese", "test@example.com");
     $test = $user->session(1)['username'];
     $this->assertEquals("cake", $test);
+    $testdos = $user->dbSel(["userblobs", ["user" => 1]]);
+    $this->assertEquals(1, $testdos[0]);
+    $this->assertEquals(1, $testdos[1]["id"]);
+    $this->assertEquals(160, strlen($testdos[1]["code"]));
+    $this->assertEquals("activate", $testdos[1]["action"]);
     $user->DATABASE->query("DROP DATABASE ".DB_DATABASE);
   }
 
