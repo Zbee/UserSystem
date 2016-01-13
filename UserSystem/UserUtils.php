@@ -34,11 +34,11 @@ class UserUtils extends Database {
   *
   * @access public
   * @param string $decrypted
-  * @param int $id
+  * @param int $identifier
   * @return mixed
   */
-  public function encrypt ($decrypted, $id) {
-    $salt = $this->dbSel(["users", ["id" => $id]]);
+  public function encrypt ($decrypted, $identifier) {
+    $salt = $this->dbSel(["users", ["id" => $identifier]]);
     if ($salt[0] == 0) return false;
     $key = hash('SHA256', $salt[1]["salt"], true);
     srand();
@@ -69,11 +69,11 @@ class UserUtils extends Database {
   *
   * @access public
   * @param string $encrypted
-  * @param int $id
+  * @param int $identifier
   * @return string
   */
-  public function decrypt ($encrypted, $id) {
-    $salt = $this->dbSel(["users", ["id" => $id]]);
+  public function decrypt ($encrypted, $identifier) {
+    $salt = $this->dbSel(["users", ["id" => $identifier]]);
     if ($salt[0] == 0) return false;
     $key = hash('SHA256', $salt[1]["salt"], true);
     $initVector  = base64_decode(substr($encrypted, 0, 22) . '==');
@@ -99,12 +99,12 @@ class UserUtils extends Database {
   * Example: $UserSystem->insertUserBlob("bob", "twoStep")
   *
   * @access public
-  * @param int $id
+  * @param int $identifier
   * @param mixed $action
   * @return boolean
   */
-  public function insertUserBlob ($id, $action = "session") {
-    $salt = $this->dbSel(["users", ["id" => $id]]);
+  public function insertUserBlob ($identifier, $action = "session") {
+    $salt = $this->dbSel(["users", ["id" => $identifier]]);
     if ($salt[0] == 0) return false;
     $hash = $this->createSalt();
     $hash = $hash.md5($salt[1]["salt"].$hash);
@@ -112,7 +112,7 @@ class UserUtils extends Database {
       [
         "userblobs",
         [
-          "user" => $id,
+          "user" => $identifier,
           "code" => $hash,
           "action" => $action,
           "date" => time()
@@ -127,12 +127,12 @@ class UserUtils extends Database {
    * Example: $UserSystem->checkBan("bob")
    *
    * @access public
-   * @param mixed $id
+   * @param mixed $identifier
    * @return boolean
    */
-  public function checkBan ($id = false) {
+  public function checkBan ($identifier = false) {
     $ipAddress = $this->getIP();
-    if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $id);
+    if (ENCRYPTION === true) $ipAddress = encrypt($ipAddress, $identifier);
 
     $thing = false;
 
@@ -145,11 +145,11 @@ class UserUtils extends Database {
           if ($thing === false || (is_numeric($thing) && $ban["date"]>$thing))
             $thing = $ban["date"];
 
-    if ($id !== false) {
-      $id = $this->sanitize($id, "n");
-      $user = $this->dbSel(["users", ["id" => $id]])[0];
+    if ($identifier !== false) {
+      $identifier = $this->sanitize($identifier, "n");
+      $user = $this->dbSel(["users", ["id" => $identifier]])[0];
       if ($user != 1) return "user";
-      $stmt = $this->dbSel(["ban", ["user" => $id]]);
+      $stmt = $this->dbSel(["ban", ["user" => $identifier]]);
       $rows = $stmt[0];
       unset($stmt[0]);
       if ($rows > 0)
