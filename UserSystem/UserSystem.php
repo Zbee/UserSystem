@@ -55,8 +55,8 @@ class UserSystem extends UserUtils {
         ]
       );
       if ($query[0] === 1) {
-        $id = $query[1]['user'];
-        $query = $this->dbSel(["users", ["id" => $id]]);
+        $identifier = $query[1]['user'];
+        $query = $this->dbSel(["users", ["id" => $identifier]]);
         if ($query[0] === 1) return $query[1];
       } else {
         return "blob";
@@ -101,11 +101,11 @@ class UserSystem extends UserUtils {
 
     $rows = $stmt[0];
     if ($rows == 1) {
-      $id = $stmt[1]['user'];
-      $select = $this->dbSel(["users", ["id" => $id]]);
+      $identifier = $stmt[1]['user'];
+      $select = $this->dbSel(["users", ["id" => $identifier]]);
       if ($select[0] !== 1) return "user";
       if (md5($select[1]["salt"].substr($session, 0, 128)) == $tamper) {
-        if ($this->checkBan($id) === false) return true;
+        if ($this->checkBan($identifier) === false) return true;
         return "ban";
       } else {
         $this->dbDel(["userblobs", ["code"=>$session, "action"=>"session"]]);
@@ -148,9 +148,9 @@ class UserSystem extends UserUtils {
            foreach ($more as $item)
              $data[array_search($item, $more)] = $item;
 
-         $id = $this->dbIns(["users", $data]);
+         $identifier = $this->dbIns(["users", $data]);
 
-         $blob = $this->insertUserBlob($id, "activate");
+         $blob = $this->insertUserBlob($identifier, "activate");
          $link = $this->sanitize(
            URL_PREFACE."://".DOMAIN."/".ACTIVATE_PG."/?blob=$blob",
            "u"
@@ -170,7 +170,7 @@ class UserSystem extends UserUtils {
            Thank you"
          );
 
-         return $id;
+         return $identifier;
        } else {
          return "email";
        }
