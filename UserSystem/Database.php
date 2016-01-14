@@ -168,11 +168,12 @@ class Database extends Utils {
       array_push($qmark, $item[1]);
     }
     $equals = substr($equals, 5);
+    $sort = "";
     if (array_key_exists(2, $data))
       $sort = "sort by " . $this->quoteIdent($data[2][0])
         . ($data[2][1] == "desc" ? "desc" : "asc");
     $stmt = $this->DATABASE->prepare("
-      select * from ".$data[0]." where $equals
+      select * from ".$data[0]." where $equals $desc
     ");
     $stmt->execute($qmark);
     $arr = [(is_object($stmt) ? $stmt->rowCount() : 0)];
