@@ -173,7 +173,7 @@ class Database extends Utils {
       $sort = "sort by " . $this->quoteIdent($data[2][0])
         . ($data[2][1] == "desc" ? "desc" : "asc");
     $stmt = $this->DATABASE->prepare("
-      select * from ".$data[0]." where $equals $desc
+      select * from ".$data[0]." where $equals $sort
     ");
     $stmt->execute($qmark);
     $arr = [(is_object($stmt) ? $stmt->rowCount() : 0)];
