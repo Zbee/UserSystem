@@ -1,6 +1,7 @@
+[![Documentation Status](https://readthedocs.org/projects/usersystem/badge/?version=latest)](https://l.zbee.me/2A0xzKx)
 [![Build Status](https://travis-ci.org/Zbee/UserSystem.svg?branch=master)](http://l.zbee.me/1ANkrWS)
-[![Maintainability](https://api.codeclimate.com/v1/badges/180d92bd495bd73ecda8/maintainability)](https://l.zbee.me/2DrZrdR)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/180d92bd495bd73ecda8/test_coverage)](https://l.zbee.me/2QQelyg)
+[![Maintainability](https://api.codeclimate.com/v1/badges/180d92bd495bd73ecda8/maintainability)](https://l.zbee.me/2DrZrdR)
 
 Runs with PHP 5.4+, and makes use of a MySQL database (5.5, 5.6 used in
 development).
