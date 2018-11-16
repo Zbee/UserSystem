@@ -1,6 +1,6 @@
-[![Build Status](https://img.shields.io/circleci/project/Zbee/UserSystem.svg?style=flat)](http://l.zbee.me/1ANkrWS)
-[![Codacy Badge](https://www.codacy.com/project/badge/a1e608648cd84fafa12ac64c18284c6f)](http://l.zbee.me/1cAI6Oi)
-[![Test Coverage](https://codeclimate.com/github/Zbee/UserSystem/badges/coverage.svg)](http://l.zbee.me/1HO3gRX)
+[![Build Status](https://travis-ci.org/Zbee/UserSystem.svg?branch=master)](http://l.zbee.me/1ANkrWS)
+[![Maintainability](https://api.codeclimate.com/v1/badges/180d92bd495bd73ecda8/maintainability)](https://l.zbee.me/2DrZrdR)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/180d92bd495bd73ecda8/test_coverage)](https://l.zbee.me/2QQelyg)
 
 Runs with PHP 5.4+, and makes use of a MySQL database (5.5, 5.6 used in
 development).
