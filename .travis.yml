@@ -19,6 +19,7 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 script:
-  - bundle exec rspec
-after_script:
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - "phpunit --testsuite=unit --coverage-text --coverage-clover build/logs/clover.xml"
+after_script: 
+  - mv tests/_output/coverage.xml clover.xml 
+  - ./cc-test-reporter after-build --coverage-input-type clover --id 12345 --exit-code $TRAVIS_TEST_RESULT
