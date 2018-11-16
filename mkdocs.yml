@@ -1,9 +1,10 @@
 site_name: UserSystem
-pages:
-- ['index.md', 'Home']
-- ['config.md', 'UserSytem', 'Config.php']
-- ['utils.md', 'UserSytem', 'Utils.php']
-- ['database.md', 'UserSytem', 'Database.php']
-- ['userutils.md', 'UserSytem', 'UserUtils.php']
-- ['usersystem.md', 'UserSytem', 'UserSystem.php']
+nav:
+- 'Home': 'index.md'
+- 'UserSystem':
+  - 'Config.php': 'config.md'
+  - 'Utils.php': 'utils.md'
+  - 'Database.php': 'database.md'
+  - 'UserUtils.php': 'userutils.md'
+  - 'UserUsystem.php': 'usersystem.md'
 docs_dir: Docs
