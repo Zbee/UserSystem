@@ -3,12 +3,9 @@
 [![Test Coverage](https://api.codeclimate.com/v1/badges/180d92bd495bd73ecda8/test_coverage)](https://l.zbee.me/2QQelyg)
 [![Maintainability](https://api.codeclimate.com/v1/badges/180d92bd495bd73ecda8/maintainability)](https://l.zbee.me/2DrZrdR)
 
-Runs with PHP 5.4+, and makes use of a MySQL database (5.5, 5.6 used in
-development).
+Runs with PHP 5.4+, and makes use of a MySQL 5.5+ database. [Todo List](https://trello.com/b/F3zUXNeK)
 
-[Todo List](https://trello.com/b/F3zUXNeK)
-
-##Installation & Use
+## Installation & Use
 
 After downloading the [archive file](http://l.zbee.me/1MrcEiw) you can add the
 `/UserSystem/ ` and `/Example/` directories to your own site and the example
@@ -18,14 +15,14 @@ site will work as soon as you update the information in
 For more detailed information please see the
 [documentation](http://l.zbee.me/1KPsvcy).
 
-##Features
+## Features
 * 2-step Logins
 * User Settings
 * Email Verification
 * Password Recovery
 * Multi-standard compliancy
 
-##Security
+## Security
 
 * The hashing and transfer methods are all FIPS 140-2 Level 2 compliant (adapted
  for software; uses a DoD-approved hashing function, tamper-checking on
@@ -62,7 +59,7 @@ For more detailed information please see the
  (PDO, not mysql_*) keeping with the times and automatically rendering the
  system invulnerable to many old attacks.
 
-##Simplicity
+## Simplicity
 
 * I've included an example site for every account action necessary, removing any
  strenuous recreation of what a page should have on it.
@@ -85,7 +82,7 @@ For more detailed information please see the
  they last changed their password, when they last changed their email, and
  more!
 
-##License
+## License
 
 Copyright 2014-2015 Ethan Henderson.
 
